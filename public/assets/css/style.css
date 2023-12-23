@@ -1,0 +1,415 @@
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap");
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span {
+  font-family: "Quicksand", sans-serif !important;
+}
+
+body {
+  background: #f3f3f9 !important;
+  overflow: scroll;
+}
+
+.dropzone {
+  width: 100%;
+  height: 20%;
+  border: 1px solid black;
+}
+
+.prinerLogo {
+  padding: 0.25rem;
+  background-color: var(--vz-body-bg);
+  border: 1pxsolidvar (--vz-border-color);
+  border-radius: 0.25rem;
+  max-width: 25%;
+  height: auto;
+}
+
+.dzu-dropzone {
+  overflow: hidden !important;
+  border: 2px dashed #bebebe !important;
+  min-height: 14rem !important;
+  border-radius: 20px !important;
+  background-color: #fbfbff;
+  margin-bottom: 0 !important;
+  padding: 25px;
+}
+
+.dzu-previewContainer {
+  box-shadow: 0 1px 15px 0 #e3e3e3;
+  background: #fff !important;
+  margin: 10px !important;
+  padding: 17px 25px !important;
+  border-radius: 20px !important;
+}
+
+.dzu-previewFileName {
+  font-size: 10px !important;
+}
+
+.dzu-inputLabelWithFiles {
+  color: rgb(22, 20, 20) !important;
+  font-family: "Quicksand", sans-serif !important;
+  margin: auto !important;
+  margin-top: 20px;
+}
+
+.custom_select {
+  padding: 3px 10px;
+  border: hidden;
+}
+
+.custom_select:focus-visible {
+  outline: none;
+}
+
+.addDir:focus {
+  outline: none;
+}
+
+input:focus {
+  outline: none;
+}
+
+button:focus {
+  outline: none !important;
+}
+
+.otpWidth {
+  width: 3em !important;
+}
+
+.chip,
+.singleChip {
+  white-space: pre-wrap !important;
+}
+
+.month {
+  background: #d8d8d8;
+  border-radius: 5px;
+  padding: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 1px 5px 0 #e3e3e3;
+  transition: background 1s;
+}
+
+.month > h4 {
+  font-size: 12px;
+  margin: 0;
+  transition: color 0.5s;
+}
+
+.month.selected {
+  background: #9b9b9b;
+  box-shadow: 0 2px 6px 0 #939393;
+  transition: background 1s;
+}
+
+.month.selected > h4 {
+  color: #fff;
+}
+
+.invoice_input {
+  border: none;
+  background: #dfdfdf;
+  border-radius: 5px;
+  padding: 2px 10px;
+}
+
+.custom_date_input {
+  width: auto;
+  text-align: center;
+  margin: auto;
+}
+
+.add_product_dashedBorder {
+  background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='10' ry='10' stroke='%23001794FF' stroke-width='3' stroke-dasharray='6%2c 14' stroke-dashoffset='0' stroke-linecap='square'/%3e%3c/svg%3e");
+  border-radius: 10px;
+}
+
+#page-topbar {
+  z-index: 999999999;
+}
+
+@media print {
+  #section-to-print {
+    display: block !important;
+  }
+
+  .col-print-1 {
+    width: 8%;
+    float: left;
+  }
+
+  .col-print-2 {
+    width: 16%;
+    float: left;
+  }
+
+  .col-print-3 {
+    width: 25%;
+    float: left;
+  }
+
+  .col-print-4 {
+    width: 33%;
+    float: left;
+  }
+
+  .col-print-5 {
+    width: 42%;
+    float: left;
+  }
+
+  .col-print-6 {
+    width: 50%;
+    float: left;
+  }
+
+  .col-print-7 {
+    width: 58%;
+    float: left;
+  }
+
+  .col-print-8 {
+    width: 66%;
+    float: left;
+  }
+
+  .col-print-9 {
+    width: 75%;
+    float: left;
+  }
+
+  .col-print-10 {
+    width: 83%;
+    float: left;
+  }
+
+  .col-print-11 {
+    width: 92%;
+    float: left;
+  }
+
+  .col-print-12 {
+    width: 100%;
+    float: left;
+  }
+
+  .table-breaked {
+    page-break-before: auto;
+  }
+
+  @page :top {
+    margin-top: 1cm;
+  }
+
+  /*  .col-sm-1,
+    .col-sm-2,
+    .col-sm-3,
+    .col-sm-4,
+    .col-sm-5,
+    .col-sm-6,
+    .col-sm-7,
+    .col-sm-8,
+    .col-sm-9,
+    .col-sm-10,
+    .col-sm-11,
+    .col-sm-12 {
+        float: left;
+    }
+
+    .col-sm-12 {
+        width: 100%;
+    }
+
+    .col-sm-11 {
+        width: 91.66666667%;
+    }
+
+    .col-sm-10 {
+        width: 83.33333333%;
+    }
+
+    .col-sm-9 {
+        width: 75%;
+    }
+
+    .col-sm-8 {
+        width: 66.66666667%;
+    }
+
+    .col-sm-7 {
+        width: 58.33333333%;
+    }
+
+    .col-sm-6 {
+        width: 50%;
+    }
+
+    .col-sm-5 {
+        width: 41.66666667%;
+    }
+
+    .col-sm-4 {
+        width: 33.33333333%;
+    }
+
+    .col-sm-3 {
+        width: 25%;
+    }
+
+    .col-sm-2 {
+        width: 16.66666667%;
+    }
+
+    .col-sm-1 {
+        width: 8.33333333%;
+    } */
+}
+.map-responsive {
+  overflow: hidden;
+  padding-bottom: 30%;
+  position: relative;
+  height: 0;
+}
+
+@page {
+  size: 3in 11in;
+  margin-top: 1cm;
+  margin-left: 0cm;
+  margin-right: 0cm;
+}
+
+#section-to-print {
+  display: none;
+  color: #000;
+  font-weight: 600;
+  height: fit-content;
+}
+
+.POS_table {
+  width: 100%;
+}
+
+.POS_tr {
+  width: 100%;
+}
+
+.POS_h1 {
+  text-align: center;
+  vertical-align: middle;
+}
+
+#logo {
+  width: 60%;
+  text-align: center;
+  -webkit-align-content: center;
+  align-content: center;
+  padding: 5px;
+  margin: 2px;
+  display: block;
+  margin: 0 auto;
+}
+
+.POS_header {
+  width: 100%;
+  text-align: center;
+  -webkit-align-content: center;
+  align-content: center;
+  vertical-align: middle;
+}
+
+.items {
+  width: 100%;
+}
+
+.items thead {
+  text-align: right;
+}
+
+.center-align {
+  text-align: center;
+}
+
+.bill-details td {
+  font-size: 12px;
+}
+
+.receipt {
+  font-size: medium;
+}
+
+.items .heading {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  border-top: 1px solid black;
+  margin-bottom: 4px;
+  border-bottom: 1px solid black;
+  vertical-align: middle;
+}
+
+.items thead tr th:first-child,
+.items tbody tr td:first-child {
+  /* width: 47%;
+    min-width: 47%;
+    max-width: 47%; */
+  word-break: break-all;
+  text-align: left;
+}
+
+.items td {
+  font-size: 10px;
+  text-align: right;
+  vertical-align: bottom;
+}
+
+.price::before {
+  content: "\20B9";
+  font-family: Arial;
+  text-align: right;
+}
+
+.sum-up {
+  text-align: right !important;
+}
+
+.total {
+  font-size: 13px;
+  border-top: 1px dashed black !important;
+  border-bottom: 1px dashed black !important;
+}
+
+.total.text,
+.total.price {
+  text-align: right;
+}
+
+.total.price::before {
+  content: "\20B9";
+}
+
+.line {
+  border-top: 1px solid black !important;
+}
+
+/* .heading.rate {
+  width: 20%;
+}
+
+.heading.amount {
+  width: 25%;
+}
+
+.heading.qty {
+  width: 5%;
+} */
