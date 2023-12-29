@@ -390,7 +390,10 @@ const OnlineSalesHistoryRecord = () => {
                       </div>
                     </div>
                   </div>
-
+                  <Box>
+                    {/* MAP */}
+                    {/* <a target="_blank" href="https://maps.google.com/?q=<?php   echo $custdetail->latitude ?>,<?php   echo $custdetail->longitude ?>">https://maps.google.com/?q=<?php   echo $custdetail->latitude ?>,<?php   echo $custdetail->longitude ?></a>  */}
+                  </Box>
                   <div className="col-xl-12">
                     <div className="table-responsive mt-4 mt-xl-0">
                       <table className="table   align-middle table-nowrap mb-0">
@@ -634,6 +637,7 @@ const OnlineSalesHistoryRecord = () => {
                   className=""
                   style={{
                     color: "#000",
+                    marginBottom: 0,
                   }}
                 >
                   Customer Name: <strong>{customerAddress?.name}</strong>
@@ -642,6 +646,7 @@ const OnlineSalesHistoryRecord = () => {
                   className=""
                   style={{
                     color: "#000",
+                    marginBottom: 0,
                   }}
                 >
                   Phone: <strong>{customerAddress?.phone}</strong>
@@ -650,6 +655,7 @@ const OnlineSalesHistoryRecord = () => {
                   className=""
                   style={{
                     color: "#000",
+                    marginBottom: 0,
                   }}
                 >
                   Alt Phone:{" "}
@@ -660,6 +666,7 @@ const OnlineSalesHistoryRecord = () => {
                   className=""
                   style={{
                     color: "#000",
+                    marginBottom: 0,
                   }}
                 >
                   Landmark: <strong>{customerAddress?.landmark}</strong>
@@ -668,6 +675,7 @@ const OnlineSalesHistoryRecord = () => {
                   className=""
                   style={{
                     color: "#000",
+                    marginBottom: 0,
                   }}
                 >
                   Distance: <strong>{customerAddress?.distance_km} KM</strong>
@@ -676,6 +684,7 @@ const OnlineSalesHistoryRecord = () => {
                   className=""
                   style={{
                     color: "#000",
+                    marginBottom: 0,
                   }}
                 >
                   Address:{" "}
@@ -688,6 +697,7 @@ const OnlineSalesHistoryRecord = () => {
                   className=""
                   style={{
                     color: "#000",
+                    marginBottom: 0,
                   }}
                 >
                   Payment Mode : <strong>{orderDetails?.payment_mode}</strong>
@@ -696,6 +706,7 @@ const OnlineSalesHistoryRecord = () => {
                   className=""
                   style={{
                     color: "#000",
+                    marginBottom: 0,
                   }}
                 >
                   Payment Status :{" "}
@@ -707,6 +718,7 @@ const OnlineSalesHistoryRecord = () => {
                   className=""
                   style={{
                     color: "#000",
+                    marginBottom: 0,
                   }}
                 >
                   Order Date:{" "}
@@ -719,6 +731,7 @@ const OnlineSalesHistoryRecord = () => {
                     className=""
                     style={{
                       color: "#000",
+                      marginBottom: 0,
                     }}
                   >
                     Slots: <strong>{delivery_slots}</strong>
@@ -728,6 +741,7 @@ const OnlineSalesHistoryRecord = () => {
                     className=""
                     style={{
                       color: "#000",
+                      marginBottom: 0,
                     }}
                   >
                     Order status: <strong>{orderDetails?.order_status}</strong>
@@ -736,6 +750,7 @@ const OnlineSalesHistoryRecord = () => {
                     className=""
                     style={{
                       color: "#000",
+                      marginBottom: 0,
                     }}
                   >
                     No of Item: <strong>{orderDetails?.no_of_items}</strong>
@@ -744,6 +759,7 @@ const OnlineSalesHistoryRecord = () => {
                     className=""
                     style={{
                       color: "#000",
+                      marginBottom: 0,
                     }}
                   >
                     Order ID: <strong>{orderDetails?.order_id}</strong>
@@ -755,12 +771,16 @@ const OnlineSalesHistoryRecord = () => {
         </SimpleGrid>
         <table class="items ml-1">
           <thead>
-            <tr>
+            <tr
+              style={{
+                fontSize: 10,
+              }}
+            >
               <th colSpan={2} class="">
                 Item
               </th>
               <th class="">Size</th>
-              <th class="">Q</th>
+              <th class="">Quant</th>
               <th class="">MRP</th>
               <th class="">RATE</th>
               <th class="">AMT</th>
@@ -770,17 +790,35 @@ const OnlineSalesHistoryRecord = () => {
           <tbody>
             {productData?.map((items, index) => {
               return (
-                <tr class="sum-up line">
+                <tr
+                  class="sum-up line"
+                  style={
+                    !Number(items.avl_status)
+                      ? {
+                          textDecoration: "line-through",
+                        }
+                      : {}
+                  }
+                >
                   <td colSpan={2} rowSpan={1}>
-                    {items?.product_name?.substring(0, 21)}
+                    {items?.product_name?.substring(0, 16)}
                   </td>
                   <td rowSpan={1}>
-                    {items.product_size} {items.product_unit}
+                    {items.product_size?.substring(0, 4)}{" "}
+                    {items.product_unit?.substring(0, 7)}
                   </td>
-                  <td>{items.quantity}</td>
+                  <td>
+                    {items.quantity}{" "}
+                    {Number(items.not_avl_qty)
+                      ? `-(${items.not_avl_qty}*)`
+                      : ""}
+                  </td>
                   <td>{items.price}</td>
                   <td class="price">{items.sale_price}</td>
-                  <td class="price">{items.total_amount}</td>
+                  <td class="price">
+                    {(Number(items.quantity) - Number(items.not_avl_qty)) *
+                      Number(items.sale_price)}
+                  </td>
                 </tr>
               );
             })}
@@ -802,6 +840,8 @@ const OnlineSalesHistoryRecord = () => {
                 width: "100%",
                 display: "flex",
                 justifyContent: "space-between",
+                marginBottom: 0,
+                fontSize: "12px",
                 // marginRight: "4px",
               }}
             >
@@ -821,6 +861,8 @@ const OnlineSalesHistoryRecord = () => {
                 width: "100%",
                 display: "flex",
                 justifyContent: "space-between",
+                marginBottom: 0,
+                fontSize: "12px",
                 // marginRight: "4px",
               }}
             >
@@ -841,6 +883,8 @@ const OnlineSalesHistoryRecord = () => {
                 width: "100%",
                 display: "flex",
                 justifyContent: "space-between",
+                marginBottom: 0,
+                fontSize: "12px",
                 // marginRight: "4px",
               }}
             >
@@ -861,6 +905,8 @@ const OnlineSalesHistoryRecord = () => {
                 width: "100%",
                 display: "flex",
                 justifyContent: "space-between",
+                marginBottom: 0,
+                fontSize: "12px",
                 // marginRight: "4px",
               }}
             >
@@ -881,6 +927,8 @@ const OnlineSalesHistoryRecord = () => {
                   width: "100%",
                   display: "flex",
                   justifyContent: "space-between",
+                  marginBottom: 0,
+                  fontSize: "12px",
                   // marginRight: "4px",
                 }}
               >
@@ -901,6 +949,8 @@ const OnlineSalesHistoryRecord = () => {
                 width: "100%",
                 display: "flex",
                 justifyContent: "space-between",
+                marginBottom: 0,
+                fontSize: "12px",
                 // marginRight: "4px",
               }}
             >
@@ -921,6 +971,8 @@ const OnlineSalesHistoryRecord = () => {
                   width: "100%",
                   display: "flex",
                   justifyContent: "space-between",
+                  marginBottom: 0,
+                  fontSize: "12px",
                   // marginRight: "4px",
                 }}
               >
@@ -943,6 +995,8 @@ const OnlineSalesHistoryRecord = () => {
                   width: "100%",
                   display: "flex",
                   justifyContent: "space-between",
+                  marginBottom: 0,
+                  fontSize: "12px",
                   // marginRight: "4px",
                 }}
               >
@@ -964,6 +1018,8 @@ const OnlineSalesHistoryRecord = () => {
                 width: "100%",
                 display: "flex",
                 justifyContent: "space-between",
+                marginBottom: 0,
+                fontSize: "12px",
                 // marginRight: "4px",
                 borderTop: "1px solid #000",
                 paddingTop: "3px",
