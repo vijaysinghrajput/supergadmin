@@ -20,7 +20,7 @@ import {
   FormLabel,
   Input,
   Text,
-  useDisclosure,
+  useClipboard,
 } from "@chakra-ui/react";
 
 import swal from "sweetalert";
@@ -28,6 +28,7 @@ import swal from "sweetalert";
 import URL from "../../URL";
 
 import "react-datepicker/dist/react-datepicker.css";
+import { IoIosCopy, IoMdCopy } from "react-icons/io";
 
 const OnlineSalesHistoryRecord = () => {
   const { orderID } = useParams();
@@ -60,6 +61,7 @@ const OnlineSalesHistoryRecord = () => {
   const [productData, setproductData] = useState([]);
   const [Store_bussiness_info, setStore_bussiness_info] = useState([]);
   const [delivery_slots, setdelivery_slots] = useState([]);
+  const { onCopy, value, setValue, hasCopied } = useClipboard("");
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
@@ -102,7 +104,9 @@ const OnlineSalesHistoryRecord = () => {
       setorderDetails(ONLINESALEHISTORYRECORD.order_details);
       setStore_bussiness_info(ONLINESALEHISTORYRECORD.Store_bussiness_info);
       setdelivery_slots(ONLINESALEHISTORYRECORD.delivery_slots);
-
+      setValue(
+        `https://maps.google.com/?q=${ONLINESALEHISTORYRECORD.customer_address_details?.latitude},${ONLINESALEHISTORYRECORD.customer_address_details?.longitude}`
+      );
       setisDataLoding(false);
     }
   }, [ONLINESALEHISTORYRECORD, isLoading]);
@@ -272,6 +276,35 @@ const OnlineSalesHistoryRecord = () => {
                               {customerAddress?.address}
                             </strong>
                           </h6>
+                          <Flex
+                            alignItems={"center"}
+                            justifyContent={"space-between"}
+                          >
+                            <h6 className="mb-0">
+                              Map:{" "}
+                              <strong>
+                                <a
+                                  target="_blank"
+                                  href={`https://maps.google.com/?q=${customerAddress?.latitude},${customerAddress?.longitude}`}
+                                >
+                                  https://maps.google.com/?q=
+                                  {customerAddress?.latitude},
+                                  {customerAddress?.longitude}
+                                </a>
+                              </strong>
+                            </h6>
+                            <Box
+                              onClick={() => {
+                                setValue(
+                                  `https://maps.google.com/?q=${customerAddress?.latitude},${customerAddress?.longitude}`
+                                );
+                                onCopy();
+                              }}
+                              cursor={"pointer"}
+                            >
+                              <IoIosCopy size={24} />
+                            </Box>
+                          </Flex>
                         </div>
                       </div>
 
@@ -390,10 +423,6 @@ const OnlineSalesHistoryRecord = () => {
                       </div>
                     </div>
                   </div>
-                  <Box>
-                    {/* MAP */}
-                    {/* <a target="_blank" href="https://maps.google.com/?q=<?php   echo $custdetail->latitude ?>,<?php   echo $custdetail->longitude ?>">https://maps.google.com/?q=<?php   echo $custdetail->latitude ?>,<?php   echo $custdetail->longitude ?></a>  */}
-                  </Box>
                   <div className="col-xl-12">
                     <div className="table-responsive mt-4 mt-xl-0">
                       <table className="table   align-middle table-nowrap mb-0">
