@@ -46,6 +46,7 @@
     "universal-cookie": "^6.1.1",
     "use-places-autocomplete": "^4.0.1",
     "use-scan-detection": "^0.2.3",
+    "use-sound": "^4.0.1",
     "web-vitals": "^3.5.0"
   },
   "scripts": {
