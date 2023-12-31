@@ -199,10 +199,21 @@ const OnlineSale = () => {
     },
 
     {
+      prop: "filter",
+      title: "Purchase Date",
+      isFilterable: true,
+      isSortable: true,
+
+      cell: (row) => {
+        return <p className="text-dark">{Number(row.purchaes_date)}</p>;
+      },
+    },
+    {
       prop: "date",
       title: "Bill Date",
       isFilterable: true,
       isSortable: true,
+
       cell: (row) => {
         return (
           <p className="text-dark">
@@ -567,7 +578,7 @@ const OnlineSale = () => {
                         paginationOptionsProps={{
                           initialState: {
                             rowsPerPage: 10,
-                            options: [10, 15, 20],
+                            options: [10, 15, 20, 50, 100, 200],
                           },
                         }}
                       >
@@ -596,7 +607,12 @@ const OnlineSale = () => {
                             <Pagination />
                           </Col>
                         </Row>
-                        <Table className="table  table-hover">
+                        <Table
+                          className="table  table-hover"
+                          style={{
+                            verticalAlign: "middle",
+                          }}
+                        >
                           <TableHeader />
                           <TableBody />
                         </Table>
