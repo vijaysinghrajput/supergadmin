@@ -39,20 +39,10 @@ import Cookies from "universal-cookie";
 const cookies = new Cookies();
 
 const SalesHistory = () => {
-  const {
-    store_customer_purchase_record,
-    removeDataToCurrentGlobal,
-    getToast,
-    reloadData,
-  } = useContext(ContextData);
+  const { removeDataToCurrentGlobal, getToast, reloadData } =
+    useContext(ContextData);
   const [delID, setProductDelID] = useState(0);
-  const [isDeletAction, setDeletAction] = useState(false);
   const [vendorData, getVendorData] = useState({});
-  const [isDataLoding, setisDataLoding] = useState(true);
-
-  // const [downloadBarcode, setdownloadBarcode] = useState({});
-
-  const [showData, setShowData] = useState(store_customer_purchase_record);
   const navigate = useNavigate();
 
   const adminStoreId = cookies.get("adminStoreId");
@@ -71,27 +61,18 @@ const SalesHistory = () => {
     })
       .then((response) => response.json())
       .then((responseJson) => responseJson);
-
+    // console.log("ok datad ==========>", data.store_customer_purchase_record);
     return data;
   }
 
   const {
-    data: PURCHASEDATA,
+    data: SALE_HISTORY,
     isError,
     isLoading: isLoadingAPI,
   } = useQuery({
-    queryKey: ["PURCHASEDATA"],
+    queryKey: ["SALE_HISTORY"],
     queryFn: (e) => fetchData(),
   });
-
-  useEffect(() => {
-    setShowData([]);
-    // console.log("search product", PURCHASEDATA, isLoadingAPI);
-    if (PURCHASEDATA) {
-      setShowData(PURCHASEDATA.store_customer_purchase_record);
-      setisDataLoding(false);
-    }
-  }, [PURCHASEDATA, isLoadingAPI]);
 
   const STORY_HEADERS = [
     {
@@ -324,7 +305,7 @@ const SalesHistory = () => {
         <div className="row">
           <div className="col-lg-12">
             <div className="card">
-              {isDataLoding ? (
+              {isLoadingAPI ? (
                 <Stack>
                   <Skeleton height="100px" />
                   <Skeleton height="100px" />
@@ -335,7 +316,9 @@ const SalesHistory = () => {
                   <div id="customerList">
                     <div className="table-responsive table-card mb-1">
                       <DatatableWrapper
-                        body={showData}
+                        body={
+                          SALE_HISTORY?.store_customer_purchase_record || []
+                        }
                         headers={STORY_HEADERS}
                         paginationOptionsProps={{
                           initialState: {

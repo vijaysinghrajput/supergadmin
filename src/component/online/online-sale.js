@@ -147,7 +147,7 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="text-success">{row.customer_name}</p>;
+        return <p className="mb-0 text-success">{row.customer_name}</p>;
       },
     },
     {
@@ -156,7 +156,7 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="text-dark">{row.customer_address}</p>;
+        return <p className="mb-0 text-dark">{row.customer_address}</p>;
       },
     },
     {
@@ -165,7 +165,7 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="text-dark">{row.delivery_slots}</p>;
+        return <p className="mb-0 text-dark">{row.delivery_slots}</p>;
       },
     },
     {
@@ -174,7 +174,7 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="text-primary">{row.customer_phone}</p>;
+        return <p className="mb-0 text-primary">{row.customer_phone}</p>;
       },
     },
 
@@ -184,7 +184,7 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="text-danger"> ₹ {row.total_payment}</p>;
+        return <p className="mb-0 text-danger"> ₹ {row.total_payment}</p>;
       },
     },
 
@@ -194,7 +194,7 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="text-dark">{row.payment_mode}</p>;
+        return <p className="mb-0 text-dark">{row.payment_mode}</p>;
       },
     },
 
@@ -205,7 +205,7 @@ const OnlineSale = () => {
       isSortable: true,
 
       cell: (row) => {
-        return <p className="text-dark">{Number(row.purchaes_date)}</p>;
+        return <p className="mb-0 text-dark">{Number(row.purchaes_date)}</p>;
       },
     },
     {

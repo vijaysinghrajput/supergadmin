@@ -34,6 +34,29 @@ const ContextProvider = (props) => {
     adminId: cookies.get("adminId"),
   };
 
+  // employes: responseJson.employes,
+  // partner: responseJson.partner[0],
+  // sallaryList: responseJson.sallaryData,
+  // salaryHistory: responseJson.salaryHistory,
+  // roles: responseJson.roles,
+  // leadsPricing: responseJson.leadsPricing,
+  // business_banners: responseJson.business_banners,
+  // plots: responseJson.plots,
+  // reviews: responseJson.reviews,
+  // storeBrandsData: responseJson.storeBrandsData,
+  // storeCategoryData: responseJson.storeCategoryData,
+  // storeProductsData: responseJson.storeProductsData,
+  // storeProductUnits: responseJson.storeProductUnits,
+  // storeProductImages: responseJson.storeProductImages,
+  // store_vendor_list: responseJson.store_vendor_list,
+  // store_stock_history: responseJson.store_stock_history,
+  // store_activity_history: responseJson.store_activity_history,
+  // store_employee_list: responseJson.store_employee_list,
+  // masterBrandsData: responseJson.masterBrandsData,
+  // masterCategoryData: responseJson.masterCategoryData,
+  // masterProductsData: responseJson.masterProductsData,
+  // masterProductUnits: responseJson.masterProductUnits,
+
   const functionality = {
     // fetchAllData: (payload) => dispatch({ type: "FETCH_ALL_DATA", payload }),
     setUserLogin: (credentials) =>
