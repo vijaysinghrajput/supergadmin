@@ -23,8 +23,6 @@ import {
   TableBody,
   TableHeader,
 } from "react-bs-datatable";
-import { useQuery } from "react-query";
-import { Box, Stack, Skeleton } from "@chakra-ui/react";
 
 // Create table headers consisting of 4 columns.
 
@@ -32,27 +30,11 @@ import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
-const adminStoreId = cookies.get("adminStoreId");
-
-async function fetchData() {
-  const data = await fetch(URLDomain + "/APP-API/Billing/BrandList", {
-    method: "post",
-    header: {
-      Accept: "application/json",
-      "Content-type": "application/json",
-    },
-    body: JSON.stringify({
-      store_id: adminStoreId,
-    }),
-  })
-    .then((response) => response.json())
-    .then((responseJson) => responseJson);
-
-  return data;
-}
-
 const BrandManagement = () => {
-  const { storeBrandsData, storeBrandRelode } = useContext(ContextData);
+  const { storeBrandsData, removeDataToCurrentGlobal, storeBrandRelode } =
+    useContext(ContextData);
+  const [delID, setDelID] = useState();
+  const [editablePlot, setEditablePlot] = useState({});
   const [showData, setShowData] = useState(storeBrandsData);
   const navigate = useNavigate();
   const adminStoreId = cookies.get("adminStoreId");
@@ -60,15 +42,6 @@ const BrandManagement = () => {
   const toast = useToast();
 
   const [radioValue1, setRadioValue1] = useState("1");
-
-  const {
-    data: BRAND_DATA,
-    isError,
-    isLoading: isLoadingAPI,
-  } = useQuery({
-    queryKey: ["BRAND_DATA"],
-    queryFn: (e) => fetchData(),
-  });
 
   const radios1 = [
     { name: "Active", value: "1" },
@@ -200,7 +173,7 @@ const BrandManagement = () => {
           .then((response) => response.json())
           .then((responseJson) => {
             if (responseJson.success) {
-              storeBrandRelode();
+              // storeBrandRelode();
 
               getToast({
                 title: "Status Change ",
@@ -311,61 +284,46 @@ const BrandManagement = () => {
               <div className="card-body">
                 <div id="customerList">
                   <div className="table-responsive table-card mb-1 px-4">
-                    {BRAND_DATA ? (
-                      <>
-                        {/* DATA */}
-                        <DatatableWrapper
-                          body={BRAND_DATA}
-                          headers={STORY_HEADERS}
-                          paginationOptionsProps={{
-                            initialState: {
-                              rowsPerPage: 5,
-                              options: [5, 10, 15, 20],
-                            },
-                          }}
+                    <DatatableWrapper
+                      body={showData}
+                      headers={STORY_HEADERS}
+                      paginationOptionsProps={{
+                        initialState: {
+                          rowsPerPage: 5,
+                          options: [5, 10, 15, 20],
+                        },
+                      }}
+                    >
+                      <Row className="mb-4 p-2">
+                        <Col
+                          xs={12}
+                          lg={4}
+                          className="d-flex flex-col justify-content-end align-items-end"
                         >
-                          <Row className="mb-4 p-2">
-                            <Col
-                              xs={12}
-                              lg={4}
-                              className="d-flex flex-col justify-content-end align-items-end"
-                            >
-                              <Filter />
-                            </Col>
-                            <Col
-                              xs={12}
-                              sm={6}
-                              lg={4}
-                              className="d-flex flex-col justify-content-lg-center align-items-center justify-content-sm-start mb-2 mb-sm-0"
-                            >
-                              <PaginationOptions />
-                            </Col>
-                            <Col
-                              xs={12}
-                              sm={6}
-                              lg={4}
-                              className="d-flex flex-col justify-content-end align-items-end"
-                            >
-                              <Pagination />
-                            </Col>
-                          </Row>
-                          <Table className="table  table-hover">
-                            <TableHeader />
-                            <TableBody />
-                          </Table>
-                        </DatatableWrapper>
-                      </>
-                    ) : (
-                      <>
-                        <Box>
-                          <Stack padding={8}>
-                            <Skeleton height="100px" borderRadius={6} />
-                            <Skeleton height="100px" borderRadius={6} />
-                            <Skeleton height="100px" borderRadius={6} />
-                          </Stack>
-                        </Box>
-                      </>
-                    )}
+                          <Filter />
+                        </Col>
+                        <Col
+                          xs={12}
+                          sm={6}
+                          lg={4}
+                          className="d-flex flex-col justify-content-lg-center align-items-center justify-content-sm-start mb-2 mb-sm-0"
+                        >
+                          <PaginationOptions />
+                        </Col>
+                        <Col
+                          xs={12}
+                          sm={6}
+                          lg={4}
+                          className="d-flex flex-col justify-content-end align-items-end"
+                        >
+                          <Pagination />
+                        </Col>
+                      </Row>
+                      <Table className="table  table-hover">
+                        <TableHeader />
+                        <TableBody />
+                      </Table>
+                    </DatatableWrapper>
                   </div>
                 </div>
               </div>
@@ -396,7 +354,7 @@ const BrandManagement = () => {
                       />
                     </div>
                     <div className="modal-body">
-                      <ImportNewBrand storeBrand={BRAND_DATA} />
+                      <ImportNewBrand />
                     </div>
                   </div>
                   {/*end modal-content*/}

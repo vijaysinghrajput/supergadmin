@@ -2,13 +2,19 @@ import { Link } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
 import ContextData from "../../context/MainContext";
 import URL from "../../URL";
-import { Stack, Skeleton } from "@chakra-ui/react";
+
+import { ImportNewProduct } from "./Import/import-new-product";
 import { AddCustomerForm } from "./Add/customer-add-form";
 // import { AddUnitForm } from "./Add/unit-add-form";
 // import { CustomerDataComp } from "./Update/CustomerDataComp";
 // import { UpdateProductStockComp } from "./Update/UpdateProductStockComp";
 import { UpdateCustomer } from "./Update/UpdateCustomer";
-import { useQuery } from "react-query";
+
+import SweetAlert from "react-bootstrap-sweetalert";
+
+import { CustomerDataTable } from "./component/CustomerDataTable";
+
+// import "bootstrap/dist/css/bootstrap.css";
 import { Col, Row, Table } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 
@@ -23,30 +29,13 @@ import {
   TableHeader,
 } from "react-bs-datatable";
 
+import { useQuery } from "react-query";
+import URLDomain from "../../URL";
+import { Stack, Skeleton } from "@chakra-ui/react";
 // Create table headers consisting of 4 columns.
 import Cookies from "universal-cookie";
-import URLDomain from "../../URL";
 
 const cookies = new Cookies();
-
-const adminStoreId = cookies.get("adminStoreId");
-
-async function fetchData() {
-  const data = await fetch(URLDomain + "/APP-API/Billing/CustomerList", {
-    method: "post",
-    header: {
-      Accept: "application/json",
-      "Content-type": "application/json",
-    },
-    body: JSON.stringify({
-      store_id: adminStoreId,
-    }),
-  })
-    .then((response) => response.json())
-    .then((responseJson) => responseJson);
-  // console.log("ok datad ==========>", data.store_customer_purchase_record);
-  return data;
-}
 
 const CustomerManagement = () => {
   const {
@@ -56,24 +45,58 @@ const CustomerManagement = () => {
     reloadData,
   } = useContext(ContextData);
   const [delID, setProductDelID] = useState(0);
+  const [isDeletAction, setDeletAction] = useState(false);
   const [CustomerData, getCustomerData] = useState({});
-  // const [downloadBarcode, setdownloadBarcode] = useState({});
-  const [showData, setShowData] = useState(store_customer_list);
 
+  const [showData, setShowData] = useState(null);
+
+  const [isDataLoding, setisDataLoding] = useState(true);
+
+  const adminStoreId = cookies.get("adminStoreId");
   const adminId = cookies.get("adminId");
 
+  async function fetchData() {
+    const data = await fetch(
+      URLDomain + "/APP-API/Billing/customer_list_load",
+      {
+        method: "post",
+        header: {
+          Accept: "application/json",
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          store_id: adminStoreId,
+        }),
+      }
+    )
+      .then((response) => response.json())
+      .then((responseJson) => responseJson);
+
+    return data;
+  }
+
   const {
-    data: COUSTOMER_MANAGEMENT,
+    data: customer_list_load,
     isError,
     isLoading: isLoadingAPI,
+    isFetching,
   } = useQuery({
-    queryKey: ["COUSTOMER_MANAGEMENT"],
+    queryKey: ["customer_list_load"],
     queryFn: (e) => fetchData(),
   });
 
   useEffect(() => {
-    setShowData(store_customer_list);
-  }, [store_customer_list]);
+    setShowData([]);
+    console.log("vendor list", customer_list_load, isLoadingAPI);
+    if (customer_list_load) {
+      setShowData(customer_list_load.store_customer_list);
+      setisDataLoding(false);
+    }
+  }, [customer_list_load, isLoadingAPI]);
+
+  const ChangeStatus = () => {
+    setProductDelID(true);
+  };
 
   const STORY_HEADERS = [
     {
@@ -268,68 +291,7 @@ const CustomerManagement = () => {
 
         <div className="row">
           <div className="col-lg-12">
-            <div className="card">
-              <div className="card-body">
-                <div id="customerList">
-                  <div className="table-responsive table-card mb-1">
-                    {isLoadingAPI ? (
-                      <Stack padding={8}>
-                        <Skeleton height="100px" mb={2} />
-                        <Skeleton height="100px" mb={2} />
-                        <Skeleton height="100px" mb={2} />
-                      </Stack>
-                    ) : (
-                      <div className="card-body">
-                        <div id="customerList">
-                          <div className="table-responsive table-card mb-1">
-                            <DatatableWrapper
-                              body={COUSTOMER_MANAGEMENT || []}
-                              headers={STORY_HEADERS}
-                              paginationOptionsProps={{
-                                initialState: {
-                                  rowsPerPage: 10,
-                                  options: [10, 15, 20],
-                                },
-                              }}
-                            >
-                              <Row className="mb-4 p-2">
-                                <Col
-                                  xs={12}
-                                  lg={4}
-                                  className="d-flex flex-col justify-content-end align-items-end"
-                                >
-                                  <Filter />
-                                </Col>
-                                <Col
-                                  xs={12}
-                                  sm={6}
-                                  lg={4}
-                                  className="d-flex flex-col justify-content-lg-center align-items-center justify-content-sm-start mb-2 mb-sm-0"
-                                >
-                                  <PaginationOptions />
-                                </Col>
-                                <Col
-                                  xs={12}
-                                  sm={6}
-                                  lg={4}
-                                  className="d-flex flex-col justify-content-end align-items-end"
-                                >
-                                  <Pagination />
-                                </Col>
-                              </Row>
-                              <Table className="table  table-hover">
-                                <TableHeader />
-                                <TableBody />
-                              </Table>
-                            </DatatableWrapper>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CustomerDataTable />
           </div>
         </div>
 

@@ -133,6 +133,15 @@ const ProductManagement = () => {
 
   const STORY_HEADERS = [
     {
+      prop: "stock_quantity",
+      title: "QTY",
+      isFilterable: true,
+      isSortable: true,
+      cell: (row) => {
+        return <p className="text-primary">{row.stock_quantity}</p>;
+      },
+    },
+    {
       prop: "product_name",
       title: "Product",
       isFilterable: true,

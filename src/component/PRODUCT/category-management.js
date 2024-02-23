@@ -530,10 +530,10 @@ const CategoryManagement = () => {
         <div className="row">
           <div className="col-lg-12">
             {isDataLoding ? (
-              <Stack padding={8}>
-                <Skeleton height="100px" borderRadius={6} />
-                <Skeleton height="100px" borderRadius={6} />
-                <Skeleton height="100px" borderRadius={6} />
+              <Stack>
+                <Skeleton height="100px" />
+                <Skeleton height="100px" />
+                <Skeleton height="100px" />
               </Stack>
             ) : (
               <div className="card">

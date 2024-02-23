@@ -17,6 +17,8 @@ import SweetAlert from "react-bootstrap-sweetalert";
 import { Col, Row, Table } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
 
+import { SaleDataTable } from "./component/SaleDataTable";
+
 import swal from "sweetalert";
 import { useQuery } from "react-query";
 
@@ -39,10 +41,20 @@ import Cookies from "universal-cookie";
 const cookies = new Cookies();
 
 const SalesHistory = () => {
-  const { removeDataToCurrentGlobal, getToast, reloadData } =
-    useContext(ContextData);
+  const {
+    store_customer_purchase_record,
+    removeDataToCurrentGlobal,
+    getToast,
+    reloadData,
+  } = useContext(ContextData);
   const [delID, setProductDelID] = useState(0);
+  const [isDeletAction, setDeletAction] = useState(false);
   const [vendorData, getVendorData] = useState({});
+  const [isDataLoding, setisDataLoding] = useState(true);
+
+  // const [downloadBarcode, setdownloadBarcode] = useState({});
+
+  const [showData, setShowData] = useState(store_customer_purchase_record);
   const navigate = useNavigate();
 
   const adminStoreId = cookies.get("adminStoreId");
@@ -61,20 +73,38 @@ const SalesHistory = () => {
     })
       .then((response) => response.json())
       .then((responseJson) => responseJson);
-    // console.log("ok datad ==========>", data.store_customer_purchase_record);
+
     return data;
   }
 
   const {
-    data: SALE_HISTORY,
+    data: offline_sale_history,
     isError,
     isLoading: isLoadingAPI,
   } = useQuery({
-    queryKey: ["SALE_HISTORY"],
+    queryKey: ["offline_sale_history"],
     queryFn: (e) => fetchData(),
   });
 
+  useEffect(() => {
+    setShowData([]);
+    console.log("search product", offline_sale_history, isLoadingAPI);
+    if (offline_sale_history) {
+      setShowData(offline_sale_history.store_customer_purchase_record);
+      setisDataLoding(false);
+    }
+  }, [offline_sale_history, isLoadingAPI]);
+
   const STORY_HEADERS = [
+    {
+      prop: "date",
+      title: "Bill Date",
+      isFilterable: true,
+      isSortable: true,
+      cell: (row) => {
+        return <p className="text-dark">{row.date}</p>;
+      },
+    },
     {
       prop: "customer_mobile",
       title: "Mobile",
@@ -120,20 +150,6 @@ const SalesHistory = () => {
       isSortable: true,
       cell: (row) => {
         return <p className="text-dark">{row.payment_mode}</p>;
-      },
-    },
-
-    {
-      prop: "date",
-      title: "Bill Date",
-      isFilterable: true,
-      isSortable: true,
-      cell: (row) => {
-        return (
-          <p className="text-dark">
-            {row.date} {row.time}
-          </p>
-        );
       },
     },
 
@@ -276,7 +292,7 @@ const SalesHistory = () => {
         <div className="row">
           <div className="col-12">
             <div className="page-title-box d-sm-flex align-items-center justify-content-between">
-              <h4 className="mb-sm-0">Vendor List</h4>
+              <h4 className="mb-sm-0">Counter Sale List</h4>
             </div>
           </div>
         </div>
@@ -305,62 +321,7 @@ const SalesHistory = () => {
         <div className="row">
           <div className="col-lg-12">
             <div className="card">
-              {isLoadingAPI ? (
-                <Stack>
-                  <Skeleton height="100px" />
-                  <Skeleton height="100px" />
-                  <Skeleton height="100px" />
-                </Stack>
-              ) : (
-                <div className="card-body">
-                  <div id="customerList">
-                    <div className="table-responsive table-card mb-1">
-                      <DatatableWrapper
-                        body={
-                          SALE_HISTORY?.store_customer_purchase_record || []
-                        }
-                        headers={STORY_HEADERS}
-                        paginationOptionsProps={{
-                          initialState: {
-                            rowsPerPage: 10,
-                            options: [10, 15, 20],
-                          },
-                        }}
-                      >
-                        <Row className="mb-4 p-2">
-                          <Col
-                            xs={12}
-                            lg={4}
-                            className="d-flex flex-col justify-content-end align-items-end"
-                          >
-                            <Filter />
-                          </Col>
-                          <Col
-                            xs={12}
-                            sm={6}
-                            lg={4}
-                            className="d-flex flex-col justify-content-lg-center align-items-center justify-content-sm-start mb-2 mb-sm-0"
-                          >
-                            <PaginationOptions />
-                          </Col>
-                          <Col
-                            xs={12}
-                            sm={6}
-                            lg={4}
-                            className="d-flex flex-col justify-content-end align-items-end"
-                          >
-                            <Pagination />
-                          </Col>
-                        </Row>
-                        <Table className="table  table-hover">
-                          <TableHeader />
-                          <TableBody />
-                        </Table>
-                      </DatatableWrapper>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <SaleDataTable />
             </div>
           </div>
         </div>

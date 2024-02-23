@@ -7,12 +7,12 @@ import URLDomain from "../../../URL";
 import Multiselect from "multiselect-react-dropdown";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "react-query";
+import { queryClient } from "../../../App";
 
 import Cookies from "universal-cookie";
 const cookies = new Cookies();
 
 export const AddBannerForm = (props) => {
-  const { storeBussinessRelode } = useContext(ContextData);
   const [isLoading, setIL] = useState(false);
   const adminStoreId = cookies.get("adminStoreId");
   const adminId = cookies.get("adminId");
@@ -132,18 +132,21 @@ export const AddBannerForm = (props) => {
         .then((response) => response.json())
         .then((responseJson) => {
           console.log("respond plot upload", responseJson);
+          queryClient.invalidateQueries({
+            queryKey: ["store_banner_list"],
+          });
           if (responseJson.success) {
             getToast({
               title: "Banner Added ",
               dec: "Successful",
               status: "success",
             });
-            storeBussinessRelode();
+            // storeBussinessRelode();
           } else {
             console.log("added");
             // addDataToCurrentGlobal({ type: "plots", payload: storeBannerData });
             getToast({ title: "Faild", dec: "", status: "error" });
-            storeBussinessRelode();
+            // storeBussinessRelode();
           }
           setIL(false);
           for (let i = 0; i < 10; i++) {

@@ -1,4 +1,5 @@
-import { useState, useContext } from "react";
+import { Link } from "react-router-dom";
+import { useState, useContext, useEffect } from "react";
 import ContextData from "../../context/MainContext";
 import URL from "../../URL";
 
@@ -28,42 +29,27 @@ import {
 
 // Create table headers consisting of 4 columns.
 import Cookies from "universal-cookie";
-import {
-  Flex,
-  Spinner,
-  useToast,
-  AlertIcon,
-  Alert,
-  Button,
-  useDisclosure,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  Text,
-  ModalBody,
-  ModalCloseButton,
-  Box,
-} from "@chakra-ui/react";
-import useSound from "use-sound";
-import { FaCheckCircle } from "react-icons/fa";
+import { Box, Flex, Spinner } from "@chakra-ui/react";
 
 const cookies = new Cookies();
 
-const NEW_FETCH_TIME = 60 * 1000;
-
 const OnlineSale = () => {
-  const { removeDataToCurrentGlobal, getToast, reloadData } =
-    useContext(ContextData);
+  const {
+    store_customer_purchase_record,
+    removeDataToCurrentGlobal,
+    getToast,
+    reloadData,
+  } = useContext(ContextData);
   const [delID, setProductDelID] = useState(0);
-  const [play, { stop }] = useSound("/tones.mp3");
+  const [isDeletAction, setDeletAction] = useState(false);
+  const [vendorData, getVendorData] = useState({});
   const navigate = useNavigate();
-  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const adminStoreId = cookies.get("adminStoreId");
   const adminId = cookies.get("adminId");
 
   const [radioValue, setRadioValue] = useState("Placed");
+  console.log("radio ======>", radioValue);
 
   const radios = [
     { name: "Placed", value: "Placed", variant: "dark" },
@@ -92,23 +78,7 @@ const OnlineSale = () => {
     })
       .then((response) => response.json())
       .then((responseJson) => responseJson);
-    return data;
-  }
-
-  async function fetchNewOrders({ id }) {
-    const data = await fetch(URL + "/APP-API/Billing/fetchNewOrders", {
-      method: "post",
-      header: {
-        Accept: "application/json",
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({
-        last_id: id,
-      }),
-    })
-      .then((response) => response.json())
-      .then((responseJson) => responseJson);
-    return data;
+    return data.online_order;
   }
 
   const {
@@ -120,21 +90,7 @@ const OnlineSale = () => {
     queryFn: (e) => fetchData({ order_status: e.queryKey[1] }),
   });
 
-  const {
-    data: FETCH_NEW_ORDERS,
-    isFetching: isFetchingNewOrder,
-    isLoading: isLoading,
-  } = useQuery({
-    queryKey: ["FETCH_NEW_ORDERS", ONLINE_ORDERS?.last_record],
-    queryFn: (e) => fetchNewOrders({ id: e.queryKey[1].id }),
-    enabled: ONLINE_ORDERS?.last_record != undefined,
-    refetchInterval: NEW_FETCH_TIME,
-  });
-
-  if (FETCH_NEW_ORDERS?.new_order_length && !isFetchingNewOrder) {
-    play();
-    !isOpen && onOpen();
-  }
+  // console.log("isisFetching", isFetching);
 
   const ChangeStatus = () => {
     setProductDelID(true);
@@ -147,7 +103,7 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="mb-0 text-success">{row.customer_name}</p>;
+        return <p className="text-success">{row.customer_name}</p>;
       },
     },
     {
@@ -156,7 +112,7 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="mb-0 text-dark">{row.customer_address}</p>;
+        return <p className="text-dark">{row.customer_address}</p>;
       },
     },
     {
@@ -165,7 +121,7 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="mb-0 text-dark">{row.delivery_slots}</p>;
+        return <p className="text-dark">{row.delivery_slots}</p>;
       },
     },
     {
@@ -174,7 +130,7 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="mb-0 text-primary">{row.customer_phone}</p>;
+        return <p className="text-primary">{row.customer_phone}</p>;
       },
     },
 
@@ -184,7 +140,7 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="mb-0 text-danger"> ₹ {row.total_payment}</p>;
+        return <p className="text-danger"> ₹ {row.total_payment}</p>;
       },
     },
 
@@ -194,26 +150,15 @@ const OnlineSale = () => {
       isFilterable: true,
       isSortable: true,
       cell: (row) => {
-        return <p className="mb-0 text-dark">{row.payment_mode}</p>;
+        return <p className="text-dark">{row.payment_mode}</p>;
       },
     },
 
-    {
-      prop: "filter",
-      title: "Purchase Date",
-      isFilterable: true,
-      isSortable: true,
-
-      cell: (row) => {
-        return <p className="mb-0 text-dark">{Number(row.purchaes_date)}</p>;
-      },
-    },
     {
       prop: "date",
       title: "Bill Date",
       isFilterable: true,
       isSortable: true,
-
       cell: (row) => {
         return (
           <p className="text-dark">
@@ -228,6 +173,7 @@ const OnlineSale = () => {
       title: "Action",
 
       cell: (row) => {
+        console.log("roww ---->", row);
         return (
           <Dropdown>
             <Dropdown.Toggle variant="dark" id="dropdown-basic">
@@ -451,43 +397,6 @@ const OnlineSale = () => {
   return (
     <>
       <div>
-        <Modal
-          isOpen={isOpen}
-          onClose={() => {
-            queryClient.invalidateQueries({
-              queryKey: ["ONLINE_ORDERS"],
-            });
-            onClose();
-          }}
-          isCentered
-        >
-          <ModalOverlay
-            onClick={() => {
-              queryClient.invalidateQueries({
-                queryKey: ["ONLINE_ORDERS"],
-              });
-              onClose();
-            }}
-          />
-          <ModalContent borderRadius={10} bg={"#13a916"}>
-            <ModalCloseButton color={"#fff"} />
-            <ModalBody>
-              <Flex
-                justifyContent={"center"}
-                p={10}
-                color={"#fff"}
-                textAlign={"center"}
-              >
-                <Box>
-                  <FaCheckCircle size={160} />
-                  <Text mb={0} mt={3} fontSize={16}>
-                    You have {FETCH_NEW_ORDERS?.new_order_length} new order
-                  </Text>
-                </Box>
-              </Flex>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
         <div className="row">
           <div className="col-12">
             <div className="page-title-box d-sm-flex align-items-center justify-content-between">
@@ -545,22 +454,6 @@ const OnlineSale = () => {
           <div className="col-lg-12">
             <div className="card">
               <div className="card-body">
-                {ONLINE_ORDERS?.new_orders ? (
-                  <Alert borderRadius={6} mb={4} status="success">
-                    <AlertIcon />
-                    Total new orders: {ONLINE_ORDERS?.new_orders}
-                  </Alert>
-                ) : null}
-                <Button onClick={() => {}}>STOP</Button>
-                <Button
-                  onClick={() => {
-                    // play();
-                    onOpen();
-                  }}
-                  id="openIt"
-                >
-                  PLAY
-                </Button>
                 <div id="customerList">
                   <div className="table-responsive table-card mb-1">
                     {ONLINE_ORDERS_LOADING ? (
@@ -573,12 +466,12 @@ const OnlineSale = () => {
                       </Flex>
                     ) : (
                       <DatatableWrapper
-                        body={ONLINE_ORDERS.online_order}
+                        body={ONLINE_ORDERS}
                         headers={STORY_HEADERS}
                         paginationOptionsProps={{
                           initialState: {
                             rowsPerPage: 10,
-                            options: [10, 15, 20, 50, 100, 200],
+                            options: [10, 15, 20],
                           },
                         }}
                       >
@@ -607,12 +500,7 @@ const OnlineSale = () => {
                             <Pagination />
                           </Col>
                         </Row>
-                        <Table
-                          className="table  table-hover"
-                          style={{
-                            verticalAlign: "middle",
-                          }}
-                        >
+                        <Table className="table  table-hover">
                           <TableHeader />
                           <TableBody />
                         </Table>

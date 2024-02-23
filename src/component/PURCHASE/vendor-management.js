@@ -1,20 +1,22 @@
 import { Link } from "react-router-dom";
 import { useState, useContext, useEffect } from "react";
 import ContextData from "../../context/MainContext";
-import URL from "../../URL";
+import { useQuery } from "react-query";
 
+import URLDomain from "../../URL";
 import { ImportNewProduct } from "./Import/import-new-product";
 import { AddVendorForm } from "./Add/vendor-add-form";
 // import { AddUnitForm } from "./Add/unit-add-form";
 // import { vendorDataComp } from "./Update/vendorDataComp";
 // import { UpdateProductStockComp } from "./Update/UpdateProductStockComp";
 import { UpdateVendor } from "./Update/UpdateVendor";
-import { useQuery } from "react-query";
+import { Stack, Skeleton } from "@chakra-ui/react";
+
+import SweetAlert from "react-bootstrap-sweetalert";
+
 // import "bootstrap/dist/css/bootstrap.css";
 import { Col, Row, Table } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
-
-import { Box, Skeleton, Stack } from "@chakra-ui/react";
 
 import swal from "sweetalert";
 
@@ -29,46 +31,60 @@ import {
 
 // Create table headers consisting of 4 columns.
 import Cookies from "universal-cookie";
-import URLDomain from "../../URL";
 
 const cookies = new Cookies();
 
-const adminStoreId = cookies.get("adminStoreId");
-
-async function fetchData() {
-  console.log("API CALLING...");
-  const data = await fetch(URLDomain + "/APP-API/Billing/VendorList", {
-    method: "post",
-    header: {
-      Accept: "application/json",
-      "Content-type": "application/json",
-    },
-    body: JSON.stringify({
-      store_id: adminStoreId,
-    }),
-  })
-    .then((response) => response.json())
-    .then((responseJson) => responseJson);
-
-  return data;
-}
-
 const VendorManagement = () => {
-  const { removeDataToCurrentGlobal, getToast, reloadData } =
-    useContext(ContextData);
   const [delID, setProductDelID] = useState(0);
+  const [isDeletAction, setDeletAction] = useState(false);
   const [vendorData, getVendorData] = useState({});
+  // const [downloadBarcode, setdownloadBarcode] = useState({});
+  const [showData, setShowData] = useState(null);
 
+  const [isDataLoding, setisDataLoding] = useState(true);
+
+  const adminStoreId = cookies.get("adminStoreId");
   const adminId = cookies.get("adminId");
 
+  async function fetchData() {
+    const data = await fetch(URLDomain + "/APP-API/Billing/vendor_list_load", {
+      method: "post",
+      header: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        store_id: adminStoreId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((responseJson) => responseJson);
+
+    return data;
+  }
+
   const {
-    data: VENDOR_INFORMATION,
+    data: vendor_list_load,
     isError,
     isLoading: isLoadingAPI,
+    isFetching,
   } = useQuery({
-    queryKey: ["VENDOR_INFORMATION"],
+    queryKey: ["vendor_list_load"],
     queryFn: (e) => fetchData(),
   });
+
+  useEffect(() => {
+    setShowData([]);
+    console.log("vendor list", vendor_list_load, isLoadingAPI);
+    if (vendor_list_load) {
+      setShowData(vendor_list_load.store_vendor_list);
+      setisDataLoding(false);
+    }
+  }, [vendor_list_load, isLoadingAPI]);
+
+  const ChangeStatus = () => {
+    setProductDelID(true);
+  };
 
   const STORY_HEADERS = [
     {
@@ -197,13 +213,7 @@ const VendorManagement = () => {
           .then((responseJson) => {
             console.log("respond delete", responseJson);
             if (responseJson.delete) {
-              getToast({
-                title: "Product Deleted ",
-                dec: "Successful",
-                status: "success",
-              });
             } else {
-              getToast({ title: "ERROR", dec: "ERROR", status: "error" });
             }
 
             for (let i = 0; i < 10; i++) {
@@ -214,7 +224,7 @@ const VendorManagement = () => {
             //  console.error(error);
           });
 
-        reloadData();
+        // reloadData();
 
         swal("Poof! Your Product  has been deleted!", {
           icon: "success",
@@ -245,12 +255,7 @@ const VendorManagement = () => {
       .then((responseJson) => {
         console.log("respond", responseJson);
         if (responseJson.deleted) {
-          removeDataToCurrentGlobal({
-            type: "store_vendor_list",
-            payload: delID,
-            where: "id",
-          });
-          getToast({ title: "Plot Deleted", dec: "", status: "error" });
+          //   getToast({ title: "Plot Deleted", dec: "", status: "error" });
         } else {
           alert("Error");
         }
@@ -276,6 +281,8 @@ const VendorManagement = () => {
         <div className="card">
           <div className="card-body">
             <div className="row g-2">
+              {isFetching && "fetching..."}
+
               <div className="col-sm-auto ms-auto">
                 <div className="list-grid-nav hstack gap-1">
                   <button
@@ -297,13 +304,19 @@ const VendorManagement = () => {
 
         <div className="row">
           <div className="col-lg-12">
-            <div className="card">
-              <div className="card-body">
-                <div id="customerList">
-                  <div className="table-responsive table-card mb-1">
-                    {VENDOR_INFORMATION ? (
+            {isDataLoding ? (
+              <Stack>
+                <Skeleton height="100px" />
+                <Skeleton height="100px" />
+                <Skeleton height="100px" />
+              </Stack>
+            ) : (
+              <div className="card">
+                <div className="card-body">
+                  <div id="customerList">
+                    <div className="table-responsive table-card mb-1">
                       <DatatableWrapper
-                        body={VENDOR_INFORMATION || []}
+                        body={showData}
                         headers={STORY_HEADERS}
                         paginationOptionsProps={{
                           initialState: {
@@ -342,21 +355,11 @@ const VendorManagement = () => {
                           <TableBody />
                         </Table>
                       </DatatableWrapper>
-                    ) : (
-                      <>
-                        <Box padding={8}>
-                          <Stack>
-                            <Skeleton height="100px" borderRadius={6} />
-                            <Skeleton height="100px" borderRadius={6} mb={5} />
-                            <Skeleton height="100px" borderRadius={6} mb={5} />
-                          </Stack>
-                        </Box>
-                      </>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
