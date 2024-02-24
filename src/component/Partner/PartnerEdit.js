@@ -197,67 +197,8 @@ const PartnerEdit = () => {
             </div>
           </div>
           <div className="row">
-            <div className="col-xxl-3">
-              <div className="card mt-n5">
-                <div className="card-body p-4">
-                  <div className="text-center">
-                    <div className="profile-user position-relative d-inline-block mx-auto  mb-4">
-                      <img
-                        src={
-                          logo
-                            ? URL.createObjectURL(logo)
-                            : Store_bussiness_info?.logo
-                        }
-                        className="rounded-circle avatar-xl img-thumbnail user-profile-image"
-                        alt="user-profile-image"
-                      />
-                      <div className="avatar-xs p-0 rounded-circle profile-photo-edit">
-                        <input
-                          id="profile-img-file-input"
-                          onChange={(e) => setLogo(e.target.files[0])}
-                          type="file"
-                          className="profile-img-file-input"
-                        />
-                        <label
-                          htmlFor="profile-img-file-input"
-                          className="profile-photo-edit avatar-xs"
-                        >
-                          <span className="avatar-title rounded-circle bg-light text-body">
-                            <i className="ri-camera-fill" />
-                          </span>
-                        </label>
-                      </div>
-                    </div>
-                    <h5 className="fs-16 mb-1">
-                      {Store_bussiness_info?.buss_name}
-                    </h5>
-                    <p className="text-muted mb-0">
-                      {Store_bussiness_info.store_slug_name}
-                    </p>
-                    {logo && (
-                      <>
-                        {isLoading ? (
-                          <a href="javascript:void(0)" className="text-success">
-                            <i className="mdi mdi-loading mdi-spin fs-20 align-middle me-2" />{" "}
-                            Updating{" "}
-                          </a>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={updateImage}
-                            className="btn btn-primary"
-                          >
-                            Update
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
             {/*end col*/}
-            <div className="col-xxl-9">
+            <div className="col-xxl-12">
               <div className="card mt-xxl-n5">
                 <div className="card-header">
                   <ul
@@ -268,6 +209,18 @@ const PartnerEdit = () => {
                       <a
                         className="nav-link active"
                         data-bs-toggle="tab"
+                        href="#personalLogo"
+                        role="tab"
+                      >
+                        <i className="fas fa-home" />
+                        Business Logo
+                      </a>
+                    </li>
+
+                    <li className="nav-item">
+                      <a
+                        className="nav-link "
+                        data-bs-toggle="tab"
                         href="#personalDetails"
                         role="tab"
                       >
@@ -275,6 +228,7 @@ const PartnerEdit = () => {
                         Business Info
                       </a>
                     </li>
+
                     <li className="nav-item">
                       <a
                         className="nav-link"
@@ -327,6 +281,73 @@ const PartnerEdit = () => {
                   <div className="tab-content">
                     <div
                       className="tab-pane active"
+                      id="personalLogo"
+                      role="tabpanel"
+                    >
+                      <div className="">
+                        <div className="">
+                          <div className="text-center">
+                            <div className="profile-user position-relative d-inline-block mx-auto  mb-4">
+                              <img
+                                src={
+                                  logo
+                                    ? URL.createObjectURL(logo)
+                                    : Store_bussiness_info?.logo
+                                }
+                                className="rounded-circle avatar-xl img-thumbnail user-profile-image"
+                                alt="user-profile-image"
+                              />
+                              <div className="avatar-xs p-0 rounded-circle profile-photo-edit">
+                                <input
+                                  id="profile-img-file-input"
+                                  onChange={(e) => setLogo(e.target.files[0])}
+                                  type="file"
+                                  className="profile-img-file-input"
+                                />
+                                <label
+                                  htmlFor="profile-img-file-input"
+                                  className="profile-photo-edit avatar-xs"
+                                >
+                                  <span className="avatar-title rounded-circle bg-light text-body">
+                                    <i className="ri-camera-fill" />
+                                  </span>
+                                </label>
+                              </div>
+                            </div>
+                            <h5 className="fs-16 mb-1">
+                              {Store_bussiness_info?.buss_name}
+                            </h5>
+                            <p className="text-muted mb-0">
+                              {Store_bussiness_info.store_slug_name}
+                            </p>
+                            {logo && (
+                              <>
+                                {isLoading ? (
+                                  <a
+                                    href="javascript:void(0)"
+                                    className="text-success"
+                                  >
+                                    <i className="mdi mdi-loading mdi-spin fs-20 align-middle me-2" />{" "}
+                                    Updating{" "}
+                                  </a>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={updateImage}
+                                    className="btn btn-primary"
+                                  >
+                                    Update
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      className="tab-pane"
                       id="personalDetails"
                       role="tabpanel"
                     >
@@ -719,7 +740,7 @@ const PartnerEdit = () => {
                                     htmlFor="phonenumberInput"
                                     className="form-label"
                                   >
-                                    Teliphone Number
+                                    Primary Number
                                   </label>
                                   <input
                                     type="number"
@@ -747,7 +768,7 @@ const PartnerEdit = () => {
                                     className="form-label"
                                   >
                                     {" "}
-                                    Alternate Teliphone Number
+                                    Alternate Number
                                   </label>
                                   <input
                                     type="number"
@@ -774,7 +795,7 @@ const PartnerEdit = () => {
                                     htmlFor="phonenumberInput"
                                     className="form-label"
                                   >
-                                    Primary Phone Number
+                                    Primary Whatsapp Number
                                   </label>
                                   <input
                                     type="number"
@@ -802,7 +823,7 @@ const PartnerEdit = () => {
                                     className="form-label"
                                   >
                                     {" "}
-                                    Alternate Phone Number
+                                    Alternate Whatsapp Number
                                   </label>
                                   <input
                                     type="number"
