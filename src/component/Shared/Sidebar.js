@@ -249,7 +249,7 @@ const Sidebar = () => {
                 </div>
               </li>
 
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <a
                   className="nav-link menu-link"
                   href="#stocks-management"
@@ -294,11 +294,11 @@ const Sidebar = () => {
                     </li>
                   </ul>
                 </div>
-              </li>
+              </li> */}
 
               {/* <li className="menu-title"><i className="ri-more-fill" /> <span data-key="t-pages">Settings</span></li> */}
 
-              <li className="nav-item">
+              {/* <li className="nav-item">
                 <a
                   className="nav-link menu-link"
                   href="#onlineManagment"
@@ -339,7 +339,7 @@ const Sidebar = () => {
                     </li>
                   </ul>
                 </div>
-              </li>
+              </li> */}
 
               <li className="menu-title">
                 <i className="ri-more-fill" />{" "}

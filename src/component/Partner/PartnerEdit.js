@@ -1091,6 +1091,30 @@ const PartnerEdit = () => {
                             </div>
                           </div>
 
+                          <div className="col-lg-12">
+                            <div className="mb-3 pb-2">
+                              <label
+                                htmlFor="exampleFormControlTextarea"
+                                className="form-label"
+                              >
+                                Order Not Taking Message
+                              </label>
+                              <textarea
+                                className="form-control"
+                                value={Store_bussiness_info?.not_taking_msg}
+                                onChange={(e) =>
+                                  setStore_bussiness_info({
+                                    ...Store_bussiness_info,
+                                    not_taking_msg: e.target.value,
+                                  })
+                                }
+                                id="exampleFormControlTextarea"
+                                placeholder="rder Not Taking Message"
+                                rows={3}
+                              />
+                            </div>
+                          </div>
+
                           {/*end col*/}
                         </div>
                         {/*end row*/}
