@@ -1,11 +1,19 @@
 import { useContext } from "react";
 import { useEffect, useState } from "react";
-import ContextData from "../../context/MainContext";
+import { DeliveryConditionData } from "./component/DeliveryConditionData";
 import { FaFacebookF } from "react-icons/fa";
 import { AiOutlineInstagram, AiOutlineTwitter } from "react-icons/ai";
 import { FaLinkedinIn, FaMapMarkedAlt } from "react-icons/fa";
 
 import { Stack, Skeleton } from "@chakra-ui/react";
+import {
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
+  SliderMark,
+  Box,
+} from "@chakra-ui/react";
 import URLDomain from "../../URL";
 import { useMutation, useQuery } from "react-query";
 import Cookies from "universal-cookie";
@@ -20,6 +28,22 @@ const PartnerEdit = () => {
   const [banner, setBanner] = useState();
   const [isDataLoding, setisDataLoding] = useState(true);
 
+  const [sliderValue, setSliderValue] = useState(50);
+
+  const labelStyles = {
+    mt: "2",
+    ml: "-2.5",
+    fontSize: "sm",
+  };
+
+  const changeTakingOrder = (val) => {
+    setSliderValue(val);
+
+    setStore_bussiness_info({
+      ...Store_bussiness_info,
+      taking_km_distance: val,
+    });
+  };
   async function fetchData() {
     const data = await fetch(
       URLDomain + "/APP-API/Billing/Store_bussiness_info",
@@ -969,124 +993,105 @@ const PartnerEdit = () => {
                     >
                       <form action="javascript:void(0);">
                         <div className="row g-2">
-                          <div className="col-lg-4">
-                            <div className="mb-3">
-                              <label
-                                htmlFor="countryInput"
-                                className="form-label"
-                              >
-                                Minimum Order Value ₹{" "}
-                              </label>
-                              <input
-                                type="number"
-                                value={Store_bussiness_info?.minimum_order}
-                                onChange={(e) =>
-                                  setStore_bussiness_info({
-                                    ...Store_bussiness_info,
-                                    minimum_order: e.target.value,
-                                  })
-                                }
-                                className="form-control"
-                                id="countryInput"
-                                placeholder="Minimum Order Value"
-                              />
-                            </div>
-                          </div>
-                          {/*end col*/}
-                          <div className="col-lg-4">
-                            <div className="mb-3">
-                              <label htmlFor="cityInput" className="form-label">
-                                Carry Bag Required (Item Quantity)
-                              </label>
-                              <input
-                                type="text"
-                                value={
-                                  Store_bussiness_info?.carry_bag_charge_minimum_qty
-                                }
-                                onChange={(e) =>
-                                  setStore_bussiness_info({
-                                    ...Store_bussiness_info,
-                                    carry_bag_charge_minimum_qty:
-                                      e.target.value,
-                                  })
-                                }
-                                className="form-control"
-                                id="cityInput"
-                                placeholder="Carry Bag Required (Item Quantity)"
-                              />
-                            </div>
-                          </div>
-                          {/*end col*/}
-                          <div className="col-lg-4">
-                            <div className="mb-3">
-                              <label
-                                htmlFor="countryInput"
-                                className="form-label"
-                              >
-                                Carry Bag Charge ₹{" "}
-                              </label>
-                              <input
-                                type="text"
-                                value={Store_bussiness_info?.carry_bag_charge}
-                                onChange={(e) =>
-                                  setStore_bussiness_info({
-                                    ...Store_bussiness_info,
-                                    carry_bag_charge: e.target.value,
-                                  })
-                                }
-                                className="form-control"
-                                id="countryInput"
-                                placeholder="Carry Bag Charge"
-                              />
-                            </div>
-                          </div>
-                          {/*end col*/}
-                          <div className="col-lg-6">
-                            <div className="mb-3">
-                              <label
-                                htmlFor="zipcodeInput"
-                                className="form-label"
-                              >
-                                Delivery Charge (Min Order Value)
-                              </label>
-                              <input
-                                type="text"
-                                value={Store_bussiness_info?.shipping}
-                                onChange={(e) =>
-                                  setStore_bussiness_info({
-                                    ...Store_bussiness_info,
-                                    shipping: e.target.value,
-                                  })
-                                }
-                                className="form-control"
-                                minLength={5}
-                                maxLength={6}
-                                id="zipcodeInput"
-                                placeholder="Delivery Charge (Min Order Value)"
-                              />
-                            </div>
-                          </div>
+                          <div className="col-lg-12">
+                            <label
+                              htmlFor="countryInput"
+                              className="form-label"
+                            >
+                              Maximum Delivery Distance KM
+                            </label>
 
-                          <div className="col-lg-6">
-                            <div className="mb-3">
+                            <Box p={4} pt={10}>
+                              <Slider
+                                defaultValue={
+                                  Store_bussiness_info.taking_km_distance
+                                }
+                                min={0}
+                                max={50}
+                                step={1}
+                                aria-label="slider-ex-6"
+                                onChange={(val) => changeTakingOrder(val)}
+                              >
+                                <SliderMark value={0} {...labelStyles}>
+                                  0 KM
+                                </SliderMark>
+
+                                <SliderMark value={5} {...labelStyles}>
+                                  5 KM
+                                </SliderMark>
+                                <SliderMark value={10} {...labelStyles}>
+                                  10 KM
+                                </SliderMark>
+                                <SliderMark value={15} {...labelStyles}>
+                                  15 KM
+                                </SliderMark>
+                                <SliderMark value={20} {...labelStyles}>
+                                  20 KM
+                                </SliderMark>
+                                <SliderMark value={25} {...labelStyles}>
+                                  25 KM
+                                </SliderMark>
+                                <SliderMark value={30} {...labelStyles}>
+                                  30 KM
+                                </SliderMark>
+                                <SliderMark value={35} {...labelStyles}>
+                                  35 KM
+                                </SliderMark>
+                                <SliderMark value={40} {...labelStyles}>
+                                  40 KM
+                                </SliderMark>
+                                <SliderMark value={45} {...labelStyles}>
+                                  45 KM
+                                </SliderMark>
+                                <SliderMark value={50} {...labelStyles}>
+                                  50 KM
+                                </SliderMark>
+                                <SliderMark
+                                  value={sliderValue}
+                                  textAlign="center"
+                                  bg="blue.500"
+                                  color="white"
+                                  mt="-10"
+                                  ml="-5"
+                                  w="12"
+                                >
+                                  {sliderValue} KM
+                                </SliderMark>
+                                <SliderTrack>
+                                  <SliderFilledTrack />
+                                </SliderTrack>
+                                <SliderThumb />
+                              </Slider>
+                            </Box>
+                          </div>
+                        </div>
+
+                        <div className="row g-2 mt-4">
+                          <div className="col-lg-12">
+                            <DeliveryConditionData />
+                          </div>
+                        </div>
+                        <div className="row g-2 mt-4">
+                          <div className="col-lg-12">
+                            <div className="mb-3 pb-2">
                               <label
-                                htmlFor="zipcodeInput"
+                                htmlFor="exampleFormControlTextarea"
                                 className="form-label"
                               >
-                                Delivery Charge ₹{" "}
+                                Order Not Taking Message
                               </label>
-                              <input
-                                type="text"
-                                value={Store_bussiness_info?.charges}
+                              <textarea
+                                className="form-control"
+                                value={Store_bussiness_info?.not_taking_msg}
                                 onChange={(e) =>
                                   setStore_bussiness_info({
                                     ...Store_bussiness_info,
-                                    charges: e.target.value,
+                                    not_taking_msg: e.target.value,
                                   })
                                 }
-                                className="form-control"
-                                id="latInput"
-                                placeholder="Delivery Charge"
+                                id="exampleFormControlTextarea"
+                                placeholder="rder Not Taking Message"
+                                rows={3}
                               />
                             </div>
                           </div>
