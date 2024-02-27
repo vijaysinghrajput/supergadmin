@@ -18,6 +18,7 @@ import URLDomain from "../../URL";
 import { useMutation, useQuery } from "react-query";
 import Cookies from "universal-cookie";
 import { queryClient } from "../../App";
+
 const cookies = new Cookies();
 
 const PartnerEdit = () => {
