@@ -9,9 +9,11 @@ import { Tag } from "primereact/tag";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router";
 import { BiSearch } from "react-icons/bi";
+import { Toast } from "primereact/toast";
 
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
+import { DeliverySlotsListTable } from "./DeliverySlotsListTable";
 
 import { useQuery } from "react-query";
 
@@ -25,8 +27,12 @@ const cookies = new Cookies();
 export const DeliveryConditionData = () => {
   const navigate = useNavigate();
 
+  const toast = useRef(null);
+
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [selectedMonthYear, setselectedMonthYear] = useState(null);
+
+  const [expandedRows, setExpandedRows] = useState(null);
 
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -80,9 +86,40 @@ export const DeliveryConditionData = () => {
       //   setSaleYear(deliveryCondtionData.sale_year);
 
       console.log("SaleYear", SaleYear);
+
       setisDataLoding(false);
     }
   }, [deliveryCondtionData, isLoadingAPI]);
+
+  const expandAll = () => {
+    let _expandedRows = {};
+
+    Sale.forEach((p) => (_expandedRows[`${p.id}`] = true));
+
+    setExpandedRows(_expandedRows);
+  };
+
+  const collapseAll = () => {
+    setExpandedRows(null);
+  };
+
+  const onRowExpand = (event) => {
+    toast.current.show({
+      severity: "info",
+      summary: "Product Expanded",
+      detail: event.data.distance_km,
+      life: 3000,
+    });
+  };
+
+  const onRowCollapse = (event) => {
+    toast.current.show({
+      severity: "success",
+      summary: "Product Collapsed",
+      detail: event.data.distance_km,
+      life: 3000,
+    });
+  };
 
   //   const cols = [
   //     { field: "customer_mobile", header: "Mobile" },
@@ -209,26 +246,46 @@ export const DeliveryConditionData = () => {
     });
   };
 
+  const allowExpansion = (rowData) => {
+    return rowData.id.length > 0;
+  };
+
+  const header = (
+    <div className="flex flex-wrap justify-content-end gap-2">
+      <Button icon="pi pi-plus" label="Expand All" onClick={expandAll} text />
+      <Button
+        icon="pi pi-minus"
+        label="Collapse All"
+        onClick={collapseAll}
+        text
+      />
+    </div>
+  );
+
+  const rowExpansionTemplate = (data) => {
+    // console.log;
+
+    return (
+      <div className="p-3">
+        <h5>Delivery Slot for {data.distance_km} KM</h5>
+        <DeliverySlotsListTable data={data.slotting_id} />
+      </div>
+    );
+  };
+
   return (
     <div className="card">
       <DataTable
         value={Sale}
-        paginator
-        rows={50}
-        // header={header}
-        selectionMode="single"
-        sortMode="multiple"
-        // sortField="date"
-        removableSort
-        stateStorage="session"
-        stateKey="dt-state-demo-local"
-        emptyMessage="No Sale found."
-        tableStyle={{ minWidth: "50rem" }}
-        filters={filters}
-        filterDisplay="row"
+        expandedRows={expandedRows}
+        onRowToggle={(e) => setExpandedRows(e.data)}
+        rowExpansionTemplate={rowExpansionTemplate}
+        dataKey="id"
         loading={isFetching}
-        // header={header}
+        header={header}
+        tableStyle={{ minWidth: "60rem" }}
       >
+        <Column expander={allowExpansion} style={{ width: "5rem" }} />
         <Column
           field="distance_km"
           header="KM"
@@ -267,26 +324,6 @@ export const DeliveryConditionData = () => {
           sortable
           style={{ width: "25%" }}
         ></Column>
-
-        {/* <Column
-          field="order_status"
-          header="Status"
-          body={statusBodyTemplate}
-          sortable
-          style={{ width: "25%" }}
-          showFilterMenu={false}
-          filterMenuStyle={{ width: "14rem" }}
-          filter
-          filterElement={statusRowFilterTemplate}
-        ></Column>
-
-        <Column
-          field=""
-          header="Action"
-          body={ActionBodyTemplate}
-          sortable
-          style={{ width: "25%" }}
-        ></Column> */}
       </DataTable>
     </div>
   );
