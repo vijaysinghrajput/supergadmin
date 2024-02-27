@@ -58,7 +58,7 @@ export const DeliveryConditionData = () => {
         },
         body: JSON.stringify({
           store_id: adminStoreId,
-          distance_km: 11,
+          distance_km: 3,
         }),
       }
     )
@@ -151,6 +151,13 @@ export const DeliveryConditionData = () => {
         severity={getSeverity(rowData.order_status)}
       ></Tag>
     );
+  };
+
+  const kmTem = (rowData) => {
+    return <p>{rowData.distance_km} KM</p>;
+  };
+  const minOrderTem = (rowData) => {
+    return <p>{rowData.min_order_value} ₹</p>;
   };
 
   const ActionBodyTemplate = (rowData) => {
@@ -291,12 +298,14 @@ export const DeliveryConditionData = () => {
           header="KM"
           sortable
           style={{ width: "25%" }}
+          body={kmTem}
         ></Column>
         <Column
           field="min_order_value"
           header="Min Ord"
           sortable
           style={{ width: "25%" }}
+          body={minOrderTem}
         ></Column>
         <Column
           field="minium_amount_free_del"

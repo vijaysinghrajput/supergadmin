@@ -52,7 +52,7 @@ export const DeliverySlotsListTable = (slotting_id) => {
         },
         body: JSON.stringify({
           store_id: adminStoreId,
-          SlotId: SlotId,
+          SlotId: slotting_id.data,
         }),
       }
     )
@@ -86,11 +86,15 @@ export const DeliverySlotsListTable = (slotting_id) => {
   const status2BodyTemplate = (rowData) => {
     return (
       <Tag
-        onClick={setSlotIDChange(rowData.id)}
+        onClick={() => setSlotingId(rowData.id)}
         value={rowData.status == 1 ? "Open" : "Close"}
         severity={getSeverity(rowData.status)}
       ></Tag>
     );
+  };
+
+  const setSlotingId = (value) => {
+    setSlotIDChange(value);
   };
 
   const slotNameTem = (rowData) => {
@@ -130,15 +134,34 @@ export const DeliverySlotsListTable = (slotting_id) => {
     );
   };
 
-  const changeActionStatus = (e) => {
-    console.log("selected value ", e);
-    console.log("SlotIDChange", SlotIDChange);
+  const changeActionStatus = async (e) => {
+    // console.log
+    const data = await fetch(URLDomain + "/APP-API/Billing/updateSlotStatus", {
+      method: "POST",
+      header: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        value: e.value,
+        SlotId: SlotIDChange,
+      }),
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        queryClient.invalidateQueries({
+          queryKey: ["delivery_slot_list_data"],
+        });
+      })
+      .catch((error) => {
+        //  console.error(error);
+      });
   };
 
   return (
     <div className="card">
       <DataTable
-        value={SlotData}
+        value={delivery_slot_list_data.store_delivery_slot_list}
         rows={24}
         selectionMode="single"
         sortMode="multiple"
