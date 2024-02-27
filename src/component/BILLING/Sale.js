@@ -210,7 +210,7 @@ export const Sale = () => {
       //   func();
       //   document.querySelectorAll("#search-options")[0].scrollIntoView();
       // }
-      console.log("key stroke ---->", event);
+      // console.log("key stroke ---->", event);
       if (event.keyCode === 220) {
         event.preventDefault();
         func();
@@ -1488,6 +1488,49 @@ export const Sale = () => {
                     price: initialRef.current.value,
                     sale_price: initialRef.current.value,
                     discount_in_rs: 0,
+                    //
+
+                    id: "00",
+                    store_id: "STORE0001",
+                    // product_name: "Anik ghee",
+                    product_full_name: "Extra",
+                    product_uniq_slug_name: "extra",
+                    product_image:
+                      "https://static.vecteezy.com/system/resources/previews/008/770/217/original/paper-bag-full-of-organic-and-fresh-grocery-products-free-vector.jpg",
+                    product_type: "Grocery",
+                    parent_category_id: "000",
+                    parent_category_name: "Extra",
+                    category_id: "000",
+                    child_category_name: "Extra",
+                    brand_id: "00",
+                    brand_name: "Extra",
+                    purchase_price: initialRef.current.value,
+                    // price: "76",
+                    discount_in_percent: "0",
+                    // discount_in_rs: "2",
+                    // sale_price: "74",
+                    // product_size: "100",
+                    // product_unit: "g",
+                    stock_quantity: "100",
+                    stok_warehouse_qty: "0",
+                    stock_alert_quantity: "0",
+                    warehouse_stock_alert_quantity: "0",
+                    max: "10",
+                    product_bar_code: "8900000000000",
+                    deceptions: "Extra",
+                    hsn_code: "00000",
+                    i_gst: "0",
+                    c_gst: "0",
+                    s_gst: "0",
+                    expeiry_date: null,
+                    margin_in_rs: "0",
+                    status: "1",
+                    add_date: "09-09-2023",
+                    update_date: "10-10-2023",
+                    priority: "10",
+                    product_name_search: "Extra",
+                    // billing_quantity: 1,
+                    // amount_total: "74",
                   },
                   ...addedItems,
                 ]);
@@ -1556,6 +1599,10 @@ export const Sale = () => {
               {selectedCustomer?.mobile
                 ? selectedCustomer?.mobile
                 : "----------"}
+            </Text>
+            <Text>
+              Name{" "}
+              {selectedCustomer?.name ? selectedCustomer?.name : "----------"}
             </Text>
           </Box>
           {/* <tr>
