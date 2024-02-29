@@ -1,12 +1,29 @@
-import { BiRupee } from "react-icons/bi";
+// import { BiRupee } from "react-icons/bi";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import ContextData from "../../context/MainContext";
+import { BiRupee, BiBarcodeReader } from "react-icons/bi";
+import { AiOutlineDelete } from "react-icons/ai";
+import { ReactSearchAutocomplete } from "react-search-autocomplete";
+import { TiPrinter } from "react-icons/ti";
+import { IoIosSave, IoMdAdd } from "react-icons/io";
+import { MdDelete } from "react-icons/md";
+import "react-datepicker/dist/react-datepicker.css";
+import URLDomain from "../../URL";
+import { useReactToPrint } from "react-to-print";
+import { useToast } from "@chakra-ui/react";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  Form,
+  ModalBody,
+  ModalCloseButton,
+} from "@chakra-ui/react";
 
 import { useQuery } from "react-query";
 import Cookies from "universal-cookie";
-import { useReactToPrint } from "react-to-print";
-import { SimpleGrid, useToast } from "@chakra-ui/react";
+import { SimpleGrid } from "@chakra-ui/react";
 import { Map, InfoWindow, Marker, GoogleApiWrapper } from "google-maps-react";
 
 import { queryClient } from "../../App";
@@ -28,6 +45,8 @@ import swal from "sweetalert";
 import URL from "../../URL";
 
 import "react-datepicker/dist/react-datepicker.css";
+const cookies = new Cookies();
+const adminId = cookies.get("adminId");
 
 const OnlineSalesHistoryRecord = () => {
   const { orderID } = useParams();
@@ -35,11 +54,11 @@ const OnlineSalesHistoryRecord = () => {
 
   const toast = useToast();
   const componentRef = useRef();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   // console.log("orderID", orderID);
   // console.log("customer_address", customer_address);
 
-  const cookies = new Cookies();
   const adminStoreId = cookies.get("adminStoreId");
   const [isDataLoding, setisDataLoding] = useState(true);
 
@@ -392,6 +411,25 @@ const OnlineSalesHistoryRecord = () => {
                   </div>
 
                   <div className="col-xl-12">
+                    <Flex
+                      alignItems={"center"}
+                      justifyContent={"right"}
+                      pb={2}
+                      pr={3}
+                      onClick={onOpen}
+                    >
+                      <Button>Add More</Button>
+                    </Flex>
+                    <AddProductModal
+                      isOpen={isOpen}
+                      onClose={onClose}
+                      onOpen={onOpen}
+                      orderId={orderDetails?.order_id}
+                      customerId={
+                        ONLINESALEHISTORYRECORD.customer_address_details
+                          .customer_id
+                      }
+                    />
                     <div className="table-responsive mt-4 mt-xl-0">
                       <table className="table   align-middle table-nowrap mb-0">
                         <thead>
@@ -1012,5 +1050,510 @@ const OnlineSalesHistoryRecord = () => {
     </>
   );
 };
+
+export function AddProductModal({
+  isOpen,
+  onOpen,
+  onClose,
+  orderId,
+  customerId,
+}) {
+  const [addedItems, setAddedItems] = useState([]);
+  const adminStoreId = cookies.get("adminStoreId");
+  const [onlyPrint, setOnlyPrint] = useState(false);
+  const [isLoading, setIL] = useState(false);
+
+  const submitSale = () => {
+    console.log("Items =======================>", addedItems);
+    console.log("Order ID =======================>", orderId);
+    console.log("Admin ID =======================>", adminId);
+    console.log("CUstomer ID =======================>", customerId);
+
+    // if (allTotals?.grandTotal == 0) {
+    //   getToast({ title: "Please add items", dec: "Requird", status: "error" });
+    //   setIL(false);
+    // } else {
+    //   const data = JSON.stringify({
+    //     customer_type: customerShoppingDetails?.customer_type,
+    //     store_id: adminStoreId,
+    //     customer_mobile: selectedCustomer.mobile,
+    //     user_id: adminId,
+    //     sub_total: allTotals?.subTotal,
+    //     i_gst: Number(allTotals?.sGstTotal) + Number(allTotals?.cGstTotal),
+    //     s_gst: Number(allTotals?.sGstTotal),
+    //     c_gst: Number(allTotals?.cGstTotal),
+    //     extra_charge: allTotals?.additional_charges,
+    //     discount: allTotals?.discount,
+    //     notes: restInfo.notes,
+    //     order_no: restInfo.order_no,
+    //     total_payment: allTotals?.grandTotal,
+    //     amount_paid: allTotals?.amount_paid,
+    //     outstanding: allTotals?.outstanding,
+    //     stock_location: restInfo.stock_location,
+    //     payment_mode: restInfo.payment_mode,
+    //     is_coupon_applied: useCouponData.is_coupon_applied,
+    //     coupon_code: useCouponData.coupon_code,
+    //     coupon_discount_value: allTotals?.coupon_discount_value,
+    //     coupon_id: useCouponData.coupon_id,
+    //     purchaes_date: Saledate.toLocaleDateString(),
+    //     product_list: addedItems,
+    //   });
+
+    //   fetch(URLDomain + "/APP-API/Billing/SaleStoreProducts", {
+    //     method: "POST",
+    //     header: {
+    //       Accept: "application/json",
+    //       "Content-type": "application/json",
+    //     },
+    //     body: data,
+    //   })
+    //     .then((response) => response.json())
+    //     .then((responseJson) => {
+    //       // functionality.fetchAllData(responseJson);
+    //       console.log(" Sale server res ---->", responseJson);
+    //       setLastInsertedRow(responseJson.inserted_row);
+    //       // setAddedItems([]);
+    //       setIL(false);
+    //       handlePrint();
+    //     })
+    //     .catch((error) => {
+    //       console.error(error);
+    //     })
+    //     .finally(() => {
+    //       setIL(false);
+    //       setPreviousAddedItems(addedItems);
+    //     });
+    // }
+  };
+
+  async function fetchData() {
+    const data = await fetch(
+      URLDomain + "/APP-API/Billing/InsertPurchaseData",
+      {
+        method: "post",
+        header: {
+          Accept: "application/json",
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          store_id: adminStoreId,
+        }),
+      }
+    )
+      .then((response) => response.json())
+      .then((responseJson) => responseJson);
+
+    return data;
+  }
+  const {
+    data: PURCHASEDATA,
+    isError,
+    isLoading: isLoadingAPI,
+  } = useQuery({
+    queryKey: ["PURCHASEDATA"],
+    queryFn: (e) => fetchData(),
+    refetchOnWindowFocus: false,
+    // refetchInterval: 100,
+  });
+
+  const handleOnSelect = (item) => {
+    console.log("barcode ---->", item.product_bar_code);
+    const allReadyExist = addedItems.some(
+      (elem) => elem.product_full_name === item.product_full_name
+    );
+    const index = addedItems.findIndex(
+      (elem) => elem.product_full_name === item.product_full_name
+    );
+    console.log("hey 2");
+    !allReadyExist
+      ? setAddedItems([
+          { ...item, billing_quantity: 1, amount_total: item.sale_price },
+          ...addedItems,
+        ])
+      : setAddedItems((previousState) => {
+          let obj = previousState[index];
+          if (obj !== undefined) {
+            obj.billing_quantity = Number(obj.billing_quantity || 0) + 1; // <-- state mutation
+            obj.amount_total =
+              Number(obj.billing_quantity) * Number(obj.sale_price);
+            console.log("Quantity Scan ---->", obj.billing_quantity);
+          }
+          return [...previousState];
+        });
+    // !allReadyExist && setAddedItems([...addedItems, item]);
+    /*  setTimeout(() => {
+             document.getElementsByClassName("clear-icon")[0].querySelector(':scope > svg')[0].click();
+         }, 1000) */ //1 second delay
+  };
+
+  const deleteFeild = (index) => {
+    let newArr = [...addedItems];
+    delete newArr[index];
+    newArr = newArr.filter((item) => item);
+    setAddedItems(newArr);
+  };
+
+  const updateFieldChanged = (index) => (e) => {
+    // console.log('index: ' + index);
+    // console.log('property name: ' + e.target.name);
+    let newArr = [...addedItems];
+
+    e.target.name === "price" &&
+      (newArr[index].price = e.target.value) &&
+      (newArr[index].sale_price = e.target.value) &&
+      (newArr[index].discount_in_rs = 0);
+
+    e.target.name === "quantity" &&
+      (newArr[index].billing_quantity = e.target.value);
+
+    e.target.name === "product_name" &&
+      (newArr[index].product_name = e.target.value);
+    e.target.name === "product_size" &&
+      (newArr[index].product_size = e.target.value);
+    e.target.name === "product_unit" &&
+      (newArr[index].product_unit = e.target.value);
+
+    e.target.name === "sale_price" &&
+      (newArr[index].sale_price = e.target.value) &&
+      (newArr[index].discount_in_rs =
+        newArr[index].price - newArr[index].sale_price);
+    e.target.name === "discount" &&
+      (newArr[index].discount_in_rs = e.target.value) &&
+      (newArr[index].sale_price =
+        newArr[index].price - newArr[index].discount_in_rs);
+    newArr[index].amount_total =
+      Number(newArr[index].billing_quantity) * Number(newArr[index].sale_price);
+    // console.log("new arrya --->", newArr);
+
+    newArr = newArr.filter((item) => item);
+    setAddedItems(newArr);
+  };
+
+  return (
+    <>
+      <Button onClick={onOpen}>Trigger modal</Button>
+
+      <Modal onClose={onClose} isOpen={isOpen} isCentered size="6xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Add More Product</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody maxH={"500px"} overflow={"auto"}>
+            <div className="col-lg-12 border-bottom pb-4">
+              <div className="row g-3">
+                <div className="col-md-12 col-sm-12">
+                  <div className="d-flex align-items-center">
+                    {/* <input id="search-dropdown" type="text" className="form-control search bg-light border-light" placeholder="Add product..." /> */}
+                    <div style={{ width: "68%" }}>
+                      <ReactSearchAutocomplete
+                        items={PURCHASEDATA.searchProduct}
+                        className="form-control search bg-light border-light"
+                        onSelect={handleOnSelect}
+                        styling={{
+                          zIndex: "1",
+                        }}
+                        fuseOptions={{
+                          keys: [
+                            "product_name",
+                            "product_bar_code",
+                            "product_full_name",
+                          ],
+                        }}
+                        resultStringKeyName="product_name_search" // formatResult={formatResult}
+                      />
+                    </div>
+                    {/* <i className="ri-search-line search-icon" /> */}
+                    {/* <h2 className="mb-0" style={{ marginLeft: "1rem" }}> */}
+                    <Box ml={4}>
+                      <BiBarcodeReader size={28} />
+                    </Box>
+                    {/* </h2> */}
+                    {addedItems.length ? (
+                      <Flex
+                        ml={10}
+                        alignItems={"center"}
+                        justifyContent={"center"}
+                        cursor={"pointer"}
+                        onClick={() => {
+                          setAddedItems([]);
+                        }}
+                        borderRadius={6}
+                        border={"2px solid #d4d4d4"}
+                        px={2}
+                        py={1}
+                      >
+                        <Text fontWeight={"700"} className="mb-0">
+                          Delete All
+                        </Text>
+                        <MdDelete size={24} color="red" />
+                      </Flex>
+                    ) : null}
+                    {addedItems.length ? (
+                      !onlyPrint ? (
+                        <Button
+                          isLoading={isLoading}
+                          onClick={submitSale}
+                          ml={6}
+                          backgroundColor={"#000"}
+                          borderRadius={6}
+                          color={"#fff"}
+                        >
+                          <Flex
+                            alignItems={"center"}
+                            justifyContent={"center"}
+                            cursor={"pointer"}
+                            // onClick={deleteAll}
+                            px={3}
+                            py={1}
+                            gap={1}
+                          >
+                            <Text
+                              fontWeight={"700"}
+                              fontSize={14}
+                              className="mb-0"
+                            >
+                              Save
+                            </Text>
+                            <IoIosSave size={28} />
+                          </Flex>
+                        </Button>
+                      ) : (
+                        <Button
+                          isLoading={isLoading}
+                          // onClick={handlePrint}
+                          ml={6}
+                          borderRadius={6}
+                          colorScheme="orange"
+                        >
+                          <Flex
+                            alignItems={"center"}
+                            justifyContent={"center"}
+                            cursor={"pointer"}
+                            // onClick={deleteAll}
+                            px={3}
+                            py={1}
+                            gap={1}
+                          >
+                            <Text
+                              fontWeight={"700"}
+                              fontSize={14}
+                              className="mb-0"
+                            >
+                              Print
+                            </Text>
+                            <TiPrinter size={28} />
+                          </Flex>
+                        </Button>
+                      )
+                    ) : null}
+                  </div>
+
+                  <div
+                    className="dropdown-menu dropdown-menu-lg"
+                    id="search-dropdown"
+                  ></div>
+                </div>
+              </div>
+            </div>
+            <div className="col-xl-12">
+              <div className="table-responsive mt-4 mt-xl-0">
+                <table className="table table-active table-hover table-striped align-middle table-nowrap mb-0">
+                  <thead>
+                    <tr>
+                      <th scope="col">NO</th>
+                      <th scope="col">QTY</th>
+                      <th scope="col">ITEMS</th>
+                      <th scope="col">Size</th>
+                      <th scope="col">Unit</th>
+
+                      <th scope="col">MRP</th>
+                      <Box
+                        as="th"
+                        display={"flex"}
+                        alignItems={"center"}
+                        scope="col"
+                      >
+                        <BiRupee />
+                        PRICE
+                      </Box>
+                      <th scope="col">DISCOUNT</th>
+                      {/* <th scope="col">HSN</th> */}
+                      {/* <th scope="col">GST</th> */}
+                      {/* <th scope="col">CGST</th> */}
+                      <th scope="col">AMOUNT</th>
+                      <th scope="col"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {addedItems?.length && addedItems ? (
+                      addedItems?.map((items, index) => {
+                        return (
+                          <>
+                            {items && (
+                              <tr>
+                                <td width={"10%"} className="fw-medium">
+                                  {index + 1}
+                                </td>
+                                <td width={"10%"}>
+                                  <input
+                                    type="number"
+                                    name="quantity"
+                                    onChange={updateFieldChanged(index)}
+                                    value={
+                                      items.billing_quantity
+                                        ? items.billing_quantity
+                                        : ""
+                                    }
+                                    className="invoice_input"
+                                    style={{ width: "3rem" }}
+                                    placeholder="0"
+                                  />
+                                </td>
+                                <td width={"40%"}>
+                                  <input
+                                    type="text"
+                                    name="product_name"
+                                    onChange={updateFieldChanged(index)}
+                                    value={items.product_name}
+                                    className="invoice_input"
+                                    style={{ width: "15rem" }}
+                                    placeholder=""
+                                  />
+                                </td>
+                                {/* <td width={"40%"} >{items.product_full_name}</td> */}
+
+                                <td width={"5%"}>
+                                  <input
+                                    type="number"
+                                    name="product_size"
+                                    onChange={updateFieldChanged(index)}
+                                    value={
+                                      items.product_size
+                                        ? items.product_size
+                                        : ""
+                                    }
+                                    className="invoice_input"
+                                    style={{ width: "3rem" }}
+                                    placeholder="0"
+                                  />
+                                </td>
+                                <td width={"5%"}>
+                                  <input
+                                    type="text"
+                                    name="product_unit"
+                                    onChange={updateFieldChanged(index)}
+                                    value={
+                                      items.product_unit
+                                        ? items.product_unit
+                                        : ""
+                                    }
+                                    className="invoice_input"
+                                    style={{ width: "3rem" }}
+                                    placeholder="0"
+                                  />
+                                </td>
+
+                                <td width={"10%"}>
+                                  <input
+                                    type="number"
+                                    name="price"
+                                    value={items.price}
+                                    onChange={updateFieldChanged(index)}
+                                    className="invoice_input"
+                                    style={{ width: "5rem" }}
+                                    placeholder="0"
+                                  />
+                                </td>
+
+                                <td width={"10%"}>
+                                  <input
+                                    type="number"
+                                    name="sale_price"
+                                    value={items.sale_price}
+                                    onChange={updateFieldChanged(index)}
+                                    className="invoice_input"
+                                    style={{ width: "5rem" }}
+                                    placeholder="0"
+                                  />
+                                </td>
+                                <td width={"10%"}>
+                                  <input
+                                    type="number"
+                                    name="discount"
+                                    onChange={updateFieldChanged(index)}
+                                    value={items.discount_in_rs}
+                                    className="invoice_input"
+                                    style={{ width: "3rem" }}
+                                    placeholder="0"
+                                  />
+                                </td>
+                                {/* <td width={"10%"} ><input type="number" value={items.hsn_code} className="invoice_input" style={{ width: "3rem" }} placeholder="0" /></td> */}
+                                {/* <td width={"10%"} ><input type="number" disabled value={items.i_gst} className="invoice_input" style={{ width: "3rem" }} placeholder="0" /></td> */}
+                                {/* <td width={"10%"} ><input type="number" value={items.c_gst} className="invoice_input" style={{ width: "3rem" }} placeholder="0" /></td> */}
+                                <td width={"10%"}>
+                                  <input
+                                    type="number"
+                                    disabled
+                                    value={
+                                      items.amount_total
+                                        ? items.amount_total
+                                        : ""
+                                    }
+                                    readOnly
+                                    className="invoice_input"
+                                    style={{ width: "6rem" }}
+                                    placeholder="0"
+                                  />
+                                </td>
+                                <td width={"10%"}>
+                                  <AiOutlineDelete
+                                    style={{
+                                      cursor: "pointer",
+                                      color: "red",
+                                    }}
+                                    onClick={() => deleteFeild(index)}
+                                    size={24}
+                                  />
+                                </td>
+                              </tr>
+                            )}
+                          </>
+                        );
+                      })
+                    ) : (
+                      <></>
+                    )}
+                  </tbody>
+                </table>
+                {!addedItems.length ? (
+                  <>
+                    <div className="col-md-12 px-0">
+                      <div className="d-flex align-items-center justify-content-center p-3 add_product_dashedBorder mt-4">
+                        <div className="w-100">
+                          <Flex
+                            justifyContent={"center"}
+                            alignItems={"center"}
+                            gap={3}
+                            color={"#001794"}
+                            fontWeight={"600"}
+                            fontSize={16}
+                          >
+                            <BiBarcodeReader size={30} /> Scan Barcode / Add you
+                            product
+                          </Flex>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            </div>
+            <Flex justifyContent={"center"} p={5}></Flex>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
+  );
+}
 
 export default OnlineSalesHistoryRecord;
