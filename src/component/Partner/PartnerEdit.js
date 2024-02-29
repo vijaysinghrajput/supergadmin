@@ -18,6 +18,7 @@ import URLDomain from "../../URL";
 import { useMutation, useQuery } from "react-query";
 import Cookies from "universal-cookie";
 import { queryClient } from "../../App";
+import { BusinessInfo } from "./component/BusinessInfo";
 
 const cookies = new Cookies();
 
@@ -45,6 +46,7 @@ const PartnerEdit = () => {
       taking_km_distance: val,
     });
   };
+
   async function fetchData() {
     const data = await fetch(
       URLDomain + "/APP-API/Billing/Store_bussiness_info",
@@ -100,12 +102,15 @@ const PartnerEdit = () => {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        console.log("respond business info ", responseJson);
         setIL(false);
         // storeBussinessRelode();
 
         queryClient.invalidateQueries({
           queryKey: ["store_business_information"],
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ["deliveryCondtionData"],
         });
       })
       .catch((error) => {
@@ -115,8 +120,6 @@ const PartnerEdit = () => {
 
   const updateImage = () => {
     setIL(true);
-
-    console.log("sesodine", logo, "banner", banner);
 
     const formData = new FormData();
 
@@ -999,7 +1002,8 @@ const PartnerEdit = () => {
                               htmlFor="countryInput"
                               className="form-label"
                             >
-                              Maximum Delivery Distance KM
+                              Maximum Delivery Distance{" "}
+                              {Store_bussiness_info.taking_km_distance} KM
                             </label>
 
                             <Box p={4} pt={10}>
@@ -1069,7 +1073,9 @@ const PartnerEdit = () => {
 
                         <div className="row g-2 mt-4">
                           <div className="col-lg-12">
-                            <DeliveryConditionData />
+                            <DeliveryConditionData
+                              data={Store_bussiness_info?.taking_km_distance}
+                            />
                           </div>
                         </div>
                         <div className="row g-2 mt-4">
