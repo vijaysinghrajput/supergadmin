@@ -171,7 +171,9 @@ const SalesHistory = () => {
                     "/salesManagement/sales-history-record/" +
                       row.order_id +
                       "/" +
-                      row.customer_mobile
+                      row.customer_mobile +
+                      "/" +
+                      row.order_type
                   )
                 }
               >

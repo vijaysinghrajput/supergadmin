@@ -160,7 +160,7 @@ const App = () => {
                   <Route index element={<h4>Online 11</h4>} />
                   <Route path="/online/order" element={<OnlineSale />} />
                   <Route
-                    path="/online/online-sales-history-record/:orderID/:customer_address"
+                    path="/online/online-sales-history-record/:orderID/:customer_address/:order_type"
                     element={<OnlineSalesHistoryRecord />}
                   />
                   <Route

@@ -121,7 +121,9 @@ export const SaleDataTable = () => {
             "/online/online-sales-history-record/" +
               rowData.order_id +
               "/" +
-              rowData.customer_address_id
+              rowData.customer_address_id +
+              "/" +
+              rowData.order_type
           )
         }
         className="btn btn-dark"

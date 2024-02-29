@@ -188,7 +188,9 @@ const OnlineSale = () => {
                     "/online/online-sales-history-record/" +
                       row.order_id +
                       "/" +
-                      row.customer_address_id
+                      row.customer_address_id +
+                      "/" +
+                      row.order_type
                   )
                 }
               >
