@@ -161,7 +161,7 @@ export const DeliverySlotsListTable = (slotting_id) => {
   return (
     <div className="card">
       <DataTable
-        value={delivery_slot_list_data.store_delivery_slot_list}
+        value={SlotData}
         rows={24}
         selectionMode="single"
         sortMode="multiple"

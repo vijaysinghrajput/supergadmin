@@ -14,7 +14,7 @@ import { Toast } from "primereact/toast";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import { DeliverySlotsListTable } from "./DeliverySlotsListTable";
-
+import { UpdateSlotCondition } from "./UpdateSlotCondition";
 import { useQuery } from "react-query";
 
 import URLDomain from "../../../URL";
@@ -24,13 +24,14 @@ import { queryClient } from "../../../App";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 const cookies = new Cookies();
 
-export const DeliveryConditionData = () => {
+export const DeliveryConditionData = (takingKM) => {
   const navigate = useNavigate();
 
   const toast = useRef(null);
 
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [selectedMonthYear, setselectedMonthYear] = useState(null);
+  const [UpdateSlotCondtion, setUpdateSlotCondtion] = useState({});
 
   const [expandedRows, setExpandedRows] = useState(null);
 
@@ -40,14 +41,17 @@ export const DeliveryConditionData = () => {
   });
   const [isDataLoding, setisDataLoding] = useState(true);
   const [Sale, setSale] = useState(null);
-  const [SaleYear, setSaleYear] = useState(null);
+  const [Distance, setDistance] = useState();
 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
 
   const adminStoreId = cookies.get("adminStoreId");
   const adminId = cookies.get("adminId");
 
-  async function fetchData() {
+  const [SlotIDChange, setSlotIDChange] = useState(null);
+
+  async function fetchData({ distance }) {
+    console.log("hey navneet ======>", distance.data);
     const data = await fetch(
       URLDomain + "/APP-API/Billing/deliveryCondtionData",
       {
@@ -57,8 +61,9 @@ export const DeliveryConditionData = () => {
           "Content-type": "application/json",
         },
         body: JSON.stringify({
+          //   Distance_KM: 7,
+          Distance_KM: distance.data,
           store_id: adminStoreId,
-          distance_km: 3,
         }),
       }
     )
@@ -68,28 +73,38 @@ export const DeliveryConditionData = () => {
     return data;
   }
 
+  //   useEffect(() => {
+  //     const timer = setTimeout(() => {
+  //       fetchData({ distance: "7" });
+  //     }, 1000);
+
+  //     return () => {
+  //       clearTimeout(timer);
+  //     };
+  //   }, [takingKM]);
+
   const {
     data: deliveryCondtionData,
     isError,
     isLoading: isLoadingAPI,
     isFetching,
   } = useQuery({
-    queryKey: ["deliveryCondtionData"],
-    queryFn: (e) => fetchData(),
+    queryKey: ["deliveryCondtionData", takingKM],
+    queryFn: (e) => fetchData({ distance: e.queryKey[1] }),
   });
+  // fetchData({ distance: e.queryKey[1] }))});
 
   useEffect(() => {
     setSale([]);
-    setSaleYear([]);
     if (deliveryCondtionData) {
       setSale(deliveryCondtionData.store_delivery_slot);
-      //   setSaleYear(deliveryCondtionData.sale_year);
 
-      console.log("SaleYear", SaleYear);
+      console.log("Distance", takingKM.data);
+      console.log("data codition", deliveryCondtionData);
 
       setisDataLoding(false);
     }
-  }, [deliveryCondtionData, isLoadingAPI]);
+  }, [takingKM.data, deliveryCondtionData, isLoadingAPI]);
 
   const expandAll = () => {
     let _expandedRows = {};
@@ -103,154 +118,135 @@ export const DeliveryConditionData = () => {
     setExpandedRows(null);
   };
 
-  const onRowExpand = (event) => {
-    toast.current.show({
-      severity: "info",
-      summary: "Product Expanded",
-      detail: event.data.distance_km,
-      life: 3000,
-    });
-  };
-
-  const onRowCollapse = (event) => {
-    toast.current.show({
-      severity: "success",
-      summary: "Product Collapsed",
-      detail: event.data.distance_km,
-      life: 3000,
-    });
-  };
-
-  //   const cols = [
-  //     { field: "customer_mobile", header: "Mobile" },
-  //     { field: "order_id", header: "ORDER NO" },
-  //     { field: "total_payment", header: "Cost" },
-  //     { field: "plateform", header: "Plateform" },
-  //     { field: "order_status", header: "Status" },
-  //     { field: "date", header: "Date" },
-  //   ];
-
-  const groupedItemTemplate = (option) => {
-    return (
-      <div className="flex align-items-center">
-        <img
-          alt={option.label}
-          src="https://primefaces.org/cdn/primereact/images/flag/flag_placeholder.png"
-          className={`mr-2 flag flag-${option.code.toLowerCase()}`}
-          style={{ width: "18px" }}
-        />
-        <div>{option.label}</div>
-      </div>
-    );
-  };
-
-  const statusBodyTemplate = (rowData) => {
-    return (
-      <Tag
-        value={rowData.order_status}
-        severity={getSeverity(rowData.order_status)}
-      ></Tag>
-    );
-  };
-
   const kmTem = (rowData) => {
     return <p>{rowData.distance_km} KM</p>;
   };
   const minOrderTem = (rowData) => {
     return <p>{rowData.min_order_value} ₹</p>;
   };
+  const minOrderforfreeTem = (rowData) => {
+    return <p>{rowData.minium_amount_free_del} ₹</p>;
+  };
+  const deliverychargetem = (rowData) => {
+    return <p>{rowData.delivery_charge} ₹</p>;
+  };
+  const timeholdslottem = (rowData) => {
+    return <p>{rowData.time_hold_slot} Minuts</p>;
+  };
+  const closeslottimetem = (rowData) => {
+    return <p>{rowData.today_close_time} PM</p>;
+  };
 
-  const ActionBodyTemplate = (rowData) => {
+  const ActionButton = (rowData) => {
     return (
-      <button
-        onClick={() =>
-          navigate(
-            "/online/online-sales-history-record/" +
-              rowData.order_id +
-              "/" +
-              rowData.customer_address_id
-          )
-        }
-        className="btn btn-dark"
+      <p
+        onClick={() => setUpdateSlotCondtion(rowData)}
+        data-bs-toggle="modal"
+        data-bs-target="#UpdateProductPricing"
+        className="btn btn-primary"
       >
-        <i className="ri-eye me-1 align-bottom" /> BILL
-      </button>
+        Change
+      </p>
     );
   };
 
   const getSeverity = (value) => {
     switch (value) {
-      case "Placed":
+      case "1":
         return "dark";
-      case "Confirmed":
+      case "2":
         return "success";
-      case "Preparing for dispatch":
+      case "3":
         return "warning";
 
-      case "On the way":
+      case "4":
         return "info";
-      case "Delivered":
+      case "5":
         return "primary";
-      case "Canceled":
+      case "6":
         return "danger";
-      case "Sold":
-        return "success";
+      case "7":
+        return "dark";
+      case "8":
+        return "secondery";
       default:
         return null;
     }
   };
 
-  const [statuses] = useState([
-    "Placed",
-    "Confirmed",
-    "Preparing for dispatch",
-    "On the way",
-    "Delivered",
-    "Canceled",
-    "Sold",
+  const getSlotName = (value) => {
+    switch (value) {
+      case "1":
+        return "1 Hour Slot";
+      case "2":
+        return "2 Hour Slot";
+      case "3":
+        return "3 Hour Slot";
+
+      case "4":
+        return "4 Hour Slot";
+      case "5":
+        return "6 Hour Slot";
+      case "6":
+        return "8 Hour Slot";
+      case "7":
+        return "12 Hour Slot";
+      case "8":
+        return "1 Day Slot";
+      default:
+        return null;
+    }
+  };
+
+  const [slotOptionList] = useState([
+    "1 Hour Slot",
+    "2 Hour Slot",
+    "3 Hour Slot",
+    "4 Hour Slot",
+    "6 Hour Slot",
+    "8 Hour Slot",
+    "12 Hour Slot",
+    "1 Day Slot",
   ]);
 
-  const statusRowFilterTemplate = (options) => {
+  const slotIdOptionList = (options) => {
     return (
       <Dropdown
-        value={options.order_status}
-        options={statuses}
-        onChange={(e) => options.filterApplyCallback(e.value)}
-        itemTemplate={statusItemTemplate}
-        placeholder="Select Status"
-        className="p-column-filter"
-        showClear
-        style={{ minWidth: "5rem" }}
+        value={options.slotting_id}
+        options={slotOptionList}
+        onChange={(e) => changeSlotIdForNew(e)}
+        placeholder="Select a Slot"
+        itemTemplate={(option) => {
+          return <Tag value={option} severity={getSeverity(option)}></Tag>;
+        }}
       />
     );
   };
 
-  const onGlobalFilterChange = (e) => {
-    const value = e.target.value;
-    let _filters = { ...filters };
-
-    _filters["global"].value = value;
-
-    setFilters(_filters);
-    setGlobalFilterValue(value);
-  };
-
-  const statusItemTemplate = (option) => {
-    return <Tag value={option} severity={getSeverity(option)} />;
-  };
-
-  const YearTemplate = (option) => {
-    return <Tag value={option} severity="dark" />;
-  };
-
-  const changeDataData = (value) => {
-    // console.log("value", value.value);
-
-    setselectedMonthYear(value.value);
-
-    queryClient.invalidateQueries({
-      queryKey: ["deliveryCondtionData"],
-    });
+  const changeSlotIdForNew = async (e) => {
+    // console.log("slot id", SlotIDChange);
+    // console.log("slot value", e.value);
+    // console.log
+    const data = await fetch(URLDomain + "/APP-API/Billing/updateSlotId", {
+      method: "POST",
+      header: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        value: e.value,
+        SlotId: SlotIDChange,
+      }),
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        queryClient.invalidateQueries({
+          queryKey: ["deliveryCondtionData"],
+        });
+      })
+      .catch((error) => {
+        //  console.error(error);
+      });
   };
 
   const allowExpansion = (rowData) => {
@@ -280,6 +276,20 @@ export const DeliveryConditionData = () => {
     );
   };
 
+  const slotBodyTemp = (rowData) => {
+    return (
+      <Tag
+        onClick={() => setSlotingId(rowData.id)}
+        value={getSlotName(rowData.slotting_id)}
+        severity={getSeverity(rowData.slotting_id)}
+      ></Tag>
+    );
+  };
+
+  const setSlotingId = (value) => {
+    setSlotIDChange(value);
+  };
+
   return (
     <div className="card">
       <DataTable
@@ -297,43 +307,92 @@ export const DeliveryConditionData = () => {
           field="distance_km"
           header="KM"
           sortable
-          style={{ width: "25%" }}
+          style={{ width: "10%" }}
           body={kmTem}
         ></Column>
+
+        <Column
+          field="slotting_id"
+          header="Slot Name"
+          body={slotBodyTemp}
+          editor={(options) => slotIdOptionList(options)}
+          style={{ width: "20%" }}
+        ></Column>
+
         <Column
           field="min_order_value"
-          header="Min Ord"
+          header="Minimum Order"
           sortable
-          style={{ width: "25%" }}
+          style={{ width: "15%" }}
           body={minOrderTem}
         ></Column>
         <Column
           field="minium_amount_free_del"
           header="Min Ord for Free Del"
+          body={minOrderforfreeTem}
           sortable
-          style={{ width: "25%" }}
+          style={{ width: "15%" }}
         ></Column>
         <Column
           field="delivery_charge"
-          header="Del Charge"
+          header="Delivery Charge"
+          body={deliverychargetem}
           sortable
-          style={{ width: "25%" }}
+          style={{ width: "15%" }}
         ></Column>
 
         <Column
           field="time_hold_slot"
-          header="time_hold_slot"
+          header="Minut For Next Slot"
+          body={timeholdslottem}
           sortable
           style={{ width: "25%" }}
         ></Column>
 
         <Column
           field="today_close_time"
-          header="today_close_time"
+          header="Close Slot Time "
+          body={closeslottimetem}
+          sortable
+          style={{ width: "25%" }}
+        ></Column>
+
+        <Column
+          field="Action"
+          header="Action "
+          body={ActionButton}
           sortable
           style={{ width: "25%" }}
         ></Column>
       </DataTable>
+
+      <div
+        className="modal fade"
+        id="UpdateProductPricing"
+        tabIndex={-1}
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered w-50">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title" id="myModalLabel">
+                Update Slot Condition
+              </h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              />
+            </div>
+            <div className="modal-body">
+              <UpdateSlotCondition SlotData={UpdateSlotCondtion} />
+            </div>
+          </div>
+          {/*end modal-content*/}
+        </div>
+        {/*end modal-dialog*/}
+      </div>
     </div>
   );
 };
