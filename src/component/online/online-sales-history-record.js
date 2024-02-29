@@ -233,6 +233,10 @@ const OnlineSalesHistoryRecord = () => {
 
   const notAvilable = debounce(notAvilable1, 1000);
 
+  if (isLoading) {
+    return <>loading...</>;
+  }
+
   return (
     <>
       <div className="row">
@@ -426,8 +430,11 @@ const OnlineSalesHistoryRecord = () => {
                       onOpen={onOpen}
                       orderId={orderDetails?.order_id}
                       customerId={
-                        ONLINESALEHISTORYRECORD.customer_address_details
-                          .customer_id
+                        ONLINESALEHISTORYRECORD?.customer_address_details
+                          ?.customer_id
+                      }
+                      customerMobile={
+                        ONLINESALEHISTORYRECORD?.order_details.customer_mobile
                       }
                     />
                     <div className="table-responsive mt-4 mt-xl-0">
@@ -1057,73 +1064,41 @@ export function AddProductModal({
   onClose,
   orderId,
   customerId,
+  customerMobile,
 }) {
   const [addedItems, setAddedItems] = useState([]);
   const adminStoreId = cookies.get("adminStoreId");
+  // const adminStoreId = cookies.get("adminStoreId");
   const [onlyPrint, setOnlyPrint] = useState(false);
   const [isLoading, setIL] = useState(false);
 
   const submitSale = () => {
-    console.log("Items =======================>", addedItems);
-    console.log("Order ID =======================>", orderId);
-    console.log("Admin ID =======================>", adminId);
-    console.log("CUstomer ID =======================>", customerId);
+    const data = JSON.stringify({
+      store_id: adminStoreId,
+      customer_mobile: customerMobile,
+      order_id: orderId,
+      user_id: adminId,
+      product_list: addedItems,
+    });
+    console.log("dataaaaa", data);
+    fetch(URLDomain + "/APP-API/Billing/SaleSExtratoreProducts", {
+      method: "POST",
+      header: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+      body: data,
+    })
+      .then((response) => response.json())
+      .then((responseJson) => {
+        // functionality.fetchAllData(responseJson);
+        console.log(" Sale server res ---->", responseJson);
 
-    // if (allTotals?.grandTotal == 0) {
-    //   getToast({ title: "Please add items", dec: "Requird", status: "error" });
-    //   setIL(false);
-    // } else {
-    //   const data = JSON.stringify({
-    //     customer_type: customerShoppingDetails?.customer_type,
-    //     store_id: adminStoreId,
-    //     customer_mobile: selectedCustomer.mobile,
-    //     user_id: adminId,
-    //     sub_total: allTotals?.subTotal,
-    //     i_gst: Number(allTotals?.sGstTotal) + Number(allTotals?.cGstTotal),
-    //     s_gst: Number(allTotals?.sGstTotal),
-    //     c_gst: Number(allTotals?.cGstTotal),
-    //     extra_charge: allTotals?.additional_charges,
-    //     discount: allTotals?.discount,
-    //     notes: restInfo.notes,
-    //     order_no: restInfo.order_no,
-    //     total_payment: allTotals?.grandTotal,
-    //     amount_paid: allTotals?.amount_paid,
-    //     outstanding: allTotals?.outstanding,
-    //     stock_location: restInfo.stock_location,
-    //     payment_mode: restInfo.payment_mode,
-    //     is_coupon_applied: useCouponData.is_coupon_applied,
-    //     coupon_code: useCouponData.coupon_code,
-    //     coupon_discount_value: allTotals?.coupon_discount_value,
-    //     coupon_id: useCouponData.coupon_id,
-    //     purchaes_date: Saledate.toLocaleDateString(),
-    //     product_list: addedItems,
-    //   });
-
-    //   fetch(URLDomain + "/APP-API/Billing/SaleStoreProducts", {
-    //     method: "POST",
-    //     header: {
-    //       Accept: "application/json",
-    //       "Content-type": "application/json",
-    //     },
-    //     body: data,
-    //   })
-    //     .then((response) => response.json())
-    //     .then((responseJson) => {
-    //       // functionality.fetchAllData(responseJson);
-    //       console.log(" Sale server res ---->", responseJson);
-    //       setLastInsertedRow(responseJson.inserted_row);
-    //       // setAddedItems([]);
-    //       setIL(false);
-    //       handlePrint();
-    //     })
-    //     .catch((error) => {
-    //       console.error(error);
-    //     })
-    //     .finally(() => {
-    //       setIL(false);
-    //       setPreviousAddedItems(addedItems);
-    //     });
-    // }
+        setIL(false);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   async function fetchData() {
@@ -1246,7 +1221,7 @@ export function AddProductModal({
                     {/* <input id="search-dropdown" type="text" className="form-control search bg-light border-light" placeholder="Add product..." /> */}
                     <div style={{ width: "68%" }}>
                       <ReactSearchAutocomplete
-                        items={PURCHASEDATA.searchProduct}
+                        items={PURCHASEDATA?.searchProduct}
                         className="form-control search bg-light border-light"
                         onSelect={handleOnSelect}
                         styling={{
