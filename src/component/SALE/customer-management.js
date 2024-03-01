@@ -3,7 +3,6 @@ import { useState, useContext, useEffect } from "react";
 import ContextData from "../../context/MainContext";
 import URL from "../../URL";
 
-import { ImportNewProduct } from "./Import/import-new-product";
 import { AddCustomerForm } from "./Add/customer-add-form";
 // import { AddUnitForm } from "./Add/unit-add-form";
 // import { CustomerDataComp } from "./Update/CustomerDataComp";

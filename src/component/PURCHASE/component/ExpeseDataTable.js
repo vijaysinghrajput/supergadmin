@@ -119,6 +119,12 @@ export const ExpeseDataTable = () => {
           style={{ width: "10%" }}
         ></Column>
         <Column
+          field="payment_type"
+          header="Payment Mode"
+          sortable
+          style={{ width: "15%" }}
+        ></Column>
+        <Column
           field="amount"
           header="Amount"
           sortable

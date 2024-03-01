@@ -384,6 +384,16 @@ const Sidebar = () => {
                         Company Info
                       </Link>
                     </li>
+                    <li className="nav-item">
+                      <Link
+                        to="/employee"
+                        className="nav-link"
+                        data-key="t-cover"
+                      >
+                        {" "}
+                        Employee
+                      </Link>
+                    </li>
                   </ul>
                 </div>
               </li>

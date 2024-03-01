@@ -16,6 +16,7 @@ export const AddExpensesForm = (props) => {
   const [expenses, setExpenses] = useState({
     store_id: adminStoreId,
     type: "Food",
+    payment_type: "Cash",
     amount: "",
     notes: "",
   });
@@ -26,6 +27,12 @@ export const AddExpensesForm = (props) => {
     if (expenses.type == "") {
       getToast({
         title: "Expenses Type  Requird",
+        dec: "Requird",
+        status: "error",
+      });
+    } else if (expenses.payment_type == "") {
+      getToast({
+        title: "Payment type Requird",
         dec: "Requird",
         status: "error",
       });
@@ -43,6 +50,7 @@ export const AddExpensesForm = (props) => {
       formData.append("store_id", expenses.store_id);
       formData.append("adminId", adminId);
       formData.append("type", expenses.type);
+      formData.append("payment_type", expenses.payment_type);
       formData.append("amount", expenses.amount);
       formData.append("notes", expenses.notes);
 
@@ -103,7 +111,7 @@ export const AddExpensesForm = (props) => {
   return (
     <>
       <div className="row">
-        <div className="col-md-6">
+        <div className="col-md-3">
           <div className="mb-3">
             <label htmlFor="firstNameinput" className="form-label text-danger">
               Expenses Type
@@ -232,6 +240,77 @@ export const AddExpensesForm = (props) => {
                   href="#"
                 >
                   Other{" "}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="col-md-3">
+          <div className="mb-3">
+            <label htmlFor="firstNameinput" className="form-label text-danger">
+              Payment Type
+            </label>
+            <div>
+              <button
+                type="button"
+                class="btn btn-light dropdown-toggle"
+                data-bs-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                {expenses.payment_type
+                  ? expenses.payment_type
+                  : "Select payment_type"}
+              </button>
+              <div class="dropdown-menu">
+                <a
+                  class="dropdown-item"
+                  onClick={() =>
+                    setExpenses({
+                      ...expenses,
+                      payment_type: "Cash",
+                    })
+                  }
+                  href="#"
+                >
+                  Cash{" "}
+                </a>
+                <a
+                  class="dropdown-item"
+                  onClick={() =>
+                    setExpenses({
+                      ...expenses,
+                      payment_type: "UPI",
+                    })
+                  }
+                  href="#"
+                >
+                  UPI{" "}
+                </a>
+
+                <a
+                  class="dropdown-item"
+                  onClick={() =>
+                    setExpenses({
+                      ...expenses,
+                      payment_type: "Bank Transfer",
+                    })
+                  }
+                  href="#"
+                >
+                  Bank Transfer{" "}
+                </a>
+                <a
+                  class="dropdown-item"
+                  onClick={() =>
+                    setExpenses({
+                      ...expenses,
+                      payment_type: "Cheque",
+                    })
+                  }
+                  href="#"
+                >
+                  Cheque{" "}
                 </a>
               </div>
             </div>

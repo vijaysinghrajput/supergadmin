@@ -63,6 +63,9 @@ import { Purchased } from "./component/BILLING/Purchased";
 import { Sale } from "./component/BILLING/Sale";
 import LowStock from "./component/STOCK/low-stocks";
 import StocksHistory from "./component/STOCK/product-stocks-history";
+
+import Employee from "./component/Employee/Employee";
+
 import { useContext } from "react";
 import ContextData from "./context/MainContext";
 import Loading from "./component/Shared/Loading";
@@ -98,7 +101,6 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/stock-dashboard" element={<StockDashPage />} />
-
                 <Route path="/purchaseManagement">
                   <Route index element={<PurchaseIndex />} />
                   <Route path="purchase" element={<VendorManagement />} />
@@ -113,7 +115,6 @@ const App = () => {
                     element={<PurchaseHistoryRecord />}
                   />
                 </Route>
-
                 <Route path="/salesManagement">
                   <Route index element={<SaleIndex />} />
                   <Route path="sales-history" element={<SalesHistory />} />
@@ -123,7 +124,6 @@ const App = () => {
                     element={<SalesHistoryRecord />}
                   />
                 </Route>
-
                 <Route path="/billing">
                   <Route index element={<h4>BILLING</h4>} />
                   <Route path="purchased" element={<Purchased />} />
@@ -136,7 +136,6 @@ const App = () => {
                   path="/product-stocks-history"
                   element={<StocksHistory />}
                 />
-
                 <Route path="/productManagement">
                   <Route index element={<ProductIndex />} />
                   <Route path="product" element={<ProductManagement />} />
@@ -155,7 +154,6 @@ const App = () => {
                   <Route path="category" element={<CategoryManagement />} />
                   <Route path="brand" element={<BrandManagement />} />
                 </Route>
-
                 <Route path="/online">
                   <Route index element={<h4>Online 11</h4>} />
                   <Route path="/online/order" element={<OnlineSale />} />
@@ -169,11 +167,10 @@ const App = () => {
                   />
                   <Route path="/online/coupon" element={<CouponManagment />} />
                 </Route>
-
                 <Route path="/settings/banners" element={<BannerSettings />} />
-
                 <Route path="/company" element={<Partner />} />
                 <Route path="/company/edit" element={<PartnerEdit />} />
+                <Route path="/employee" element={<Employee />} />
               </Routes>
             </MainContainer>
           </PrimeReactProvider>
