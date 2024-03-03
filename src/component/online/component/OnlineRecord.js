@@ -330,6 +330,13 @@ export const OnlineRecord = (ORD, MO) => {
                           </h6>
 
                           <h6 className="">
+                            Extra Added Amount :{" "}
+                            <strong>
+                              {Number(orderDetails?.extra_item_total)}
+                            </strong>
+                          </h6>
+
+                          <h6 className="">
                             Total Paymnet :{" "}
                             <strong>
                               {Number(orderDetails?.total_payment)}
@@ -437,6 +444,7 @@ export const OnlineRecord = (ORD, MO) => {
                         ONLINESALEHISTORYRECORD?.order_details.customer_mobile
                       }
                       total_payment={orderDetails?.total_payment}
+                      extra_item_total={orderDetails?.extra_item_total}
                     />
                     <div className="table-responsive mt-4 mt-xl-0">
                       <table className="table   align-middle table-nowrap mb-0">
@@ -963,6 +971,27 @@ export const OnlineRecord = (ORD, MO) => {
                 </strong>
               </h6>
             ) : null}
+
+            <h6
+              style={{
+                color: "#000",
+                width: "100%",
+                display: "flex",
+                justifyContent: "space-between",
+                // marginRight: "4px",
+              }}
+            >
+              Extra Added Amount :{" "}
+              <strong
+                className="price"
+                style={{
+                  marginRight: "6px",
+                }}
+              >
+                {orderDetails?.extra_item_total}
+              </strong>
+            </h6>
+
             <h6
               style={{
                 color: "#000",
@@ -982,6 +1011,7 @@ export const OnlineRecord = (ORD, MO) => {
                 {orderDetails?.total_payment}
               </strong>
             </h6>
+
             {ONLINESALEHISTORYRECORD?.sumOfNotAvilable ? (
               <h6
                 style={{
@@ -1065,6 +1095,7 @@ export function AddProductModal({
   onClose,
   orderId,
   total_payment,
+  extra_item_total,
   customerMobile,
 }) {
   const [addedItems, setAddedItems] = useState([]);
@@ -1083,6 +1114,7 @@ export function AddProductModal({
       user_id: adminId,
       product_list: addedItems,
       total_payment,
+      extra_item_total,
     });
     console.log("dataaaaa", data);
     fetch(URLDomain + "/APP-API/Billing/SaleSExtratoreProducts", {
