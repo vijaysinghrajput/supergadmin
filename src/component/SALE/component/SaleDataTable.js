@@ -41,7 +41,7 @@ export const SaleDataTable = () => {
   const adminStoreId = cookies.get("adminStoreId");
   const adminId = cookies.get("adminId");
 
-  async function fetchData() {
+  async function fetchData(MonthYear) {
     const data = await fetch(URLDomain + "/APP-API/Billing/sale_history", {
       method: "post",
       header: {
@@ -50,7 +50,7 @@ export const SaleDataTable = () => {
       },
       body: JSON.stringify({
         store_id: adminStoreId,
-        selectedMonthYear: selectedMonthYear,
+        selectedMonthYear: MonthYear,
       }),
     })
       .then((response) => response.json())
@@ -65,18 +65,19 @@ export const SaleDataTable = () => {
     isLoading: isLoadingAPI,
     isFetching,
   } = useQuery({
-    queryKey: ["offline_sale_history"],
-    queryFn: (e) => fetchData(),
+    queryKey: ["offline_sale_history", selectedMonthYear],
+    queryFn: (e) => fetchData({ MonthYear: e.queryKey[1] }),
   });
 
   useEffect(() => {
     setSale([]);
     setSaleYear([]);
+
     if (offline_sale_history) {
       setSale(offline_sale_history.store_customer_purchase_record);
       setSaleYear(offline_sale_history.sale_year);
 
-      console.log("SaleYear", SaleYear);
+      console.log("Sales", Sale);
       setisDataLoding(false);
     }
   }, [offline_sale_history, isLoadingAPI]);
@@ -260,76 +261,74 @@ export const SaleDataTable = () => {
 
   return (
     <div className="card">
-      <DataTable
-        value={Sale}
-        paginator
-        rows={5}
-        header={header}
-        selectionMode="single"
-        sortMode="multiple"
-        // sortField="date"
-        removableSort
-        stateStorage="session"
-        stateKey="dt-state-demo-local"
-        emptyMessage="No Sale found."
-        tableStyle={{ minWidth: "50rem" }}
-        filters={filters}
-        filterDisplay="row"
-        loading={isFetching}
-        // header={header}
-      >
-        <Column
-          field="customer_mobile"
-          header="Mobile"
-          sortable
-          style={{ width: "25%" }}
-        ></Column>
-        <Column
-          field="order_id"
-          header="Order No"
-          sortable
-          style={{ width: "25%" }}
-        ></Column>
-        <Column
-          field="plateform"
-          header="Plateform"
-          sortable
-          style={{ width: "25%" }}
-        ></Column>
-        <Column
-          field="total_payment"
-          header="Payment"
-          sortable
-          style={{ width: "25%" }}
-        ></Column>
+      {isDataLoding ? (
+        "Loding"
+      ) : (
+        <DataTable
+          value={offline_sale_history.store_customer_purchase_record}
+          paginator
+          rows={5}
+          header={header}
+          emptyMessage="No Sale found."
+          tableStyle={{ minWidth: "50rem" }}
+          filters={filters}
+          filterDisplay="row"
+          loading={isFetching}
+          // header={header}
+        >
+          <Column
+            field="customer_mobile"
+            header="Mobile"
+            sortable
+            style={{ width: "25%" }}
+          ></Column>
+          <Column
+            field="order_id"
+            header="Order No"
+            sortable
+            style={{ width: "25%" }}
+          ></Column>
+          <Column
+            field="plateform"
+            header="Plateform"
+            sortable
+            style={{ width: "25%" }}
+          ></Column>
+          <Column
+            field="total_payment"
+            header="Payment"
+            sortable
+            style={{ width: "25%" }}
+          ></Column>
 
-        <Column
-          field="date"
-          header="Date"
-          sortable
-          style={{ width: "25%" }}
-        ></Column>
+          <Column
+            field="date"
+            header="Date"
+            sortable
+            style={{ width: "25%" }}
+          ></Column>
 
-        <Column
-          field="order_status"
-          header="Status"
-          body={statusBodyTemplate}
-          sortable
-          style={{ width: "25%" }}
-          showFilterMenu={false}
-          filterMenuStyle={{ width: "14rem" }}
-          filter
-          filterElement={statusRowFilterTemplate}
-        ></Column>
+          <Column
+            field="order_status"
+            header="Status"
+            body={statusBodyTemplate}
+            sortable
+            style={{ width: "25%" }}
+            showFilterMenu={false}
+            filterMenuStyle={{ width: "14rem" }}
+            filter
+            filterElement={statusRowFilterTemplate}
+          ></Column>
 
-        <Column
-          field=""
-          header="Action"
-          body={ActionBodyTemplate}
-          sortable
-          style={{ width: "25%" }}
-        ></Column>
-      </DataTable>
+          <Column
+            field=""
+            header="Action"
+            body={ActionBodyTemplate}
+            sortable
+            style={{ width: "25%" }}
+          ></Column>
+        </DataTable>
+      )}
     </div>
   );
 };
