@@ -10,7 +10,7 @@ import { MdDelete } from "react-icons/md";
 import "react-datepicker/dist/react-datepicker.css";
 import URLDomain from "../../../URL";
 import { useReactToPrint } from "react-to-print";
-import { useToast } from "@chakra-ui/react";
+import { useBoolean, useToast } from "@chakra-ui/react";
 import {
   Modal,
   ModalOverlay,
@@ -436,6 +436,7 @@ export const OnlineRecord = (ORD, MO) => {
                       customerMobile={
                         ONLINESALEHISTORYRECORD?.order_details.customer_mobile
                       }
+                      total_payment={orderDetails?.total_payment}
                     />
                     <div className="table-responsive mt-4 mt-xl-0">
                       <table className="table   align-middle table-nowrap mb-0">
@@ -1063,22 +1064,25 @@ export function AddProductModal({
   onOpen,
   onClose,
   orderId,
-  customerId,
+  total_payment,
   customerMobile,
 }) {
   const [addedItems, setAddedItems] = useState([]);
   const adminStoreId = cookies.get("adminStoreId");
   // const adminStoreId = cookies.get("adminStoreId");
   const [onlyPrint, setOnlyPrint] = useState(false);
-  const [isLoading, setIL] = useState(false);
+  // const [isLoading, setIL] = useState(false);
+  const [isLoading, setLoading] = useBoolean();
 
   const submitSale = () => {
+    setLoading.on();
     const data = JSON.stringify({
       store_id: adminStoreId,
       customer_mobile: customerMobile,
       order_id: orderId,
       user_id: adminId,
       product_list: addedItems,
+      total_payment,
     });
     console.log("dataaaaa", data);
     fetch(URLDomain + "/APP-API/Billing/SaleSExtratoreProducts", {
@@ -1093,8 +1097,11 @@ export function AddProductModal({
       .then((responseJson) => {
         // functionality.fetchAllData(responseJson);
         console.log(" Sale server res ---->", responseJson);
-
-        setIL(false);
+        setLoading.off();
+        if (responseJson.purchase_product_insert) onClose();
+        queryClient.invalidateQueries({
+          queryKey: ["ONLINESALEHISTORYRECORD"],
+        });
       })
       .catch((error) => {
         console.error(error);

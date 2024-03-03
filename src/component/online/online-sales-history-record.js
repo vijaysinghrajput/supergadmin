@@ -9,15 +9,13 @@ const OnlineSalesHistoryRecord = () => {
   const { customer_address } = useParams();
   const { order_type } = useParams();
 
-  if (order_type == "Online") {
+  if (order_type == "Online")
     return (
       <OnlineRecord orderID={orderID} customer_address={customer_address} />
     );
-  } else {
-    return (
-      <OfflineRecord orderID={orderID} customer_address={customer_address} />
-    );
-  }
+  return (
+    <OfflineRecord orderID={orderID} customer_address={customer_address} />
+  );
 };
 
 export default OnlineSalesHistoryRecord;
