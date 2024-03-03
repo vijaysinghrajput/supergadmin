@@ -476,6 +476,11 @@ export const OnlineRecord = (ORD, MO) => {
                                           ? "table-active"
                                           : "table-danger"
                                       }
+                                      className={
+                                        items.is_extra_item == "1"
+                                          ? "bg-secondery"
+                                          : "bg-light"
+                                      }
                                     >
                                       <td scope="col">
                                         <img
@@ -1245,8 +1250,6 @@ export function AddProductModal({
 
   return (
     <>
-      <Button onClick={onOpen}>Trigger modal</Button>
-
       <Modal onClose={onClose} isOpen={isOpen} isCentered size="6xl">
         <ModalOverlay />
         <ModalContent>
