@@ -2,16 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { FilterMatchMode, FilterOperator } from "primereact/api";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { InputText } from "primereact/inputtext";
-import { MultiSelect } from "primereact/multiselect";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
-import { Button } from "primereact/button";
 import { useNavigate } from "react-router";
 import { BiSearch } from "react-icons/bi";
 
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
+import { ActionForSaleList } from "./ActionForSaleList";
 
 import { useQuery } from "react-query";
 
@@ -23,8 +21,6 @@ import "primereact/resources/themes/lara-light-cyan/theme.css";
 const cookies = new Cookies();
 
 export const SaleDataTable = () => {
-  const navigate = useNavigate();
-
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [selectedMonthYear, setselectedMonthYear] = useState(null);
 
@@ -50,7 +46,7 @@ export const SaleDataTable = () => {
       },
       body: JSON.stringify({
         store_id: adminStoreId,
-        selectedMonthYear: MonthYear,
+        selectedMonthYear,
       }),
     })
       .then((response) => response.json())
@@ -115,23 +111,7 @@ export const SaleDataTable = () => {
   };
 
   const ActionBodyTemplate = (rowData) => {
-    return (
-      <button
-        onClick={() =>
-          navigate(
-            "/online/online-sales-history-record/" +
-              rowData.order_id +
-              "/" +
-              rowData.customer_address_id +
-              "/" +
-              rowData.order_type
-          )
-        }
-        className="btn btn-dark"
-      >
-        <i className="ri-eye me-1 align-bottom" /> BILL
-      </button>
-    );
+    return <ActionForSaleList id={rowData} />;
   };
 
   const getSeverity = (value) => {
@@ -176,7 +156,7 @@ export const SaleDataTable = () => {
         placeholder="Select Status"
         className="p-column-filter"
         showClear
-        style={{ minWidth: "5rem" }}
+        // style={{ minWidth: "2rem" }}
       />
     );
   };
@@ -265,7 +245,7 @@ export const SaleDataTable = () => {
         "Loding"
       ) : (
         <DataTable
-          value={offline_sale_history.store_customer_purchase_record}
+          value={Sale}
           paginator
           rows={5}
           header={header}
@@ -305,7 +285,7 @@ export const SaleDataTable = () => {
             field="date"
             header="Date"
             sortable
-            style={{ width: "25%" }}
+            style={{ width: "55%" }}
           ></Column>
 
           <Column
@@ -313,9 +293,9 @@ export const SaleDataTable = () => {
             header="Status"
             body={statusBodyTemplate}
             sortable
-            style={{ width: "25%" }}
+            style={{ width: "15%" }}
             showFilterMenu={false}
-            filterMenuStyle={{ width: "14rem" }}
+            // filterMenuStyle={{ width: "6rem" }}
             filter
             filterElement={statusRowFilterTemplate}
           ></Column>
