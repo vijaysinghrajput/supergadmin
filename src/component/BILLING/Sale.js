@@ -621,7 +621,11 @@ export const Sale = () => {
   };
 
   const deleteLastOrder = ({ id }) => {
-    const data = JSON.stringify({ id });
+    const data = JSON.stringify({
+      id: id,
+      store_id: adminStoreId,
+      user_id: adminId,
+    });
 
     fetch(URLDomain + "/APP-API/Billing/deleteLastSaleRow", {
       method: "POST",

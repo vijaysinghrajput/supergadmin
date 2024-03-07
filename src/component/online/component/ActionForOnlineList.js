@@ -8,7 +8,7 @@ import { queryClient } from "../../../App";
 import Cookies from "universal-cookie";
 const cookies = new Cookies();
 
-export const ActionForSaleList = (row) => {
+export const ActionForOnlineList = (row) => {
   const navigate = useNavigate();
   const toast = useToast();
   const getToast = (e) => {
