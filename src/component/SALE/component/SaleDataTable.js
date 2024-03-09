@@ -4,8 +4,20 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
-import { useNavigate } from "react-router";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { BiSearch } from "react-icons/bi";
+import { CiCalendarDate } from "react-icons/ci";
+
+import { Calendar } from "primereact/calendar";
 
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
@@ -14,14 +26,21 @@ import { ActionForSaleList } from "./ActionForSaleList";
 import { useQuery } from "react-query";
 
 import URLDomain from "../../../URL";
-import Cookies from "universal-cookie";
 import { queryClient } from "../../../App";
 
 import "primereact/resources/themes/lara-light-cyan/theme.css";
+import { Box } from "@chakra-ui/react";
+import Cookies from "universal-cookie";
+
 const cookies = new Cookies();
 
 export const SaleDataTable = () => {
   const [globalFilterValue, setGlobalFilterValue] = useState("");
+  const [SaleDate, setSaleDate] = useState(null);
+  const [RangeSaleDate, setRangeSaleDate] = useState(null);
+
+  const [saleDateValue, setsaleDateValue] = useState(null);
+
   const [selectedMonthYear, setselectedMonthYear] = useState(null);
 
   const [filters, setFilters] = useState({
@@ -33,6 +52,7 @@ export const SaleDataTable = () => {
   const [SaleYear, setSaleYear] = useState(null);
 
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const adminStoreId = cookies.get("adminStoreId");
   const adminId = cookies.get("adminId");
@@ -161,6 +181,26 @@ export const SaleDataTable = () => {
     );
   };
 
+  const changeSaleDateOnly = (e) => {
+    let d = e.value;
+    let month = String(d.getMonth() + 1);
+    let day = String(d.getDate());
+    const year = String(d.getFullYear());
+
+    if (month.length < 2) month = "0" + month;
+    if (day.length < 2) day = "0" + day;
+
+    let dateDatat = `${day}-${month}-${year}`;
+    setSaleDate(e.value);
+    setsaleDateValue(dateDatat);
+  };
+
+  const changeRangeSaleDateOnly = (e) => {
+    setRangeSaleDate(e.value);
+    console.log("date range", e.value);
+    // setRangeSaleDate(dateDatat);
+  };
+
   const onGlobalFilterChange = (e) => {
     const value = e.target.value;
     let _filters = { ...filters };
@@ -192,7 +232,7 @@ export const SaleDataTable = () => {
   const renderHeader = () => {
     return (
       <div className="row  ">
-        <div className="col-sm-4">
+        <div className="col-sm-3">
           <InputGroup className="mb-3">
             <InputGroup.Text id="basic-addon1">
               <BiSearch />
@@ -206,7 +246,7 @@ export const SaleDataTable = () => {
             />
           </InputGroup>
         </div>
-        <div className="col-sm-4">
+        <div className="col-sm-3">
           <Dropdown
             value={selectedMonthYear}
             onChange={(e) => changeDataData(e)}
@@ -219,19 +259,28 @@ export const SaleDataTable = () => {
             placeholder="YEAR / MONTH"
           />
         </div>
-        <div className="col-sm-4">
-          <InputGroup className="mb-3">
-            <InputGroup.Text id="basic-addon1">
-              <BiSearch />
-            </InputGroup.Text>
-            <Form.Control
-              placeholder="Search in Data"
-              aria-label="Username"
-              aria-describedby="basic-addon1"
-              value={globalFilterValue}
-              onChange={onGlobalFilterChange}
-            />
-          </InputGroup>
+        <div className="col-sm-3">
+          <label htmlFor="buttondisplay" className="font-bold block mb-2">
+            <CiCalendarDate onClick={onOpen} size={35} /> Sale Date{" "}
+            {saleDateValue}
+          </label>
+        </div>
+
+        <div className="col-sm-3">
+          <label htmlFor="buttondisplay" className="font-bold block mb-2">
+            Sale Date Range
+          </label>
+          <Box position={"relative"}>
+            <div className="card flex justify-content-center">
+              <Calendar
+                value={RangeSaleDate}
+                onChange={(e) => changeRangeSaleDateOnly(e)}
+                selectionMode="range"
+                readOnlyInput
+                maxDate={new Date()}
+              />
+            </div>
+          </Box>
         </div>
       </div>
     );
@@ -309,6 +358,25 @@ export const SaleDataTable = () => {
           ></Column>
         </DataTable>
       )}
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Modal Title</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Calendar
+              id="buttondisplay"
+              value={SaleDate}
+              formatDateTime="dd-mm-yyyy"
+              onChange={(e) => changeSaleDateOnly(e)}
+              inline
+              maxDate={new Date()}
+              onSelect={onClose}
+            />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   );
 };

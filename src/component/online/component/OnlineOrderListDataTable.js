@@ -107,13 +107,16 @@ export const OnlineOrderListDataTable = (order_type) => {
     );
   };
 
-  const statusBodyTemplate = (rowData) => {
+  const customer_name = (rowData) => {
     return (
-      <Tag
-        value={rowData.order_status}
-        severity={getSeverity(rowData.order_status)}
-      ></Tag>
+      <p>
+        {rowData.customer_name} {rowData.customer_phone}
+      </p>
     );
+  };
+
+  const customer_addrsss = (rowData) => {
+    return <p>{rowData.customer_address}</p>;
   };
 
   const ActionBodyTemplate = (rowData) => {
@@ -268,19 +271,29 @@ export const OnlineOrderListDataTable = (order_type) => {
           field="order_id"
           header="Order No"
           sortable
-          style={{ width: "25%" }}
+          style={{ width: "10%" }}
+        ></Column>
+
+        <Column
+          field="order_status"
+          header="Name"
+          body={customer_name}
+          sortable
+          style={{ width: "15%" }}
         ></Column>
         <Column
-          field="plateform"
-          header="Plateform"
+          field="order_status"
+          header="Address"
+          body={customer_addrsss}
           sortable
-          style={{ width: "25%" }}
+          style={{ width: "55%" }}
         ></Column>
+
         <Column
-          field="total_payment"
-          header="Payment"
+          field="date"
+          header="Date"
           sortable
-          style={{ width: "25%" }}
+          style={{ width: "55%" }}
         ></Column>
 
         <Column
@@ -288,14 +301,6 @@ export const OnlineOrderListDataTable = (order_type) => {
           header="Slot"
           sortable
           style={{ width: "55%" }}
-        ></Column>
-
-        <Column
-          field="order_status"
-          header="Status"
-          body={statusBodyTemplate}
-          sortable
-          style={{ width: "15%" }}
         ></Column>
 
         <Column
