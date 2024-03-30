@@ -70,6 +70,19 @@ const Sidebar = () => {
                     </li>
                   </ul>
                 </div>
+                <div className="collapse menu-dropdown" id="sidebarAuth">
+                  <ul className="nav nav-sm flex-column">
+                    <li className="nav-item">
+                      <Link
+                        to="/dashboard/sales"
+                        className="nav-link"
+                        data-key="t-cover"
+                      >
+                        Sales Dashboard
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
               </li>
 
               <li className="menu-title">

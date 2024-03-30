@@ -180,20 +180,21 @@ const StockDashPage = () => {
                         </p>
                       </div>
                       <div className="flex-shrink-0">
-                        <h5 className="text-success fs-14 mb-0">
+                        {/* <h5 className="text-success fs-14 mb-0">
                           <i className="ri-arrow-right-up-line fs-13 align-middle" />
                           +16.24 %
-                        </h5>
+                        </h5> */}
                       </div>
                     </div>
                     <div className="d-flex align-items-end justify-content-between mt-4">
                       <div>
                         <h4 className="fs-22 fw-semibold ff-secondary mb-4">
-                          $
+                          ₹
                           <span className="counter-value" data-target={count}>
-                            0
+                            {Number(
+                              DASHBOARD_REPORT?.totalEarning
+                            ).toLocaleString()}
                           </span>
-                          k
                         </h4>
                         <a href="#" className="text-decoration-underline">
                           View net earnings
@@ -222,17 +223,19 @@ const StockDashPage = () => {
                         </p>
                       </div>
                       <div className="flex-shrink-0">
-                        <h5 className="text-danger fs-14 mb-0">
+                        {/* <h5 className="text-danger fs-14 mb-0">
                           <i className="ri-arrow-right-down-line fs-13 align-middle" />
                           -3.57 %
-                        </h5>
+                        </h5> */}
                       </div>
                     </div>
                     <div className="d-flex align-items-end justify-content-between mt-4">
                       <div>
                         <h4 className="fs-22 fw-semibold ff-secondary mb-4">
                           <span className="counter-value" data-target={36894}>
-                            0
+                            {Number(
+                              DASHBOARD_REPORT?.totalOrdersCount
+                            ).toLocaleString()}
                           </span>
                         </h4>
                         <a href="#" className="text-decoration-underline">
@@ -262,19 +265,20 @@ const StockDashPage = () => {
                         </p>
                       </div>
                       <div className="flex-shrink-0">
-                        <h5 className="text-success fs-14 mb-0">
+                        {/* <h5 className="text-success fs-14 mb-0">
                           <i className="ri-arrow-right-up-line fs-13 align-middle" />
                           +29.08 %
-                        </h5>
+                        </h5> */}
                       </div>
                     </div>
                     <div className="d-flex align-items-end justify-content-between mt-4">
                       <div>
                         <h4 className="fs-22 fw-semibold ff-secondary mb-4">
                           <span className="counter-value" data-target="183.35">
-                            0
+                            {Number(
+                              DASHBOARD_REPORT?.totalCustomersCount
+                            ).toLocaleString()}
                           </span>
-                          M
                         </h4>
                         <a href="#" className="text-decoration-underline">
                           See details
@@ -392,7 +396,7 @@ const StockDashPage = () => {
                             datasets: [
                               {
                                 label: "Number of orders",
-                                data: numberOfOrders,
+                                data: DASHBOARD_REPORT?.ordersByWithoutMonths,
                                 borderWidth: 1,
                               },
                             ],

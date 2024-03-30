@@ -71,6 +71,7 @@ import ContextData from "./context/MainContext";
 import Loading from "./component/Shared/Loading";
 import Cookies from "universal-cookie";
 import { PrimeReactProvider } from "primereact/api";
+import SaleDashboard from "./component/Dashboard/SaleDashboard";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -101,6 +102,9 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/stock-dashboard" element={<StockDashPage />} />
+                <Route path="/dashboard">
+                  <Route path="sales" element={<SaleDashboard />} />
+                </Route>
                 <Route path="/purchaseManagement">
                   <Route index element={<PurchaseIndex />} />
                   <Route path="purchase" element={<VendorManagement />} />
