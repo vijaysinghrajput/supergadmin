@@ -535,6 +535,7 @@ const SaleDashboard = () => {
                                     </h5>
                                     <span className="text-muted">Stock</span>
                                   </td>
+                                  {/* log */}
                                   <td>
                                     <h5 className="fs-14 my-1 fw-normal">
                                       ₹
