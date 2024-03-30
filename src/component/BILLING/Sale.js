@@ -560,6 +560,7 @@ export const Sale = () => {
         customer_type: customerShoppingDetails?.customer_type,
         store_id: adminStoreId,
         customer_mobile: selectedCustomer.mobile,
+        customer_id: selectedCustomer.id,
         user_id: adminId,
         sub_total: allTotals?.subTotal,
         i_gst: Number(allTotals?.sGstTotal) + Number(allTotals?.cGstTotal),

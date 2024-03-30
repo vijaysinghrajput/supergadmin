@@ -19,6 +19,7 @@
     "chart.js": "^4.4.2",
     "framer-motion": "^4.1.17",
     "google-maps-react": "^2.0.6",
+    "jquery": "^3.7.1",
     "jspdf": "^2.5.1",
     "multiselect-react-dropdown": "^2.0.25",
     "primereact": "^10.5.1",

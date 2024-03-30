@@ -125,10 +125,6 @@ export const Purchased = () => {
   });
 
   useEffect(() => {
-    setVendorLists(store_vendor_list);
-  }, [store_vendor_list]);
-
-  useEffect(() => {
     const subTotalGet = addedItems.reduce((acc, obj) => {
       return acc + Number(Number(obj?.amount_total || 0));
     }, 0);
@@ -328,14 +324,15 @@ export const Purchased = () => {
     setAddedItems(newArr);
   };
 
-  const submitPurchase = (adminId) => {
+  const submitPurchase = () => {
     if (selectedVendor) {
       const data = JSON.stringify({
-        store_id: store_login_user.store_id,
+        store_id: adminStoreId,
         vendor_id: selectedVendor.id,
         vendor_firm_name: selectedVendor.firm_name,
+        vendor_mobile: selectedVendor.mobile,
         sale_man_name: restInfo.sales_man,
-        user_id: store_login_user.id,
+        user_id: adminId,
         sub_total: allTotals.subTotal,
         i_gst: Number(allTotals.sGstTotal) + Number(allTotals.cGstTotal),
         s_gst: Number(allTotals.sGstTotal),

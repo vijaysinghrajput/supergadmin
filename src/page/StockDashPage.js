@@ -95,7 +95,7 @@ const StockDashPage = () => {
 
   useEffect(() => {
     setNumberOfOrders(DASHBOARD_REPORT?.ordersByWithoutMonths);
-  }, []);
+  }, [DASHBOARD_REPORT]);
 
   //   console.log("dashboard data ==========>", Object.values(DASHBOARD_REPORT));
   //   console.log("dashboard data ==========>", DASHBOARD_REPORT);
