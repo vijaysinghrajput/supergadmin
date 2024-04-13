@@ -36,6 +36,7 @@
     "react-icons": "^4.4.0",
     "react-images-upload": "^1.2.8",
     "react-jsbarcode": "^0.2.4",
+    "react-native-component-inview": "^1.0.2",
     "react-otp-input": "^2.4.0",
     "react-places-autocomplete": "^7.3.0",
     "react-qr-code": "^2.0.8",

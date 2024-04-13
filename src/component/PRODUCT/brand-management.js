@@ -6,6 +6,8 @@ import { useNavigate } from "react-router";
 
 import { AddBrandForm } from "./Add/brand-add-form";
 import { ImportNewBrand } from "./Import/import-new-brand";
+import { useQuery } from "react-query";
+import { Stack, Skeleton } from "@chakra-ui/react";
 
 // import "bootstrap/dist/css/bootstrap.css";
 import { Col, Row, Table } from "react-bootstrap";
@@ -31,11 +33,10 @@ import Cookies from "universal-cookie";
 const cookies = new Cookies();
 
 const BrandManagement = () => {
-  const { storeBrandsData, removeDataToCurrentGlobal, storeBrandRelode } =
-    useContext(ContextData);
-  const [delID, setDelID] = useState();
+  useContext(ContextData);
+  const [isDataLoding, setisDataLoding] = useState(true);
   const [editablePlot, setEditablePlot] = useState({});
-  const [showData, setShowData] = useState(storeBrandsData);
+  const [showData, setShowData] = useState(null);
   const navigate = useNavigate();
   const adminStoreId = cookies.get("adminStoreId");
   const adminId = cookies.get("adminId");
@@ -59,9 +60,41 @@ const BrandManagement = () => {
     });
   };
 
+  async function fetchData() {
+    const data = await fetch(URLDomain + "/APP-API/Billing/storeBrandDataApi", {
+      method: "post",
+      header: {
+        Accept: "application/json",
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        store_id: adminStoreId,
+      }),
+    })
+      .then((response) => response.json())
+      .then((responseJson) => responseJson);
+
+    return data;
+  }
+
+  const {
+    data: BRANDDATA,
+    isError,
+    isLoading: isLoadingAPI,
+  } = useQuery({
+    queryKey: ["BRANDDATA"],
+    queryFn: (e) => fetchData(),
+  });
+
   useEffect(() => {
-    setShowData(storeBrandsData);
-  }, [storeBrandsData]);
+    console.log("brand data", BRANDDATA);
+    if (BRANDDATA) {
+      setShowData(BRANDDATA.stores_brand);
+      // setShowDataCopy(BRANDDATA.stores_brand);
+      console.log("brand data", BRANDDATA);
+      setisDataLoding(false);
+    }
+  }, [BRANDDATA, isLoadingAPI]);
 
   const STORY_HEADERS = [
     {
@@ -203,14 +236,6 @@ const BrandManagement = () => {
 
   const changeStatusData = (value) => {
     setRadioValue1(value);
-
-    if (value == 1) {
-      const newParentData = storeBrandsData.filter((obj) => obj.status == 1);
-      setShowData(newParentData);
-    } else {
-      const newChildData = storeBrandsData.filter((obj) => obj.status == 0);
-      setShowData(newChildData);
-    }
   };
 
   return (
@@ -281,52 +306,60 @@ const BrandManagement = () => {
         <div className="row">
           <div className="col-lg-12">
             <div className="card">
-              <div className="card-body">
-                <div id="customerList">
-                  <div className="table-responsive table-card mb-1 px-4">
-                    <DatatableWrapper
-                      body={showData}
-                      headers={STORY_HEADERS}
-                      paginationOptionsProps={{
-                        initialState: {
-                          rowsPerPage: 5,
-                          options: [5, 10, 15, 20],
-                        },
-                      }}
-                    >
-                      <Row className="mb-4 p-2">
-                        <Col
-                          xs={12}
-                          lg={4}
-                          className="d-flex flex-col justify-content-end align-items-end"
-                        >
-                          <Filter />
-                        </Col>
-                        <Col
-                          xs={12}
-                          sm={6}
-                          lg={4}
-                          className="d-flex flex-col justify-content-lg-center align-items-center justify-content-sm-start mb-2 mb-sm-0"
-                        >
-                          <PaginationOptions />
-                        </Col>
-                        <Col
-                          xs={12}
-                          sm={6}
-                          lg={4}
-                          className="d-flex flex-col justify-content-end align-items-end"
-                        >
-                          <Pagination />
-                        </Col>
-                      </Row>
-                      <Table className="table  table-hover">
-                        <TableHeader />
-                        <TableBody />
-                      </Table>
-                    </DatatableWrapper>
+              {isDataLoding ? (
+                <Stack>
+                  <Skeleton height="100px" />
+                  <Skeleton height="100px" />
+                  <Skeleton height="100px" />
+                </Stack>
+              ) : (
+                <div className="card-body">
+                  <div id="customerList">
+                    <div className="table-responsive table-card mb-1 px-4">
+                      <DatatableWrapper
+                        body={showData}
+                        headers={STORY_HEADERS}
+                        paginationOptionsProps={{
+                          initialState: {
+                            rowsPerPage: 5,
+                            options: [5, 10, 15, 20],
+                          },
+                        }}
+                      >
+                        <Row className="mb-4 p-2">
+                          <Col
+                            xs={12}
+                            lg={4}
+                            className="d-flex flex-col justify-content-end align-items-end"
+                          >
+                            <Filter />
+                          </Col>
+                          <Col
+                            xs={12}
+                            sm={6}
+                            lg={4}
+                            className="d-flex flex-col justify-content-lg-center align-items-center justify-content-sm-start mb-2 mb-sm-0"
+                          >
+                            <PaginationOptions />
+                          </Col>
+                          <Col
+                            xs={12}
+                            sm={6}
+                            lg={4}
+                            className="d-flex flex-col justify-content-end align-items-end"
+                          >
+                            <Pagination />
+                          </Col>
+                        </Row>
+                        <Table className="table  table-hover">
+                          <TableHeader />
+                          <TableBody />
+                        </Table>
+                      </DatatableWrapper>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -353,9 +386,7 @@ const BrandManagement = () => {
                         aria-label="Close"
                       />
                     </div>
-                    <div className="modal-body">
-                      <ImportNewBrand />
-                    </div>
+                    <div className="modal-body">{/* <ImportNewBrand /> */}</div>
                   </div>
                   {/*end modal-content*/}
                 </div>
@@ -390,9 +421,7 @@ const BrandManagement = () => {
                         aria-label="Close"
                       />
                     </div>
-                    <div className="modal-body">
-                      <AddBrandForm />
-                    </div>
+                    <div className="modal-body">{/* <AddBrandForm /> */}</div>
                   </div>
                   {/*end modal-content*/}
                 </div>

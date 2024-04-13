@@ -40,11 +40,10 @@ const adminStoreId = cookies.get("adminStoreId");
 const adminId = cookies.get("adminId");
 
 const CategoryManagement = () => {
-  const { storeCategoryData, storeCategoryRelode } = useContext(ContextData);
   const [delID, setDelID] = useState(false);
   const [editablePlot, setEditablePlot] = useState({});
-  const [showData, setShowData] = useState(storeCategoryData);
-  const [showDataCopy, setShowDataCopy] = useState(storeCategoryData);
+  const [showData, setShowData] = useState(null);
+  const [showDataCopy, setShowDataCopy] = useState(null);
   const [isDataLoding, setisDataLoding] = useState(true);
 
   const navigate = useNavigate();
@@ -313,7 +312,7 @@ const CategoryManagement = () => {
           .then((response) => response.json())
           .then((responseJson) => {
             if (responseJson.success) {
-              storeCategoryRelode();
+              // storeCategoryRelode();
 
               getToast({
                 title: "Status Change ",
@@ -376,7 +375,7 @@ const CategoryManagement = () => {
           .then((response) => response.json())
           .then((responseJson) => {
             if (responseJson.success) {
-              storeCategoryRelode();
+              // storeCategoryRelode();
 
               getToast({
                 title: "Status Change ",

@@ -50,6 +50,7 @@ export const Purchased = () => {
     cGstTotal: 0,
     grandTotal: 0,
     discount: 0,
+    discount_cd: 0,
     additional_charges: 0,
     amount_paid: 0,
     outstanding: 0,
@@ -191,6 +192,16 @@ export const Purchased = () => {
       grandTotal: AdditionalChargesTotal,
     });
   }, [allTotals.additional_charges]);
+
+  useEffect(() => {
+    const { subTotal, sGstTotal, cGstTotal, discount, discount_cd } = allTotals;
+    const Total = subTotal + sGstTotal + cGstTotal - Number(discount || 0);
+    const doscountaAFter = Number(Total || 0) - Number(discount_cd || 0);
+    setAllTotals({
+      ...allTotals,
+      grandTotal: doscountaAFter,
+    });
+  }, [allTotals.discount_cd]);
 
   useEffect(() => {
     console.log("amount paid useeffct");
@@ -339,6 +350,7 @@ export const Purchased = () => {
         c_gst: Number(allTotals.cGstTotal),
         extra_charge: allTotals.additional_charges,
         discount: allTotals.discount,
+        discount_cd: allTotals.discount_cd,
         notes: restInfo.notes,
         total_payment: allTotals.grandTotal,
         amount_paid: allTotals.amount_paid,
@@ -938,7 +950,7 @@ export const Purchased = () => {
                                 color: "black",
                               }}
                             >
-                              Discount
+                              Discount / CD
                             </h5>
                             <Flex
                               fontWeight={"600"}
@@ -951,7 +963,7 @@ export const Purchased = () => {
                                 onChange={(e) =>
                                   setAllTotals({
                                     ...allTotals,
-                                    discount: e.target.value,
+                                    discount_cd: e.target.value,
                                   })
                                 }
                                 className="invoice_input"

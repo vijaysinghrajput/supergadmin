@@ -114,12 +114,7 @@ const Sidebar = () => {
                         SALE
                       </Link>
                     </li>
-                    <li className="nav-item">
-                      <Link to="/online/order" className="nav-link">
-                        {" "}
-                        Online Order{" "}
-                      </Link>
-                    </li>
+
                     <li className="nav-item">
                       <Link
                         to="/salesManagement/sales-history"
@@ -262,98 +257,6 @@ const Sidebar = () => {
                 </div>
               </li>
 
-              {/* <li className="nav-item">
-                <a
-                  className="nav-link menu-link"
-                  href="#stocks-management"
-                  data-bs-toggle="collapse"
-                  role="button"
-                  aria-expanded="false"
-                  aria-controls="stocks-management"
-                >
-                  <AiOutlineStock size={24} style={{ fill: "#e9e9e9" }} />
-                  <span data-key="t-authentication">STOCK</span>
-                </a>
-                <div className="collapse menu-dropdown" id="stocks-management">
-                  <ul className="nav nav-sm flex-column">
-                    <li className="nav-item">
-                      <Link
-                        to="/product-stocks"
-                        className="nav-link"
-                        data-key="t-cover"
-                      >
-                        {" "}
-                        STOCKS
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link
-                        to="/low-stocks"
-                        className="nav-link"
-                        data-key="t-cover"
-                      >
-                        LOW STOCKS
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link
-                        to="/product-stocks-history"
-                        className="nav-link"
-                        data-key="t-cover"
-                      >
-                        {" "}
-                        STOCKS HISTORY
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </li> */}
-
-              {/* <li className="menu-title"><i className="ri-more-fill" /> <span data-key="t-pages">Settings</span></li> */}
-
-              {/* <li className="nav-item">
-                <a
-                  className="nav-link menu-link"
-                  href="#onlineManagment"
-                  data-bs-toggle="collapse"
-                  role="button"
-                  aria-expanded="false"
-                  aria-controls="onlineManagment"
-                >
-                  <BsFillRecordCircleFill
-                    size={24}
-                    style={{ fill: "#e9e9e9" }}
-                  />{" "}
-                  <span data-key="t-dashboards">ONLINE ORDER </span>
-                </a>
-                <div className="collapse menu-dropdown" id="onlineManagment">
-                  <ul className="nav nav-sm flex-column">
-                    <li className="nav-item">
-                      <Link to="/online/order" className="nav-link">
-                        {" "}
-                        ORDER{" "}
-                      </Link>
-                      <Link
-                        to="/online/delivery"
-                        className="nav-link"
-                        data-key="t-cover"
-                      >
-                        {" "}
-                        DELIVERY
-                      </Link>
-                      <Link
-                        to="/online/coupon"
-                        className="nav-link"
-                        data-key="t-cover"
-                      >
-                        {" "}
-                        COUPON
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-              </li> */}
-
               <li className="menu-title">
                 <i className="ri-more-fill" />{" "}
                 <span data-key="t-pages">Settings</span>
@@ -405,6 +308,55 @@ const Sidebar = () => {
                       >
                         {" "}
                         Employee
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+
+              <li className="menu-title">
+                <i className="ri-more-fill" />{" "}
+                <span data-key="t-pages">Online </span>
+              </li>
+              <li className="nav-item">
+                <a
+                  className="nav-link menu-link"
+                  href="#onlineSettings"
+                  data-bs-toggle="collapse"
+                  role="button"
+                  aria-expanded="false"
+                  aria-controls="onlineSettings"
+                >
+                  <AiFillSetting size={24} style={{ fill: "#e9e9e9" }} />{" "}
+                  <span data-key="t-authentication">Online Store</span>
+                </a>
+                <div className="collapse menu-dropdown" id="onlineSettings">
+                  <ul className="nav nav-sm flex-column">
+                    <li className="nav-item">
+                      <Link to="/online/order" className="nav-link">
+                        {" "}
+                        Online Order{" "}
+                      </Link>
+                    </li>
+
+                    <li className="nav-item">
+                      <Link
+                        to="/company"
+                        className="nav-link"
+                        data-key="t-cover"
+                      >
+                        {" "}
+                        Delivery Setting
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link
+                        to="/employee"
+                        className="nav-link"
+                        data-key="t-cover"
+                      >
+                        {" "}
+                        Website / App Setting
                       </Link>
                     </li>
                   </ul>
