@@ -1052,7 +1052,7 @@ export const Purchased = () => {
                                 color: "black",
                               }}
                             >
-                              Discount
+                              Discount SCM
                             </h5>
                             <Flex
                               fontWeight={"600"}

@@ -559,7 +559,7 @@ const PurchaseHistoryRecord = () => {
                                 color: "black",
                               }}
                             >
-                              Discount
+                              Discount SCM
                             </h5>
                             <Flex
                               fontWeight={"600"}
@@ -568,6 +568,26 @@ const PurchaseHistoryRecord = () => {
                             >
                               -<BiRupee />
                               {store_vendor_purchase_record_data.discount}
+                            </Flex>
+                          </div>
+                          <div className="d-flex py-3 px-5 justify-content-between align-items-center">
+                            <h5
+                              style={{
+                                fontSize: 14,
+                                margin: 0,
+                                fontWeight: "600",
+                                color: "black",
+                              }}
+                            >
+                              Discount CD
+                            </h5>
+                            <Flex
+                              fontWeight={"600"}
+                              fontSize={14}
+                              alignItems={"center"}
+                            >
+                              -<BiRupee />
+                              {store_vendor_purchase_record_data.discount_cd}
                             </Flex>
                           </div>
                           <div className="d-flex py-3 px-5 justify-content-between align-items-center  border-bottom">

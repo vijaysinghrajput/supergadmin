@@ -8,7 +8,7 @@ import { AddProductForm } from "./Add/product-add-form";
 import { AddUnitForm } from "./Add/unit-add-form";
 import { UpdateProductPriceComp } from "./Update/UpdateProductPriceComp";
 import { UpdateProductStockComp } from "./Update/UpdateProductStockComp";
-import { UpdateProductComp } from "./Update/UpdateProductComp";
+// import { UpdateProductComp } from "./Update/UpdateProductComp";
 import { DownloadBarcode } from "./Update/DownloadBarcode";
 import { UpdateProductImage } from "./Update/UpdateProductImage";
 import { ProductImageView } from "./Update/ProductImageView";
@@ -865,7 +865,7 @@ const ProductManagement = () => {
                 />
               </div>
               <div className="modal-body">
-                <UpdateProductComp productDetails={UpdateProductPrice} />
+                {/* <UpdateProductComp productDetails={UpdateProductPrice} /> */}
               </div>
             </div>
             {/*end modal-content*/}
