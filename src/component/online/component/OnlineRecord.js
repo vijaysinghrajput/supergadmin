@@ -22,11 +22,10 @@ import {
 } from "@chakra-ui/react";
 
 import { useQuery } from "react-query";
+import { queryClient } from "../../../App";
 import Cookies from "universal-cookie";
 import { SimpleGrid } from "@chakra-ui/react";
 import { Map, InfoWindow, Marker, GoogleApiWrapper } from "google-maps-react";
-
-import { queryClient } from "../../../App";
 
 import {
   Box,

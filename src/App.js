@@ -30,6 +30,8 @@ import BannerSettings from "./component/Settings/Website/Banner";
 // import TestimonialSettings from './component/Settings/Website/Testimonial/Testimonial';
 
 import PurchaseIndex from "./component/PURCHASE/purchase-index";
+import ExpairyManagement from "./component/PURCHASE/expairy-management";
+
 import VendorManagement from "./component/PURCHASE/vendor-management";
 import ExpensesManagement from "./component/PURCHASE/expenses-management";
 
@@ -43,6 +45,7 @@ import CustomerManagement from "./component/SALE/customer-management";
 
 import PurchaseHistory from "./component/PURCHASE/purchase-history";
 import PurchaseHistoryRecord from "./component/PURCHASE/purchase-history-record";
+import ExpiryHistoryRecord from "./component/PURCHASE/expiry-history-record";
 
 import OnlineSale from "./component/online/online-sale";
 import OnlineSalesHistoryRecord from "./component/online/online-sales-history-record";
@@ -110,6 +113,7 @@ const App = () => {
                   <Route path="purchase" element={<VendorManagement />} />
                   <Route path="vendor" element={<VendorManagement />} />
                   <Route path="expenses" element={<ExpensesManagement />} />
+                  <Route path="expairy" element={<ExpairyManagement />} />
                   <Route
                     path="purchase-history"
                     element={<PurchaseHistory />}
@@ -118,6 +122,10 @@ const App = () => {
                     path="/purchaseManagement/purchase-history-record/:orderID/:vendorID"
                     element={<PurchaseHistoryRecord />}
                   />
+                  <Route
+                    path="/purchaseManagement/expiry-history-record/:orderID/:vendorID"
+                    element={<ExpiryHistoryRecord />}
+                  />
                 </Route>
                 <Route path="/salesManagement">
                   <Route index element={<SaleIndex />} />
@@ -125,6 +133,10 @@ const App = () => {
                   <Route path="customers" element={<CustomerManagement />} />
                   <Route
                     path="/salesManagement/sales-history-record/:orderID/:customer_mobile"
+                    element={<SalesHistoryRecord />}
+                  />
+                  <Route
+                    path="/salesManagement/customer-history-record/:customerID/:customer_mobile"
                     element={<SalesHistoryRecord />}
                   />
                 </Route>

@@ -200,6 +200,17 @@ const Sidebar = () => {
                         Expenses
                       </Link>
                     </li>
+
+                    <li className="nav-item">
+                      <Link
+                        to="/purchaseManagement/expairy"
+                        className="nav-link"
+                        data-key="t-cover"
+                      >
+                        {" "}
+                        Expairy
+                      </Link>
+                    </li>
                   </ul>
                 </div>
               </li>

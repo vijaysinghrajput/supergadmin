@@ -36,6 +36,9 @@ const cookies = new Cookies();
 
 export const SaleDataTable = () => {
   const [globalFilterValue, setGlobalFilterValue] = useState("");
+
+  const [msgHeading, setmsgHeading] = useState(null);
+
   const [SaleDate, setSaleDate] = useState(null);
   const [RangeSaleDate, setRangeSaleDate] = useState(null);
 
@@ -92,6 +95,7 @@ export const SaleDataTable = () => {
     if (offline_sale_history) {
       setSale(offline_sale_history.store_customer_purchase_record);
       setSaleYear(offline_sale_history.sale_year);
+      setmsgHeading(offline_sale_history.msg_heading);
 
       console.log("Sales", Sale);
       setisDataLoding(false);
@@ -156,24 +160,16 @@ export const SaleDataTable = () => {
     }
   };
 
-  const [statuses] = useState([
-    "Placed",
-    "Confirmed",
-    "Preparing for dispatch",
-    "On the way",
-    "Delivered",
-    "Canceled",
-    "Sold",
-  ]);
+  const [statuses] = useState(["Store Billing", "Android", "Website", "iOs"]);
 
   const statusRowFilterTemplate = (options) => {
     return (
       <Dropdown
-        value={options.order_status}
+        value={options.plateform}
         options={statuses}
         onChange={(e) => options.filterApplyCallback(e.value)}
         itemTemplate={statusItemTemplate}
-        placeholder="Select Status"
+        placeholder="Select Plateform"
         className="p-column-filter"
         showClear
         // style={{ minWidth: "2rem" }}
@@ -231,58 +227,61 @@ export const SaleDataTable = () => {
 
   const renderHeader = () => {
     return (
-      <div className="row  ">
-        <div className="col-sm-3">
-          <InputGroup className="mb-3">
-            <InputGroup.Text id="basic-addon1">
-              <BiSearch />
-            </InputGroup.Text>
-            <Form.Control
-              placeholder="Search in Data"
-              aria-label="Username"
-              aria-describedby="basic-addon1"
-              value={globalFilterValue}
-              onChange={onGlobalFilterChange}
-            />
-          </InputGroup>
-        </div>
-        <div className="col-sm-3">
-          <Dropdown
-            value={selectedMonthYear}
-            onChange={(e) => changeDataData(e)}
-            options={SaleYear}
-            optionLabel="label"
-            optionGroupLabel="label"
-            optionGroupChildren="items"
-            optionGroupTemplate={groupedItemTemplate}
-            className="w-full md:w-14rem"
-            placeholder="YEAR / MONTH"
-          />
-        </div>
-        <div className="col-sm-3">
-          <label htmlFor="buttondisplay" className="font-bold block mb-2">
-            <CiCalendarDate onClick={onOpen} size={35} /> Sale Date{" "}
-            {saleDateValue}
-          </label>
-        </div>
-
-        <div className="col-sm-3">
-          <label htmlFor="buttondisplay" className="font-bold block mb-2">
-            Sale Date Range
-          </label>
-          <Box position={"relative"}>
-            <div className="card flex justify-content-center">
-              <Calendar
-                value={RangeSaleDate}
-                onChange={(e) => changeRangeSaleDateOnly(e)}
-                selectionMode="range"
-                readOnlyInput
-                maxDate={new Date()}
+      <>
+        <div className="row  ">
+          <div className="col-sm-3">
+            <InputGroup className="mb-3">
+              <InputGroup.Text id="basic-addon1">
+                <BiSearch />
+              </InputGroup.Text>
+              <Form.Control
+                placeholder="Search in Data"
+                aria-label="Username"
+                aria-describedby="basic-addon1"
+                value={globalFilterValue}
+                onChange={onGlobalFilterChange}
               />
-            </div>
-          </Box>
+            </InputGroup>
+          </div>
+          <div className="col-sm-3">
+            <Dropdown
+              value={selectedMonthYear}
+              onChange={(e) => changeDataData(e)}
+              options={SaleYear}
+              optionLabel="label"
+              optionGroupLabel="label"
+              optionGroupChildren="items"
+              optionGroupTemplate={groupedItemTemplate}
+              className="w-full md:w-14rem"
+              placeholder="YEAR / MONTH"
+            />
+          </div>
+          {/* <div className="col-sm-3">
+            <label htmlFor="buttondisplay" className="font-bold block mb-2">
+              <CiCalendarDate onClick={onOpen} size={35} /> Sale Date{" "}
+              {saleDateValue}
+            </label>
+          </div>
+
+          <div className="col-sm-3">
+            <label htmlFor="buttondisplay" className="font-bold block mb-2">
+              Sale Date Range
+            </label>
+
+            <Box position={"relative"}>
+              <div className="card flex justify-content-center">
+                <Calendar
+                  value={RangeSaleDate}
+                  onChange={(e) => changeRangeSaleDateOnly(e)}
+                  selectionMode="range"
+                  readOnlyInput
+                  maxDate={new Date()}
+                />
+              </div>
+            </Box>
+          </div> */}
         </div>
-      </div>
+      </>
     );
   };
 
@@ -290,6 +289,12 @@ export const SaleDataTable = () => {
 
   return (
     <div className="card">
+      <div className="row  ">
+        <div className="col-sm-12">
+          <p>{msgHeading}</p>
+        </div>
+      </div>
+
       {isDataLoding ? (
         "Loding"
       ) : (
@@ -343,10 +348,8 @@ export const SaleDataTable = () => {
             body={statusBodyTemplate}
             sortable
             style={{ width: "15%" }}
-            showFilterMenu={false}
+
             // filterMenuStyle={{ width: "6rem" }}
-            filter
-            filterElement={statusRowFilterTemplate}
           ></Column>
 
           <Column

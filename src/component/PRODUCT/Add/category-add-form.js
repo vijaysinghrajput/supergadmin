@@ -90,6 +90,8 @@ export const AddCategoryForm = (OldcategoryData) => {
     // console.log("search product", PRODUCTDATA, isLoadingAPI);
     if (PRODUCTDATA) {
       setstoreCategoryData(PRODUCTDATA.master_category);
+      setFilterCategoryData(PRODUCTDATA.master_category);
+
       setisDataLoding(false);
 
       let CategorysData = [];
@@ -215,7 +217,7 @@ export const AddCategoryForm = (OldcategoryData) => {
               }
               value={categoryData.category_name}
               className="form-control"
-              placeholder="Product Name"
+              placeholder="New Category Name"
               id="compnayNameinput"
             />
           </div>
@@ -312,7 +314,7 @@ export const AddCategoryForm = (OldcategoryData) => {
                 onClick={AddCategoryAction}
                 className="btn btn-primary"
               >
-                Add Plot
+                Add Category
               </button>
             )}
           </div>

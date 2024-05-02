@@ -20,7 +20,7 @@ const ContextProvider = (props) => {
   };
 
   const functionality = {
-    // fetchAllData: (payload) => dispatch({ type: "FETCH_ALL_DATA", payload }),
+    fetchAllData: (payload) => dispatch({ type: "FETCH_ALL_DATA", payload }),
     setUserLogin: (credentials) =>
       dispatch({ type: "USER_LOGIN", credentials }),
     addDataToCurrentGlobal: (data) => dispatch({ type: "ADD_DATA", data }),
@@ -29,7 +29,9 @@ const ContextProvider = (props) => {
       dispatch({ type: "REMOVE_DATA", data }),
     updateDataToCurrentGlobal: (data, where) =>
       dispatch({ type: "UPDATE_DATA", data, where }),
-
+    // getStoreData: () => {
+    //   dispatch({ type: "SOTRE_DATA", data });
+    // },
     logOut: () => {
       cookies.remove("isUserLogin");
       cookies.remove("adminId");
@@ -53,6 +55,33 @@ const ContextProvider = (props) => {
       });
     },
   };
+
+  useEffect(async () => {
+    async function fetchData() {
+      const data = await fetch(URL + "/APP-API/Billing/Store_bussiness_info", {
+        method: "post",
+        header: {
+          Accept: "application/json",
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({
+          store_id: MainData.adminId,
+        }),
+      })
+        .then((response) => response.json())
+        .then((responseJson) => responseJson);
+
+      return data;
+    }
+
+    const data = await fetchData();
+
+    MainData.Store_bussiness_info = data;
+
+    console.log("data", data);
+
+    functionality.fetchAllData({ store_data: data });
+  }, []);
 
   const [MainDataExport, dispatch] = useReducer(reducer, MainData);
 

@@ -421,7 +421,9 @@ const BrandManagement = () => {
                         aria-label="Close"
                       />
                     </div>
-                    <div className="modal-body">{/* <AddBrandForm /> */}</div>
+                    <div className="modal-body">
+                      <AddBrandForm />
+                    </div>
                   </div>
                   {/*end modal-content*/}
                 </div>

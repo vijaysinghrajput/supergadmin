@@ -18,6 +18,7 @@ import ToggleButton from "react-bootstrap/ToggleButton";
 import Dropdown from "react-bootstrap/Dropdown";
 import swal from "sweetalert";
 import { Stack, Skeleton } from "@chakra-ui/react";
+import { queryClient } from "../../App";
 
 import { useToast } from "@chakra-ui/react";
 
@@ -73,6 +74,7 @@ const CategoryManagement = () => {
   const {
     data: CATEGORYDATAT,
     isError,
+    isFetching,
     isLoading: isLoadingAPI,
   } = useQuery({
     queryKey: ["CATEGORYDATAT"],
@@ -85,8 +87,6 @@ const CategoryManagement = () => {
       setShowDataCopy(CATEGORYDATAT.stores_category);
       setisDataLoding(false);
     }
-
-    console.log("showDataCopy", showDataCopy);
   }, [CATEGORYDATAT, isLoadingAPI]);
 
   const ChangeStatus = () => {
@@ -311,6 +311,10 @@ const CategoryManagement = () => {
         })
           .then((response) => response.json())
           .then((responseJson) => {
+            queryClient.invalidateQueries({
+              queryKey: ["CATEGORYDATAT"],
+            });
+
             if (responseJson.success) {
               // storeCategoryRelode();
 
@@ -374,6 +378,10 @@ const CategoryManagement = () => {
         })
           .then((response) => response.json())
           .then((responseJson) => {
+            queryClient.invalidateQueries({
+              queryKey: ["CATEGORYDATAT"],
+            });
+
             if (responseJson.success) {
               // storeCategoryRelode();
 
@@ -493,6 +501,7 @@ const CategoryManagement = () => {
 
               <div className="col-sm-auto ms-auto">
                 <div className="list-grid-nav hstack gap-1">
+                  {isFetching ? "Fetching" : null}
                   <button
                     className="btn btn-primary"
                     data-bs-toggle="modal"

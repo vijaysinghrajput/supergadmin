@@ -98,15 +98,15 @@ export const CustomerDataTable = () => {
       <button
         onClick={() =>
           navigate(
-            "/online/online-sales-history-record/" +
-              rowData.name +
+            "/salesManagement/customer-history-record/" +
+              rowData.id +
               "/" +
-              rowData.customer_address_id
+              rowData.mobile
           )
         }
         className="btn btn-dark"
       >
-        <i className="ri-eye me-1 align-bottom" /> BILL
+        <i className="ri-eye me-1 align-bottom" /> Details
       </button>
     );
   };
@@ -175,43 +175,6 @@ export const CustomerDataTable = () => {
   const renderHeader = () => {
     return (
       <div className="row  ">
-        <div className="col-sm-4">
-          <InputGroup className="mb-3">
-            <InputGroup.Text id="basic-addon1">
-              <BiSearch />
-            </InputGroup.Text>
-            <Form.Control
-              placeholder="Search in Data"
-              aria-label="Username"
-              aria-describedby="basic-addon1"
-              value={globalFilterValue}
-              onChange={onGlobalFilterChange}
-            />
-          </InputGroup>
-        </div>
-        <div className="col-sm-4">
-          <Dropdown
-            value={statuses.order_status}
-            options={statuses}
-            onChange={(e) => statuses.filterApplyCallback(e.value)}
-            itemTemplate={statusItemTemplate}
-            placeholder="Select Year"
-            className="p-column-filter"
-            showClear
-            style={{ minWidth: "5rem" }}
-          />
-
-          <Dropdown
-            value={statuses.order_status}
-            options={statuses}
-            onChange={(e) => statuses.filterApplyCallback(e.value)}
-            itemTemplate={statusItemTemplate}
-            placeholder="Select Year"
-            className="p-column-filter"
-            showClear
-            style={{ minWidth: "5rem" }}
-          />
-        </div>
         <div className="col-sm-4">
           <InputGroup className="mb-3">
             <InputGroup.Text id="basic-addon1">
