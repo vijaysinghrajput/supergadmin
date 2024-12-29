@@ -628,470 +628,108 @@ const OnlineSalesHistoryRecord = () => {
         </div>
       </div>
 
-      <div id="section-to-print" ref={componentRef}>
-        <div className="POS_header px-1">
-          {/* {console.log("Store_bussiness_info", Store_bussiness_info)}
+      <div
+        id="section-to-print"
+        ref={componentRef}
+        style={{
+          width: "3in",
+          fontFamily: "Arial, sans-serif",
+          fontSize: "10px",
+          color: "#000",
+          margin: "0 auto", // Center align for thermal printer
+          padding: "0 5px", // Add left and right margins
+        }}
+      >
+        {/* Header */}
+        <div
+          className="POS_header"
+          style={{ textAlign: "center", marginBottom: "10px" }}
+        ></div>
 
-          <div className="col-auto ">
-            <h6
-              style={{
-                fontSize: 14,
-                color: "#000",
-                fontWeight: "800",
-                textAlign: "center",
-                marginBottom: 1,
-              }}
-            >
-              {Store_bussiness_info?.buss_name},
-              <span
-                style={{
-                  fontSize: 10,
-                }}
-              >
-                {Store_bussiness_info?.strteet_linn2}{" "}
-                {Store_bussiness_info?.area}
-              </span>
-            </h6>
-            <h6
-              style={{
-                fontSize: 10,
-                fontWeight: "800",
-                textAlign: "center",
-                color: "#000",
-              }}
-            >
-              {Store_bussiness_info?.mobile1} {Store_bussiness_info?.mobile2}{" "}
-            </h6>
-          </div> */}
+        {/* Customer Details */}
+        <div style={{ marginBottom: "10px" }}>
+          <p style={{ margin: "0 0 5px", fontWeight: "bold" }}>
+            Customer Name: {customerAddress?.name}
+          </p>
+          <p style={{ margin: "0 0 5px", fontWeight: "bold" }}>
+            Order Date: {orderDetails?.date} || {orderDetails?.time}
+          </p>
         </div>
-        {/* <div class="bill-details">
-          <Box textAlign={"center"} fontSize={10}>
-            <Text>
-              Mo{" "}
-              {customerAddress?.phone ? customerAddress?.phone : "----------"},{" "}
-              {orderDetails?.date} || {orderDetails?.time}
-            </Text>
-          </Box>
-        </div> */}
-        <SimpleGrid
-          fontSize={11}
-          // columns={2}
-          pl={2}
-          py={2}
-          borderTop={"1px solid #000"}
-          borderBottom={"1px solid #000"}
-          color={"#000"}
+
+        {/* Items Table */}
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            marginBottom: "10px",
+          }}
         >
-          <Box>
-            <div>
-              <div className="">
-                <h6
-                  className=""
-                  style={{
-                    color: "#000",
-                  }}
-                >
-                  Customer Name: <strong>{customerAddress?.name}</strong>
-                </h6>
-                {/* <h6
-                  className=""
-                  style={{
-                    color: "#000",
-                  }}
-                >
-                  Phone: <strong>{customerAddress?.phone}</strong>
-                </h6>
-                <h6
-                  className=""
-                  style={{
-                    color: "#000",
-                  }}
-                >
-                  Alt Phone:{" "}
-                  <strong>{customerAddress?.alternative_phone}</strong>
-                </h6>
-
-                <h6
-                  className=""
-                  style={{
-                    color: "#000",
-                  }}
-                >
-                  Landmark: <strong>{customerAddress?.landmark}</strong>
-                </h6>
-                <h6
-                  className=""
-                  style={{
-                    color: "#000",
-                  }}
-                >
-                  Distance: <strong>{customerAddress?.distance_km} KM</strong>
-                </h6>
-                <h6
-                  className=""
-                  style={{
-                    color: "#000",
-                  }}
-                >
-                  Address:{" "}
-                  <strong>
-                    {customerAddress?.user_house_no}{" "}
-                    {customerAddress?.base_address} {customerAddress?.address}
-                  </strong>
-                </h6>
-                <h6
-                  className=""
-                  style={{
-                    color: "#000",
-                  }}
-                >
-                  Payment Mode : <strong>{orderDetails?.payment_mode}</strong>
-                </h6>
-                <h6
-                  className=""
-                  style={{
-                    color: "#000",
-                  }}
-                >
-                  Payment Status :{" "}
-                  <strong>
-                    {orderDetails?.payment_status == 0 ? "Unpaid" : "Paid"}
-                  </strong>
-                </h6> */}
-                <h6
-                  className=""
-                  style={{
-                    color: "#000",
-                  }}
-                >
-                  Order Date:{" "}
-                  <strong>
-                    {orderDetails?.date} || {orderDetails?.time}
-                  </strong>
-                </h6>
-                {/* <div className="">
-                  <h6
-                    className=""
-                    style={{
-                      color: "#000",
-                    }}
-                  >
-                    Slots: <strong>{delivery_slots}</strong>
-                  </h6>
-
-                  <h6
-                    className=""
-                    style={{
-                      color: "#000",
-                    }}
-                  >
-                    Order status: <strong>{orderDetails?.order_status}</strong>
-                  </h6>
-                  <h6
-                    className=""
-                    style={{
-                      color: "#000",
-                    }}
-                  >
-                    No of Item: <strong>{orderDetails?.no_of_items}</strong>
-                  </h6>
-                  <h6
-                    className=""
-                    style={{
-                      color: "#000",
-                    }}
-                  >
-                    Order ID: <strong>{orderDetails?.order_id}</strong>
-                  </h6>
-                </div> */}
-              </div>
-            </div>
-          </Box>
-        </SimpleGrid>
-        <table class="items ml-1">
           <thead>
             <tr
               style={{
+                borderBottom: "1px solid #000",
                 fontSize: "10px",
+                fontWeight: "bold",
               }}
             >
-              <th colSpan={2} class="">
-                Item
-              </th>
-              <th class="">Size</th>
-              <th class="">Quant</th>
-              <th class="">MRP</th>
-              <th class="">RATE</th>
-              <th class="">AMT</th>
+              <th style={{ textAlign: "left", padding: "2px" }}>Item</th>
+              <th style={{ textAlign: "center", padding: "2px" }}>Size</th>
+              <th style={{ textAlign: "center", padding: "2px" }}>Qty</th>
+              <th style={{ textAlign: "right", padding: "2px" }}>Rate</th>
+              <th style={{ textAlign: "right", padding: "2px" }}>Amt</th>
             </tr>
           </thead>
-
           <tbody>
-            {productData?.map((items, index) => {
-              console.log("product ========>", productData);
-              return (
-                <tr
-                  class="sum-up line"
-                  style={
-                    !Number(items.avl_status)
-                      ? {
-                          textDecoration: "line-through",
-                        }
-                      : {}
-                  }
-                >
-                  <td colSpan={2} rowSpan={1}>
-                    {items?.product_name?.substring(0, 21)}
-                  </td>
-                  <td rowSpan={1}>
-                    {items.product_size} {items.product_unit}
-                  </td>
-                  <td>
-                    {items.quantity}{" "}
-                    {Number(items.not_avl_qty)
-                      ? `-(${items.not_avl_qty}*)`
-                      : ""}
-                  </td>
-                  <td>{items.price}</td>
-                  <td class="price">{items.sale_price}</td>
-                  <td class="price">
-                    {(Number(items.quantity) - Number(items.not_avl_qty)) *
-                      Number(items.sale_price)}
-                  </td>
-                </tr>
-              );
-            })}
+            {productData?.map((items, index) => (
+              <tr
+                key={index}
+                style={{
+                  borderBottom: "1px dashed #000", // Underline rows
+                  fontSize: "10px",
+                }}
+              >
+                <td style={{ textAlign: "left", padding: "2px" }}>
+                  {items?.product_name?.substring(0, 21)}
+                </td>
+                <td style={{ textAlign: "center", padding: "2px" }}>
+                  {items.product_size} {items.product_unit}
+                </td>
+                <td style={{ textAlign: "center", padding: "2px" }}>
+                  {items.quantity}
+                </td>
+                <td style={{ textAlign: "right", padding: "2px" }}>
+                  {items.sale_price}
+                </td>
+                <td style={{ textAlign: "right", padding: "2px" }}>
+                  {(Number(items.quantity) - Number(items.not_avl_qty)) *
+                    Number(items.sale_price)}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
-        <Box
-          fontSize={11}
-          // columns={2}
-          pl={2}
-          pt={2}
-          borderTop={"1px solid #000"}
-          // borderBottom={"1px solid #000"}
-          color={"#000"}
+
+        {/* Summary */}
+        <div
+          style={{
+            borderTop: "1px dashed #000",
+            paddingTop: "5px",
+            marginBottom: "10px",
+          }}
         >
-          <div className="">
-            <div style={{ width: "100%" }}>
-              <h3
-                style={{
-                  color: "#000",
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontWeight: "bold", // Ensure bold for on-screen and print
-                }}
-              >
-                Sub Total:{" "}
-                <strong
-                  className="price"
-                  style={{
-                    marginRight: "6px",
-                    fontWeight: "bold", // Bold styling
-                  }}
-                >
-                  {orderDetails?.sub_total}
-                </strong>
-              </h3>
-
-              <h3
-                style={{
-                  color: "#000",
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontWeight: "bold", // Ensure bold for on-screen and print
-                }}
-              >
-                Discount:{" "}
-                <strong
-                  className="price"
-                  style={{
-                    marginRight: "6px",
-                    fontWeight: "bold", // Bold styling
-                  }}
-                >
-                  - {orderDetails?.discount}
-                </strong>
-              </h3>
-
-              <h3
-                style={{
-                  color: "#000",
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontWeight: "bold", // Ensure bold for on-screen and print
-                }}
-              >
-                Grand Total:{" "}
-                <strong
-                  className="price"
-                  style={{
-                    marginRight: "6px",
-                    fontWeight: "bold", // Bold styling
-                  }}
-                >
-                  {/* navneet */}
-                  {orderDetails?.grand_total}
-                </strong>
-              </h3>
-            </div>
-
-            {/* <h6
-              style={{
-                color: "#000",
-                width: "100%",
-                display: "flex",
-                justifyContent: "space-between",
-                // marginRight: "4px",
-              }}
-            >
-              Delivery Charge :{" "}
-              <strong
-                className="price"
-                style={{
-                  marginRight: "6px",
-                }}
-              >
-                + {orderDetails?.delivery_charge}
-              </strong>
-            </h6> */}
-            {ONLINESALEHISTORYRECORD?.coupon_discount_value ? (
-              <h6
-                style={{
-                  color: "#000",
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  // marginRight: "4px",
-                }}
-              >
-                Coupon Discount :{" "}
-                <strong
-                  className="price"
-                  style={{
-                    marginRight: "6px",
-                  }}
-                >
-                  - {orderDetails?.coupon_discount_value}
-                </strong>
-              </h6>
-            ) : null}
-
-            {/* <h6
-              style={{
-                color: "#000",
-                width: "100%",
-                display: "flex",
-                justifyContent: "space-between",
-                // marginRight: "4px",
-              }}
-            >
-              Extra Added Amount :{" "}
-              <strong
-                className="price"
-                style={{
-                  marginRight: "6px",
-                }}
-              >
-                {orderDetails?.extra_item_total}
-              </strong>
-            </h6> */}
-
-            {/* <h6
-              style={{
-                color: "#000",
-                width: "100%",
-                display: "flex",
-                justifyContent: "space-between",
-                // marginRight: "4px",
-              }}
-            >
-              Total Paymnet :{" "}
-              <strong
-                className="price"
-                style={{
-                  marginRight: "6px",
-                }}
-              >
-                {orderDetails?.total_payment}
-              </strong>
-            </h6> */}
-
-            {ONLINESALEHISTORYRECORD?.sumOfNotAvilable ? (
-              <h6
-                style={{
-                  color: "#000",
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  // marginRight: "4px",
-                }}
-              >
-                Not avilable Settlement :{" "}
-                <strong
-                  className="price"
-                  style={{
-                    marginRight: "6px",
-                  }}
-                >
-                  {ONLINESALEHISTORYRECORD?.sumOfNotAvilable}
-                </strong>
-              </h6>
-            ) : null}
-
-            {ONLINESALEHISTORYRECORD?.getSumOfProductNotAvilable ? (
-              <h6
-                style={{
-                  color: "#000",
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  // marginRight: "4px",
-                }}
-              >
-                Product Not avilable Settlement :{" "}
-                <strong
-                  className="price"
-                  style={{
-                    marginRight: "6px",
-                  }}
-                >
-                  {ONLINESALEHISTORYRECORD?.getSumOfProductNotAvilable}
-                </strong>
-              </h6>
-            ) : null}
-
-            {/* <h6
-              style={{
-                color: "#000",
-                width: "100%",
-                display: "flex",
-                justifyContent: "space-between",
-                // marginRight: "4px",
-                borderTop: "1px solid #000",
-                paddingTop: "3px",
-                marginTop: "3px",
-                fontSize: "12px",
-              }}
-            >
-              Payment after All Settlement :{" "}
-              <strong
-                className="price"
-                style={{
-                  marginRight: "6px",
-                  fontSize: "16px",
-                }}
-              >
-                {Number(orderDetails?.total_payment) -
-                  Number(ONLINESALEHISTORYRECORD?.sumOfNotAvilable) -
-                  Number(ONLINESALEHISTORYRECORD?.getSumOfProductNotAvilable)}
-              </strong>
-            </h6> */}
-          </div>
-        </Box>
+          <p style={{ margin: "0 0 5px", fontWeight: "bold" }}>
+            Sub Total:{" "}
+            <span style={{ float: "right" }}>{orderDetails?.sub_total}</span>
+          </p>
+          <p style={{ margin: "0 0 5px", fontWeight: "bold" }}>
+            Discount:{" "}
+            <span style={{ float: "right" }}>- {orderDetails?.discount}</span>
+          </p>
+          <p style={{ margin: "0 0 5px", fontWeight: "bold" }}>
+            Grand Total:{" "}
+            <span style={{ float: "right" }}>{orderDetails?.grand_total}</span>
+          </p>
+        </div>
       </div>
     </>
   );

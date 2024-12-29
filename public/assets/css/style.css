@@ -11,6 +11,38 @@ span {
   font-family: "Quicksand", sans-serif !important;
 }
 
+@media print {
+
+  h3,
+  h6 {
+    font-weight: bold !important;
+    color: #000 !important;
+    /* Ensures text color is consistent */
+  }
+
+  .price {
+    font-weight: bold !important;
+    color: #000 !important;
+    /* Ensures text color is consistent */
+  }
+
+  .POS_header {
+    font-weight: bold !important;
+    color: #000 !important;
+  }
+
+  .items th,
+  .items td {
+    font-weight: bold !important;
+    color: #000 !important;
+  }
+
+  #section-to-print {
+    display: block !important;
+    /* Ensure visibility in print */
+  }
+}
+
 body {
   background: #f3f3f9 !important;
   overflow: scroll;
