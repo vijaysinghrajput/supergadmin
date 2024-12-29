@@ -933,6 +933,7 @@ const OnlineSalesHistoryRecord = () => {
                     fontWeight: "bold", // Bold styling
                   }}
                 >
+                  {/* navneet */}
                   {orderDetails?.grand_total}
                 </strong>
               </h3>
