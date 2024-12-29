@@ -76,6 +76,8 @@ export const OfflineRecord = (ORD, MO) => {
   const [orderDetails, setorderDetails] = useState([]);
 
   const [customerAddress, setcustomerAddress] = useState({});
+  const [customerDetails, setcustomerDetails] = useState({});
+
   const [productData, setproductData] = useState([]);
   const [Store_bussiness_info, setStore_bussiness_info] = useState([]);
   const [delivery_slots, setdelivery_slots] = useState([]);
@@ -117,6 +119,7 @@ export const OfflineRecord = (ORD, MO) => {
     if (ONLINESALEHISTORYRECORD) {
       // setShowData(ONLINESALEHISTORYRECORD.store_customer_purchase_record);
       setcustomerAddress(ONLINESALEHISTORYRECORD.customer_address_details);
+      setcustomerDetails(ONLINESALEHISTORYRECORD.customer_address_details);
       setproductData(ONLINESALEHISTORYRECORD.order_products_details);
       setorderDetails(ONLINESALEHISTORYRECORD.order_details);
       setStore_bussiness_info(ONLINESALEHISTORYRECORD.Store_bussiness_info);

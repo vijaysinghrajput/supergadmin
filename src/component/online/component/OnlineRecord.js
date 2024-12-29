@@ -47,9 +47,10 @@ import "react-datepicker/dist/react-datepicker.css";
 const cookies = new Cookies();
 const adminId = cookies.get("adminId");
 
-export const OnlineRecord = (ORD, MO) => {
-  const orderID = ORD.orderID;
-  const customer_address = MO.customer_address;
+export const OnlineRecord = () => {
+  const { orderID } = useParams();
+  const { customer_address } = useParams();
+  const { order_type } = useParams();
 
   const toast = useToast();
   const componentRef = useRef();
