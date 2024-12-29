@@ -630,11 +630,7 @@ const OnlineSalesHistoryRecord = () => {
 
       <div id="section-to-print" ref={componentRef}>
         <div className="POS_header px-1">
-          {/* <div className=" d-flex justify-content-center">
-                        <img src={Store_bussiness_info?.logo} alt="user-img" className="prinerLogo rounded-circle" />
-                    </div> */}
-
-          {console.log("Store_bussiness_info", Store_bussiness_info)}
+          {/* {console.log("Store_bussiness_info", Store_bussiness_info)}
 
           <div className="col-auto ">
             <h6
@@ -666,9 +662,9 @@ const OnlineSalesHistoryRecord = () => {
             >
               {Store_bussiness_info?.mobile1} {Store_bussiness_info?.mobile2}{" "}
             </h6>
-          </div>
+          </div> */}
         </div>
-        <div class="bill-details">
+        {/* <div class="bill-details">
           <Box textAlign={"center"} fontSize={10}>
             <Text>
               Mo{" "}
@@ -676,7 +672,7 @@ const OnlineSalesHistoryRecord = () => {
               {orderDetails?.date} || {orderDetails?.time}
             </Text>
           </Box>
-        </div>
+        </div> */}
         <SimpleGrid
           fontSize={11}
           // columns={2}
@@ -697,7 +693,7 @@ const OnlineSalesHistoryRecord = () => {
                 >
                   Customer Name: <strong>{customerAddress?.name}</strong>
                 </h6>
-                <h6
+                {/* <h6
                   className=""
                   style={{
                     color: "#000",
@@ -761,7 +757,7 @@ const OnlineSalesHistoryRecord = () => {
                   <strong>
                     {orderDetails?.payment_status == 0 ? "Unpaid" : "Paid"}
                   </strong>
-                </h6>
+                </h6> */}
                 <h6
                   className=""
                   style={{
@@ -773,7 +769,7 @@ const OnlineSalesHistoryRecord = () => {
                     {orderDetails?.date} || {orderDetails?.time}
                   </strong>
                 </h6>
-                <div className="">
+                {/* <div className="">
                   <h6
                     className=""
                     style={{
@@ -807,7 +803,7 @@ const OnlineSalesHistoryRecord = () => {
                   >
                     Order ID: <strong>{orderDetails?.order_id}</strong>
                   </h6>
-                </div>
+                </div> */}
               </div>
             </div>
           </Box>
@@ -877,66 +873,72 @@ const OnlineSalesHistoryRecord = () => {
           color={"#000"}
         >
           <div className="">
-            <h6
-              style={{
-                color: "#000",
-                width: "100%",
-                display: "flex",
-                justifyContent: "space-between",
-                // marginRight: "4px",
-              }}
-            >
-              Sub Total :{" "}
-              <strong
-                className="price"
+            <div style={{ width: "100%" }}>
+              <h3
                 style={{
-                  marginRight: "6px",
+                  color: "#000",
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontWeight: "bold", // Ensure bold for on-screen and print
                 }}
               >
-                {orderDetails?.sub_total}
-              </strong>
-            </h6>
-            <h6
-              style={{
-                color: "#000",
-                width: "100%",
-                display: "flex",
-                justifyContent: "space-between",
-                // marginRight: "4px",
-              }}
-            >
-              Discount :{" "}
-              <strong
-                className="price"
-                style={{
-                  marginRight: "6px",
-                }}
-              >
-                - {orderDetails?.discount}
-              </strong>
-            </h6>
+                Sub Total:{" "}
+                <strong
+                  className="price"
+                  style={{
+                    marginRight: "6px",
+                    fontWeight: "bold", // Bold styling
+                  }}
+                >
+                  {orderDetails?.sub_total}
+                </strong>
+              </h3>
 
-            <h6
-              style={{
-                color: "#000",
-                width: "100%",
-                display: "flex",
-                justifyContent: "space-between",
-                // marginRight: "4px",
-              }}
-            >
-              Grand Total :{" "}
-              <strong
-                className="price"
+              <h3
                 style={{
-                  marginRight: "6px",
+                  color: "#000",
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontWeight: "bold", // Ensure bold for on-screen and print
                 }}
               >
-                {orderDetails?.grand_total}
-              </strong>
-            </h6>
+                Discount:{" "}
+                <strong
+                  className="price"
+                  style={{
+                    marginRight: "6px",
+                    fontWeight: "bold", // Bold styling
+                  }}
+                >
+                  - {orderDetails?.discount}
+                </strong>
+              </h3>
 
-            <h6
+              <h3
+                style={{
+                  color: "#000",
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontWeight: "bold", // Ensure bold for on-screen and print
+                }}
+              >
+                Grand Total:{" "}
+                <strong
+                  className="price"
+                  style={{
+                    marginRight: "6px",
+                    fontWeight: "bold", // Bold styling
+                  }}
+                >
+                  {orderDetails?.grand_total}
+                </strong>
+              </h3>
+            </div>
+
+            {/* <h6
               style={{
                 color: "#000",
                 width: "100%",
@@ -954,7 +956,7 @@ const OnlineSalesHistoryRecord = () => {
               >
                 + {orderDetails?.delivery_charge}
               </strong>
-            </h6>
+            </h6> */}
             {ONLINESALEHISTORYRECORD?.coupon_discount_value ? (
               <h6
                 style={{
@@ -977,7 +979,7 @@ const OnlineSalesHistoryRecord = () => {
               </h6>
             ) : null}
 
-            <h6
+            {/* <h6
               style={{
                 color: "#000",
                 width: "100%",
@@ -995,9 +997,9 @@ const OnlineSalesHistoryRecord = () => {
               >
                 {orderDetails?.extra_item_total}
               </strong>
-            </h6>
+            </h6> */}
 
-            <h6
+            {/* <h6
               style={{
                 color: "#000",
                 width: "100%",
@@ -1015,7 +1017,7 @@ const OnlineSalesHistoryRecord = () => {
               >
                 {orderDetails?.total_payment}
               </strong>
-            </h6>
+            </h6> */}
 
             {ONLINESALEHISTORYRECORD?.sumOfNotAvilable ? (
               <h6
@@ -1061,7 +1063,7 @@ const OnlineSalesHistoryRecord = () => {
               </h6>
             ) : null}
 
-            <h6
+            {/* <h6
               style={{
                 color: "#000",
                 width: "100%",
@@ -1086,7 +1088,7 @@ const OnlineSalesHistoryRecord = () => {
                   Number(ONLINESALEHISTORYRECORD?.sumOfNotAvilable) -
                   Number(ONLINESALEHISTORYRECORD?.getSumOfProductNotAvilable)}
               </strong>
-            </h6>
+            </h6> */}
           </div>
         </Box>
       </div>
