@@ -1,4 +1,3 @@
-const URLDomain = 'https://admin.martpay.in';
+const URLDomain = "https://admin.superg.in";
 
 export default URLDomain;
-
