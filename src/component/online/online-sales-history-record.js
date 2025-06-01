@@ -675,6 +675,7 @@ const OnlineSalesHistoryRecord = () => {
               <th style={{ textAlign: "left", padding: "2px" }}>Item</th>
               <th style={{ textAlign: "center", padding: "2px" }}>Size</th>
               <th style={{ textAlign: "center", padding: "2px" }}>Qty</th>
+              <th style={{ textAlign: "right", padding: "2px" }}>MRP</th>
               <th style={{ textAlign: "right", padding: "2px" }}>Rate</th>
               <th style={{ textAlign: "right", padding: "2px" }}>Amt</th>
             </tr>
@@ -696,6 +697,9 @@ const OnlineSalesHistoryRecord = () => {
                 </td>
                 <td style={{ textAlign: "center", padding: "2px" }}>
                   {items.quantity}
+                </td>
+                <td style={{ textAlign: "right", padding: "2px" }}>
+                  {items.mrp}
                 </td>
                 <td style={{ textAlign: "right", padding: "2px" }}>
                   {items.sale_price}
