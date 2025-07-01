@@ -81,6 +81,15 @@ const Sidebar = () => {
                         Sales Dashboard
                       </Link>
                     </li>
+                    <li className="nav-item">
+                      <Link
+                        to="/dashboard/analytics"
+                        className="nav-link"
+                        data-key="t-cover"
+                      >
+                        Analytics Dashboard
+                      </Link>
+                    </li>
                   </ul>
                 </div>
               </li>
