@@ -62,6 +62,12 @@ ChartJS.register(
 );
 
 function getFormattedDate(date) {
+  // Validate date input
+  if (!date || !(date instanceof Date) || isNaN(date.getTime())) {
+    console.warn('Invalid date provided to getFormattedDate:', date);
+    return new Date().toISOString().split('T')[0].split('-').reverse().join('-'); // Return today's date in DD-MM-YYYY format
+  }
+  
   const day = String(date.getDate()).padStart(2, "0");
   const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are 0-based
   const year = date.getFullYear();
@@ -143,7 +149,11 @@ const AnalyticsDashboard = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("month");
   const [kpiComparison, setKpiComparison] = useState("previous");
   const [dateRange, setDateRange] = useState({
-    startDate: new Date(new Date().setDate(new Date().getDate() - 30)),
+    startDate: (() => {
+      const date = new Date();
+      date.setDate(date.getDate() - 30);
+      return date;
+    })(),
     endDate: new Date()
   });
   const [showCustomDatePicker, setShowCustomDatePicker] = useState(false);
@@ -521,9 +531,17 @@ const AnalyticsDashboard = () => {
   };
 
   const handleCustomDateChange = (field, value) => {
+    if (!value) return; // Don't update if value is empty
+    
+    const newDate = new Date(value);
+    if (isNaN(newDate.getTime())) {
+      console.warn('Invalid date provided:', value);
+      return; // Don't update if date is invalid
+    }
+    
     setDateRange(prev => ({
       ...prev,
-      [field]: new Date(value)
+      [field]: newDate
     }));
   };
 
