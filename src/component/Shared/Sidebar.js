@@ -1,4 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { ImBook } from "react-icons/im";
 import { AiFillDashboard } from "react-icons/ai";
 import { AiFillSetting } from "react-icons/ai";
@@ -7,13 +8,90 @@ import { BiPurchaseTagAlt } from "react-icons/bi";
 import { FaProductHunt } from "react-icons/fa";
 import { AiOutlineStock } from "react-icons/ai";
 import { BsFillRecordCircleFill } from "react-icons/bs";
-
 import { RiUserSettingsFill } from "react-icons/ri";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [activeMenu, setActiveMenu] = useState("");
+
+  // Add CSS for smooth transitions
+  const sidebarStyles = `
+    .nav-link.menu-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.3s ease;
+    }
+    
+    .menu-dropdown {
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .menu-dropdown.show {
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        max-height: 0;
+      }
+      to {
+        opacity: 1;
+        max-height: 300px;
+      }
+    }
+    
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+    
+    .nav-link.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+  `;
+
+  // Set active menu based on current route
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes("/dashboard") || path.includes("/stock-dashboard")) {
+      setActiveMenu("dashboard");
+    } else if (
+      path.includes("/billing/sale") ||
+      path.includes("/salesManagement")
+    ) {
+      setActiveMenu("sales");
+    } else if (
+      path.includes("/billing/purchased") ||
+      path.includes("/purchaseManagement")
+    ) {
+      setActiveMenu("purchase");
+    } else if (path.includes("/productManagement")) {
+      setActiveMenu("product");
+    } else if (
+      path.includes("/settings") ||
+      path.includes("/company") ||
+      path.includes("/employee")
+    ) {
+      setActiveMenu("settings");
+    } else if (path.includes("/online")) {
+      setActiveMenu("online");
+    } else {
+      setActiveMenu("");
+    }
+  }, [location.pathname]);
+
+  const handleMenuClick = (menuName) => {
+    setActiveMenu(activeMenu === menuName ? "" : menuName);
+  };
   return (
     <>
+      <style>{sidebarStyles}</style>
       <div className="app-menu navbar-menu">
         <div className="navbar-brand-box">
           {/* Dark Logo*/}
@@ -42,47 +120,19 @@ const Sidebar = () => {
             <i className="ri-record-circle-line" />
           </button>
         </div>
-        <div id="scrollbar">
+        <div id="scrollbar" style={{ maxHeight: "100vh", overflowY: "auto" }}>
           <div className="container-fluid">
             <ul className="navbar-nav" id="navbar-nav">
               <li className="nav-item">
-                <a
-                  className="nav-link menu-link"
-                  href="#sidebarAuth"
-                  data-bs-toggle="collapse"
-                  role="button"
-                  aria-expanded="false"
-                  aria-controls="sidebarAuth"
+                <Link
+                  to="/"
+                  className={`nav-link justify-content-start menu-link ${
+                    location.pathname === "/" ? "active" : ""
+                  }`}
                 >
                   <AiFillDashboard size={24} style={{ fill: "#e9e9e9" }} />
                   <span data-key="t-authentication">DASHBOARD</span>
-                </a>
-                <div className="collapse menu-dropdown" id="sidebarAuth">
-                  <ul className="nav nav-sm flex-column">
-                    <li className="nav-item">
-                      <Link
-                        to="/stock-dashboard"
-                        className="nav-link"
-                        data-key="t-cover"
-                      >
-                        Stock Dashboard
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
-                <div className="collapse menu-dropdown" id="sidebarAuth">
-                  <ul className="nav nav-sm flex-column">
-                    <li className="nav-item">
-                      <Link
-                        to="/dashboard/sales"
-                        className="nav-link"
-                        data-key="t-cover"
-                      >
-                        Sales Dashboard
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
+                </Link>
               </li>
 
               <li className="menu-title">
@@ -92,47 +142,69 @@ const Sidebar = () => {
 
               <li className="nav-item">
                 <a
-                  className="nav-link menu-link"
-                  href="#sales-managmenet"
-                  data-bs-toggle="collapse"
+                  className={`nav-link menu-link ${
+                    activeMenu === "sales" ? "active" : ""
+                  }`}
+                  href="#sales-management"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuClick("sales");
+                  }}
                   role="button"
-                  aria-expanded="false"
-                  aria-controls="sales-managmenet"
+                  aria-expanded={activeMenu === "sales"}
+                  aria-controls="sales-management"
+                  style={{ transition: "all 0.3s ease" }}
                 >
-                  <FcSalesPerformance size={24} style={{ fill: "#e9e9e9" }} />{" "}
+                  <FcSalesPerformance size={24} style={{ fill: "#e9e9e9" }} />
                   <span data-key="t-authentication">SALES</span>
+                  {activeMenu === "sales" ? (
+                    <IoIosArrowUp size={16} style={{ marginLeft: "auto" }} />
+                  ) : (
+                    <IoIosArrowDown size={16} style={{ marginLeft: "auto" }} />
+                  )}
                 </a>
-                <div className="collapse menu-dropdown" id="sales-managmenet">
+                <div
+                  className={`collapse menu-dropdown ${
+                    activeMenu === "sales" ? "show" : ""
+                  }`}
+                  id="sales-management"
+                  style={{ transition: "all 0.3s ease" }}
+                >
                   <ul className="nav nav-sm flex-column">
                     <li className="nav-item">
                       <Link
                         to="/billing/sale"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/billing/sale" ? "active" : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
                         SALE
                       </Link>
                     </li>
-
                     <li className="nav-item">
                       <Link
                         to="/salesManagement/sales-history"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/salesManagement/sales-history"
+                            ? "active"
+                            : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
                         SALES HISTORY
                       </Link>
                     </li>
-
                     <li className="nav-item">
                       <Link
                         to="/salesManagement/customers"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/salesManagement/customers"
+                            ? "active"
+                            : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
                         CUSTOMER
                       </Link>
                     </li>
@@ -142,73 +214,99 @@ const Sidebar = () => {
 
               <li className="nav-item">
                 <a
-                  className="nav-link menu-link"
+                  className={`nav-link menu-link ${
+                    activeMenu === "purchase" ? "active" : ""
+                  }`}
                   href="#purchase-management"
-                  data-bs-toggle="collapse"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuClick("purchase");
+                  }}
                   role="button"
-                  aria-expanded="false"
+                  aria-expanded={activeMenu === "purchase"}
                   aria-controls="purchase-management"
+                  style={{ transition: "all 0.3s ease" }}
                 >
-                  <BiPurchaseTagAlt size={24} style={{ fill: "#e9e9e9" }} />{" "}
+                  <BiPurchaseTagAlt size={24} style={{ fill: "#e9e9e9" }} />
                   <span data-key="t-authentication">PURCHASE</span>
+                  {activeMenu === "purchase" ? (
+                    <IoIosArrowUp size={16} style={{ marginLeft: "auto" }} />
+                  ) : (
+                    <IoIosArrowDown size={16} style={{ marginLeft: "auto" }} />
+                  )}
                 </a>
                 <div
-                  className="collapse menu-dropdown"
+                  className={`collapse menu-dropdown ${
+                    activeMenu === "purchase" ? "show" : ""
+                  }`}
                   id="purchase-management"
+                  style={{ transition: "all 0.3s ease" }}
                 >
                   <ul className="nav nav-sm flex-column">
                     <li className="nav-item">
                       <Link
                         to="/billing/purchased"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/billing/purchased"
+                            ? "active"
+                            : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
                         PURCHASE
                       </Link>
                     </li>
-
                     <li className="nav-item">
                       <Link
                         to="/purchaseManagement/purchase-history"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname ===
+                          "/purchaseManagement/purchase-history"
+                            ? "active"
+                            : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
                         PURCHASE HISTORY
                       </Link>
                     </li>
-
                     <li className="nav-item">
                       <Link
                         to="/purchaseManagement/vendor"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/purchaseManagement/vendor"
+                            ? "active"
+                            : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
                         VENDOR
                       </Link>
                     </li>
-
                     <li className="nav-item">
                       <Link
                         to="/purchaseManagement/expenses"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/purchaseManagement/expenses"
+                            ? "active"
+                            : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
-                        Expenses
+                        EXPENSES
                       </Link>
                     </li>
-
                     <li className="nav-item">
                       <Link
-                        to="/purchaseManagement/expairy"
-                        className="nav-link"
+                        to="/purchaseManagement/expiry"
+                        className={`nav-link ${
+                          location.pathname === "/purchaseManagement/expiry"
+                            ? "active"
+                            : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
-                        Expairy
+                        EXPIRY
                       </Link>
                     </li>
                   </ul>
@@ -222,45 +320,71 @@ const Sidebar = () => {
 
               <li className="nav-item">
                 <a
-                  className="nav-link menu-link"
+                  className={`nav-link menu-link ${
+                    activeMenu === "product" ? "active" : ""
+                  }`}
                   href="#product-management"
-                  data-bs-toggle="collapse"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuClick("product");
+                  }}
                   role="button"
-                  aria-expanded="false"
+                  aria-expanded={activeMenu === "product"}
                   aria-controls="product-management"
+                  style={{ transition: "all 0.3s ease" }}
                 >
                   <FaProductHunt size={24} style={{ fill: "#e9e9e9" }} />
                   <span data-key="t-authentication">PRODUCT</span>
+                  {activeMenu === "product" ? (
+                    <IoIosArrowUp size={16} style={{ marginLeft: "auto" }} />
+                  ) : (
+                    <IoIosArrowDown size={16} style={{ marginLeft: "auto" }} />
+                  )}
                 </a>
-                <div className="collapse menu-dropdown" id="product-management">
+                <div
+                  className={`collapse menu-dropdown ${
+                    activeMenu === "product" ? "show" : ""
+                  }`}
+                  id="product-management"
+                  style={{ transition: "all 0.3s ease" }}
+                >
                   <ul className="nav nav-sm flex-column">
                     <li className="nav-item">
                       <Link
                         to="/productManagement/category"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/productManagement/category"
+                            ? "active"
+                            : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
                         CATEGORY
                       </Link>
                     </li>
                     <li className="nav-item">
                       <Link
                         to="/productManagement/brand"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/productManagement/brand"
+                            ? "active"
+                            : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
                         BRAND
                       </Link>
                     </li>
                     <li className="nav-item">
                       <Link
                         to="/productManagement/product"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/productManagement/product"
+                            ? "active"
+                            : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
                         PRODUCT
                       </Link>
                     </li>
@@ -274,51 +398,68 @@ const Sidebar = () => {
               </li>
               <li className="nav-item">
                 <a
-                  className="nav-link menu-link"
+                  className={`nav-link menu-link ${
+                    activeMenu === "settings" ? "active" : ""
+                  }`}
                   href="#websiteSettings"
-                  data-bs-toggle="collapse"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuClick("settings");
+                  }}
                   role="button"
-                  aria-expanded="false"
+                  aria-expanded={activeMenu === "settings"}
                   aria-controls="websiteSettings"
+                  style={{ transition: "all 0.3s ease" }}
                 >
-                  <AiFillSetting size={24} style={{ fill: "#e9e9e9" }} />{" "}
-                  <span data-key="t-authentication">Website Settings</span>
+                  <AiFillSetting size={24} style={{ fill: "#e9e9e9" }} />
+                  <span data-key="t-authentication">WEBSITE SETTINGS</span>
+                  {activeMenu === "settings" ? (
+                    <IoIosArrowUp size={16} style={{ marginLeft: "auto" }} />
+                  ) : (
+                    <IoIosArrowDown size={16} style={{ marginLeft: "auto" }} />
+                  )}
                 </a>
-                <div className="collapse menu-dropdown" id="websiteSettings">
+                <div
+                  className={`collapse menu-dropdown ${
+                    activeMenu === "settings" ? "show" : ""
+                  }`}
+                  id="websiteSettings"
+                  style={{ transition: "all 0.3s ease" }}
+                >
                   <ul className="nav nav-sm flex-column">
                     <li className="nav-item">
                       <Link
                         to="/settings/banners"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/settings/banners"
+                            ? "active"
+                            : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
-                        Banners
+                        BANNERS
                       </Link>
                     </li>
-                    {/*
-                                        <li className="nav-item">
-                                            <Link to="/settings/testimonial" className="nav-link" data-key="t-cover"> Testimonial
-                                            </Link>
-                                        </li> */}
                     <li className="nav-item">
                       <Link
                         to="/company"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/company" ? "active" : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
-                        Company Info
+                        COMPANY INFO
                       </Link>
                     </li>
                     <li className="nav-item">
                       <Link
                         to="/employee"
-                        className="nav-link"
+                        className={`nav-link ${
+                          location.pathname === "/employee" ? "active" : ""
+                        }`}
                         data-key="t-cover"
                       >
-                        {" "}
-                        Employee
+                        EMPLOYEE
                       </Link>
                     </li>
                   </ul>
@@ -326,48 +467,48 @@ const Sidebar = () => {
               </li>
 
               <li className="menu-title">
-                <i className="ri-more-fill" />{" "}
-                <span data-key="t-pages">Online </span>
+                <i className="ri-more-fill" />
+                <span data-key="t-pages">ONLINE</span>
               </li>
               <li className="nav-item">
                 <a
-                  className="nav-link menu-link"
+                  className={`nav-link menu-link ${
+                    activeMenu === "online" ? "active" : ""
+                  }`}
                   href="#onlineSettings"
-                  data-bs-toggle="collapse"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleMenuClick("online");
+                  }}
                   role="button"
-                  aria-expanded="false"
+                  aria-expanded={activeMenu === "online"}
                   aria-controls="onlineSettings"
+                  style={{ transition: "all 0.3s ease" }}
                 >
-                  <AiFillSetting size={24} style={{ fill: "#e9e9e9" }} />{" "}
-                  <span data-key="t-authentication">Online Store</span>
+                  <AiFillSetting size={24} style={{ fill: "#e9e9e9" }} />
+                  <span data-key="t-authentication">ONLINE STORE</span>
+                  {activeMenu === "online" ? (
+                    <IoIosArrowUp size={16} style={{ marginLeft: "auto" }} />
+                  ) : (
+                    <IoIosArrowDown size={16} style={{ marginLeft: "auto" }} />
+                  )}
                 </a>
-                <div className="collapse menu-dropdown" id="onlineSettings">
+                <div
+                  className={`collapse menu-dropdown ${
+                    activeMenu === "online" ? "show" : ""
+                  }`}
+                  id="onlineSettings"
+                  style={{ transition: "all 0.3s ease" }}
+                >
                   <ul className="nav nav-sm flex-column">
                     <li className="nav-item">
-                      <Link to="/online/order" className="nav-link">
-                        {" "}
-                        Online Order{" "}
-                      </Link>
-                    </li>
-
-                    <li className="nav-item">
                       <Link
-                        to="/company"
-                        className="nav-link"
-                        data-key="t-cover"
+                        to="/online/order"
+                        className={`nav-link ${
+                          location.pathname === "/online/order" ? "active" : ""
+                        }`}
                       >
-                        {" "}
-                        Delivery Setting
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link
-                        to="/employee"
-                        className="nav-link"
-                        data-key="t-cover"
-                      >
-                        {" "}
-                        Website / App Setting
+                        ONLINE ORDER
                       </Link>
                     </li>
                   </ul>
