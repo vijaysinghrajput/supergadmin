@@ -11,7 +11,7 @@ import { UpdateCustomer } from "./Update/UpdateCustomer";
 
 import SweetAlert from "react-bootstrap-sweetalert";
 
-import { CustomerDataTable } from "./component/CustomerDataTable";
+import CustomerDataTable from "./component/CustomerDataTable";
 
 // import "bootstrap/dist/css/bootstrap.css";
 import { Col, Row, Table } from "react-bootstrap";

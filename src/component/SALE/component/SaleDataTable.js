@@ -3,17 +3,18 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
-import { Calendar } from "primereact/calendar";
-import { BiSearch } from "react-icons/bi";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { BiSearch, BiCalendar } from "react-icons/bi";
 import { useQuery } from "react-query";
 import Cookies from "universal-cookie";
 import InputGroup from "react-bootstrap/InputGroup";
 import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import Badge from "react-bootstrap/Badge";
 
 import { ActionForSaleList } from "./ActionForSaleList";
 import URLDomain from "../../../URL";
-import { queryClient } from "../../../App";
-
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 
 const cookies = new Cookies();
@@ -21,12 +22,16 @@ const cookies = new Cookies();
 const SaleDataTable = () => {
   const adminStoreId = cookies.get("adminStoreId");
   const [selectedFilter, setSelectedFilter] = useState("today");
-  const [customDateRange, setCustomDateRange] = useState([null, null]);
+  const [customStartDate, setCustomStartDate] = useState("");
+  const [customEndDate, setCustomEndDate] = useState("");
   const [globalFilterValue, setGlobalFilterValue] = useState("");
+  const [dateError, setDateError] = useState("");
 
   useEffect(() => {
-    console.log("Admin Store ID:", adminStoreId);
-  }, [adminStoreId]);
+    if (selectedFilter !== "custom") {
+      setDateError("");
+    }
+  }, [selectedFilter]);
 
   const filterOptions = [
     { label: "Today", value: "today" },
@@ -37,13 +42,39 @@ const SaleDataTable = () => {
     { label: "Custom Date", value: "custom" },
   ];
 
-  const formatDate = (dateObj) => {
-    if (!dateObj) return null;
-    const d = new Date(dateObj);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
+  const formatCurrency = (value) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
+
+  // Fixed date formatting to handle server format
+  const formatDateForDisplay = (dateStr) => {
+    if (!dateStr) return "";
+
+    // Check if date is in "DD-MM-YYYY" format
+    if (dateStr.includes("-") && dateStr.split("-")[0].length === 2) {
+      const [day, month, year] = dateStr.split("-");
+      return `${day}-${month}-${year}`;
+    }
+
+    // Handle other formats using Date object
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date)) return dateStr;
+
+      return date
+        .toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        })
+        .replace(/\//g, "-");
+    } catch (e) {
+      return dateStr;
+    }
   };
 
   const fetchSaleData = async () => {
@@ -52,23 +83,21 @@ const SaleDataTable = () => {
       filterType: selectedFilter,
     };
 
-    if (
-      selectedFilter === "custom" &&
-      customDateRange[0] &&
-      customDateRange[1]
-    ) {
-      body.customStartDate = formatDate(customDateRange[0]);
-      body.customEndDate = formatDate(customDateRange[1]);
-    }
+    if (selectedFilter === "custom") {
+      if (!customStartDate || !customEndDate) {
+        setDateError("Please select both dates");
+        return { store_customer_purchase_record: [] };
+      }
 
-    console.log("Sending Request Body:", body);
+      // Format dates for server (YYYY-MM-DD to DD-MM-YYYY)
+      body.customStartDate = customStartDate.split("-").reverse().join("-");
+      body.customEndDate = customEndDate.split("-").reverse().join("-");
+      setDateError("");
+    }
 
     const res = await fetch(URLDomain + "/APP-API/Billing/sale_history", {
       method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
 
@@ -76,15 +105,21 @@ const SaleDataTable = () => {
   };
 
   const { data, isLoading, refetch, isFetching } = useQuery(
-    ["offline_sale_history", selectedFilter, customDateRange],
-    fetchSaleData
+    ["offline_sale_history", selectedFilter, customStartDate, customEndDate],
+    fetchSaleData,
+    {
+      keepPreviousData: true,
+      refetchOnWindowFocus: false,
+    }
   );
 
   const saleData = data?.store_customer_purchase_record || [];
-  const msgHeading = data?.msg_heading || "";
+  const totalSalesCount = data?.total_sales || 0;
+  const totalSalesValue = data?.total_sales_value || 0;
+  const summaryMessage = data?.msg_heading || "";
 
   const getSeverity = (status) => {
-    const map = {
+    const statusMap = {
       Placed: "dark",
       Confirmed: "success",
       "Preparing for dispatch": "warning",
@@ -93,118 +128,260 @@ const SaleDataTable = () => {
       Canceled: "danger",
       Sold: "success",
     };
-    return map[status] || null;
+    return statusMap[status] || null;
   };
 
   const statusBodyTemplate = (rowData) => (
     <Tag
       value={rowData.order_status}
       severity={getSeverity(rowData.order_status)}
+      className="p-tag-rounded"
     />
+  );
+
+  const paymentBodyTemplate = (rowData) => (
+    <span className="font-semibold">
+      {formatCurrency(rowData.total_payment)}
+    </span>
+  );
+
+  const dateBodyTemplate = (rowData) => (
+    <div className="d-flex flex-column">
+      <span className="text-nowrap">{formatDateForDisplay(rowData.date)}</span>
+      {rowData.time && <small className="text-muted">{rowData.time}</small>}
+    </div>
   );
 
   const actionBodyTemplate = (rowData) => <ActionForSaleList id={rowData} />;
 
-  const onGlobalFilterChange = (e) => {
-    setGlobalFilterValue(e.target.value);
+  const handleFilterChange = (value) => {
+    setSelectedFilter(value);
+    if (value !== "custom") {
+      setCustomStartDate("");
+      setCustomEndDate("");
+      refetch();
+    }
+  };
+
+  const handleApplyCustomDate = () => {
+    if (!customStartDate || !customEndDate) {
+      setDateError("Please select both dates");
+      return;
+    }
+
+    if (new Date(customStartDate) > new Date(customEndDate)) {
+      setDateError("End date cannot be before start date");
+      return;
+    }
+
+    refetch();
   };
 
   const renderHeader = useMemo(
     () => (
-      <div className="row align-items-center">
-        <div className="col-sm-3">
-          <InputGroup className="mb-3">
-            <InputGroup.Text>
-              <BiSearch />
-            </InputGroup.Text>
-            <Form.Control
-              placeholder="Search"
-              value={globalFilterValue}
-              onChange={onGlobalFilterChange}
-            />
-          </InputGroup>
-        </div>
+      <div className="d-flex flex-column flex-md-row gap-3 align-items-start align-items-md-center mb-3">
+        <InputGroup className="flex-grow-1">
+          <InputGroup.Text>
+            <BiSearch />
+          </InputGroup.Text>
+          <Form.Control
+            placeholder="Search orders..."
+            value={globalFilterValue}
+            onChange={(e) => setGlobalFilterValue(e.target.value)}
+            aria-label="Search orders"
+          />
+        </InputGroup>
 
-        <div className="col-sm-3">
+        <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2 w-100 w-md-auto">
           <Dropdown
             value={selectedFilter}
             options={filterOptions}
-            onChange={(e) => {
-              setSelectedFilter(e.value);
-              if (e.value !== "custom") refetch();
-            }}
+            onChange={(e) => handleFilterChange(e.value)}
             placeholder="Select Filter"
-            className="w-full"
+            className="w-100 w-md-auto"
           />
-        </div>
 
-        {selectedFilter === "custom" && (
-          <div className="col-sm-4">
-            <Calendar
-              selectionMode="range"
-              value={customDateRange}
-              onChange={(e) => setCustomDateRange(e.value)}
-              readOnlyInput
-              maxDate={new Date()}
-              placeholder="Pick Date Range"
-            />
-            <button className="btn btn-primary mt-2" onClick={() => refetch()}>
-              Apply
-            </button>
-          </div>
-        )}
+          {selectedFilter === "custom" && (
+            <div className="d-flex flex-column w-100">
+              <div className="d-flex flex-column flex-sm-row gap-2 w-100">
+                <div className="position-relative flex-grow-1">
+                  <Form.Control
+                    type="date"
+                    value={customStartDate}
+                    onChange={(e) => setCustomStartDate(e.target.value)}
+                    max={new Date().toISOString().split("T")[0]}
+                    className="pe-4"
+                  />
+                  <BiCalendar className="position-absolute top-50 end-0 translate-middle-y me-2 text-muted" />
+                </div>
+
+                <div className="position-relative flex-grow-1">
+                  <Form.Control
+                    type="date"
+                    value={customEndDate}
+                    onChange={(e) => setCustomEndDate(e.target.value)}
+                    max={new Date().toISOString().split("T")[0]}
+                    min={customStartDate}
+                    className="pe-4"
+                  />
+                  <BiCalendar className="position-absolute top-50 end-0 translate-middle-y me-2 text-muted" />
+                </div>
+
+                <Button
+                  variant="primary"
+                  onClick={handleApplyCustomDate}
+                  disabled={isFetching}
+                  className="d-flex align-items-center"
+                >
+                  {isFetching ? (
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                    />
+                  ) : null}
+                  Apply
+                </Button>
+              </div>
+
+              {dateError && (
+                <div className="text-danger small mt-1">{dateError}</div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     ),
-    [globalFilterValue, selectedFilter, customDateRange]
+    [
+      globalFilterValue,
+      selectedFilter,
+      customStartDate,
+      customEndDate,
+      dateError,
+      isFetching,
+    ]
   );
 
-  return (
-    <div className="card">
-      <div className="row">
-        <div className="col-sm-12">
-          <p>{msgHeading}</p>
-        </div>
+  if (isLoading) {
+    return (
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ height: "300px" }}
+      >
+        <ProgressSpinner />
       </div>
+    );
+  }
 
-      {isLoading ? (
-        "Loading..."
-      ) : (
-        <DataTable
-          value={saleData}
-          paginator
-          rows={10}
-          header={renderHeader}
-          emptyMessage="No Sale found."
-          tableStyle={{ minWidth: "50rem" }}
-          loading={isFetching}
-          globalFilterFields={[
-            "customer_mobile",
-            "order_id",
-            "plateform",
-            "total_payment",
-            "order_status",
-            "date",
-          ]}
-          filters={{
-            global: { value: globalFilterValue, matchMode: "contains" },
-          }}
-        >
-          <Column field="customer_mobile" header="Mobile" sortable />
-          <Column field="order_id" header="Order No" sortable />
-          <Column field="plateform" header="Platform" sortable />
-          <Column field="total_payment" header="Payment" sortable />
-          <Column field="date" header="Date" sortable />
-          <Column
-            field="order_status"
-            header="Status"
-            body={statusBodyTemplate}
-          />
-          <Column header="Action" body={actionBodyTemplate} />
-        </DataTable>
-      )}
+  return (
+    <div className="d-flex flex-column gap-3">
+      <Card className="border-0 shadow-sm">
+        <Card.Body className="py-3">
+          <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+              <h5 className="mb-1">Sales Summary</h5>
+              <p className="mb-0 text-muted small">{summaryMessage}</p>
+            </div>
+
+            <div className="d-flex gap-4">
+              <div className="text-center">
+                <div className="text-muted small">Total Orders</div>
+                <div className="h4 mb-0 fw-bold">{totalSalesCount}</div>
+              </div>
+
+              <div className="text-center">
+                <div className="text-muted small">Total Value</div>
+                <div className="h4 mb-0 fw-bold text-success">
+                  {formatCurrency(totalSalesValue)}
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card.Body>
+      </Card>
+
+      <Card className="border-0 shadow-sm">
+        <Card.Body>
+          {renderHeader}
+
+          <DataTable
+            value={saleData}
+            paginator
+            rows={10}
+            rowsPerPageOptions={[5, 10, 20]}
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
+            emptyMessage={
+              <div className="text-center py-4">
+                <BiSearch size={24} className="mb-2" />
+                <p className="mb-1">No sales records found</p>
+                <small className="text-muted">Try changing your filters</small>
+              </div>
+            }
+            loading={isFetching}
+            loadingTemplate={<ProgressSpinner />}
+            tableStyle={{ minWidth: "50rem" }}
+            globalFilter={globalFilterValue}
+            globalFilterFields={[
+              "customer_mobile",
+              "order_id",
+              "plateform",
+              "total_payment",
+              "order_status",
+              "date",
+            ]}
+            size="small"
+            responsiveLayout="stack"
+          >
+            <Column
+              field="customer_mobile"
+              header="Mobile"
+              sortable
+              style={{ minWidth: "100px" }}
+            />
+            <Column
+              field="order_id"
+              header="Order ID"
+              sortable
+              style={{ minWidth: "120px" }}
+            />
+            <Column
+              field="plateform"
+              header="Platform"
+              sortable
+              style={{ minWidth: "100px" }}
+            />
+            <Column
+              field="total_payment"
+              header="Payment"
+              body={paymentBodyTemplate}
+              sortable
+              style={{ minWidth: "120px" }}
+              align="right"
+            />
+            <Column
+              field="date"
+              header="Date"
+              body={dateBodyTemplate}
+              sortable
+              style={{ minWidth: "130px" }}
+            />
+            <Column
+              field="order_status"
+              header="Status"
+              body={statusBodyTemplate}
+              className="text-center"
+              style={{ minWidth: "150px" }}
+            />
+            <Column
+              header="Actions"
+              body={actionBodyTemplate}
+              className="text-center"
+              style={{ minWidth: "100px" }}
+            />
+          </DataTable>
+        </Card.Body>
+      </Card>
     </div>
   );
 };
 
 export default React.memo(SaleDataTable);
-SaleDataTable.displayName = "SaleDataTable";
