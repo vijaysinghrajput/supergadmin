@@ -1,5 +1,5 @@
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
 import { ImBook } from "react-icons/im";
 import { AiFillDashboard } from "react-icons/ai";
 import { AiFillSetting } from "react-icons/ai";
@@ -11,13 +11,13 @@ import { BsFillRecordCircleFill } from "react-icons/bs";
 import { RiUserSettingsFill } from "react-icons/ri";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 
-const Sidebar = () => {
+const Sidebar = React.memo(() => {
   const navigate = useNavigate();
   const location = useLocation();
   const [activeMenu, setActiveMenu] = useState("");
 
-  // Add CSS for smooth transitions
-  const sidebarStyles = `
+  // Memoize CSS styles to prevent recreation on every render
+  const sidebarStyles = useMemo(() => `
     .nav-link.menu-link {
       display: flex;
       align-items: center;
@@ -54,41 +54,46 @@ const Sidebar = () => {
       background-color: rgba(255, 255, 255, 0.2);
       border-radius: 4px;
     }
-  `;
+  `, []);
 
-  // Set active menu based on current route
-  useEffect(() => {
+  // Memoize active menu determination logic
+  const currentActiveMenu = useMemo(() => {
     const path = location.pathname;
     if (path.includes("/dashboard") || path.includes("/stock-dashboard")) {
-      setActiveMenu("dashboard");
+      return "dashboard";
     } else if (
       path.includes("/billing/sale") ||
       path.includes("/salesManagement")
     ) {
-      setActiveMenu("sales");
+      return "sales";
     } else if (
       path.includes("/billing/purchased") ||
       path.includes("/purchaseManagement")
     ) {
-      setActiveMenu("purchase");
+      return "purchase";
     } else if (path.includes("/productManagement")) {
-      setActiveMenu("product");
+      return "product";
     } else if (
       path.includes("/settings") ||
       path.includes("/company") ||
       path.includes("/employee")
     ) {
-      setActiveMenu("settings");
+      return "settings";
     } else if (path.includes("/online")) {
-      setActiveMenu("online");
-    } else {
-      setActiveMenu("");
+      return "online";
     }
+    return "";
   }, [location.pathname]);
 
-  const handleMenuClick = (menuName) => {
-    setActiveMenu(activeMenu === menuName ? "" : menuName);
-  };
+  // Set active menu based on current route
+  useEffect(() => {
+    setActiveMenu(currentActiveMenu);
+  }, [currentActiveMenu]);
+
+  // Memoize menu click handler to prevent recreation
+  const handleMenuClick = useCallback((menuName) => {
+    setActiveMenu(prev => prev === menuName ? "" : menuName);
+  }, []);
   return (
     <>
       <style>{sidebarStyles}</style>
@@ -521,6 +526,8 @@ const Sidebar = () => {
       </div>
     </>
   );
-};
+});
+
+Sidebar.displayName = 'Sidebar';
 
 export default Sidebar;

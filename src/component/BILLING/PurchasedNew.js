@@ -1,7 +1,7 @@
+import React, { useContext, useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { BiRupee, BiBarcodeReader } from "react-icons/bi";
 import { FcCalendar } from "react-icons/fc";
 import { AiOutlineDelete } from "react-icons/ai";
-import { useContext, useEffect, useRef, useState } from "react";
 import ContextData from "../../context/MainContext";
 import Multiselect from "multiselect-react-dropdown";
 import DatePicker from "react-datepicker";
@@ -12,7 +12,7 @@ import { Box, Checkbox, Flex, useToast } from "@chakra-ui/react";
 import "react-datepicker/dist/react-datepicker.css";
 import URLDomain from "../../URL";
 
-export const Purchased = () => {
+export const Purchased = React.memo(() => {
   const getAllVendorsRef = useRef(null);
   const { store_vendor_list, storeProductsData, store_login_user, reloadData } =
     useContext(ContextData);
@@ -61,141 +61,165 @@ export const Purchased = () => {
     setVendorLists(store_vendor_list);
   }, [store_vendor_list]);
 
-  useEffect(() => {
-    const subTotalGet = addedItems.reduce((acc, obj) => {
-      return (
-        acc +
-        Number(
-          Number(obj?.purchase_price || 0) * Number(obj?.billing_quantity || 0)
-        )
-      );
-    }, 0);
-    const discount = addedItems.reduce((acc, obj) => {
-      return (
-        acc +
-        Number(
-          Number(obj?.discount_in_rs || 0) * Number(obj?.billing_quantity || 0)
-        )
-      );
-    }, 0);
-    const sGstTotal = addedItems.reduce((acc, obj) => {
-      return acc + Number(obj?.s_gst || 0) * Number(obj?.billing_quantity || 0);
-    }, 0);
-    const cGstTotal = addedItems.reduce((acc, obj) => {
-      return acc + Number(obj?.c_gst || 0) * Number(obj?.billing_quantity || 0);
-    }, 0);
-    const subTotal = subTotalGet - (sGstTotal + cGstTotal);
-    const grandTotal = subTotal + sGstTotal + cGstTotal;
-    setAllTotals({
-      ...allTotals,
-      discount,
+  // Optimized calculation using useMemo to prevent unnecessary recalculations
+  const calculatedTotals = useMemo(() => {
+    if (!addedItems.length) {
+      return {
+        subTotal: 0,
+        sGstTotal: 0,
+        cGstTotal: 0,
+        discount: 0,
+        grandTotal: 0
+      };
+    }
+
+    // Single pass through addedItems for all calculations
+    const totals = addedItems.reduce((acc, obj) => {
+      const quantity = Number(obj?.billing_quantity || 0);
+      const price = Number(obj?.purchase_price || 0);
+      const discountPerItem = Number(obj?.discount_in_rs || 0);
+      const sGst = Number(obj?.s_gst || 0);
+      const cGst = Number(obj?.c_gst || 0);
+
+      return {
+        subTotalGet: acc.subTotalGet + (price * quantity),
+        discount: acc.discount + (discountPerItem * quantity),
+        sGstTotal: acc.sGstTotal + (sGst * quantity),
+        cGstTotal: acc.cGstTotal + (cGst * quantity)
+      };
+    }, { subTotalGet: 0, discount: 0, sGstTotal: 0, cGstTotal: 0 });
+
+    const subTotal = totals.subTotalGet - (totals.sGstTotal + totals.cGstTotal);
+    const grandTotal = subTotal + totals.sGstTotal + totals.cGstTotal;
+
+    return {
       subTotal,
-      sGstTotal,
-      cGstTotal,
-      grandTotal,
-    });
-    console.log("hey there ----->", discount);
+      sGstTotal: totals.sGstTotal,
+      cGstTotal: totals.cGstTotal,
+      discount: totals.discount,
+      grandTotal
+    };
   }, [addedItems]);
 
+  // Update allTotals when calculated values change
   useEffect(() => {
-    const { subTotal, sGstTotal, cGstTotal, discount, additional_charges } =
-      allTotals;
-    const Total =
-      subTotal + sGstTotal + cGstTotal + Number(additional_charges || 0);
-    const discountedPrice = Number(Total || 0) - Number(discount || 0);
-    setAllTotals({
-      ...allTotals,
-      grandTotal: discountedPrice,
-    });
-    console.log("hey there 2 ----->", discount);
-  }, [allTotals.discount]);
+    setAllTotals(prev => ({
+      ...prev,
+      ...calculatedTotals
+    }));
+  }, [calculatedTotals]);
 
+  // Optimized final calculations using useMemo
+  const finalTotals = useMemo(() => {
+    const { subTotal, sGstTotal, cGstTotal, discount, additional_charges, amount_paid, fully_paid } = allTotals;
+    
+    // Calculate grand total with discount and additional charges
+    const baseTotal = subTotal + sGstTotal + cGstTotal;
+    const totalWithCharges = baseTotal + Number(additional_charges || 0);
+    const grandTotal = totalWithCharges - Number(discount || 0);
+    
+    // Calculate outstanding amount
+    const outstanding = fully_paid ? 0 : grandTotal - Number(amount_paid || 0);
+    
+    return {
+      grandTotal,
+      outstanding
+    };
+  }, [allTotals.subTotal, allTotals.sGstTotal, allTotals.cGstTotal, allTotals.discount, allTotals.additional_charges, allTotals.amount_paid, allTotals.fully_paid]);
+
+  // Update final totals when they change
   useEffect(() => {
-    const { subTotal, sGstTotal, cGstTotal, discount, additional_charges } =
-      allTotals;
-    const Total = subTotal + sGstTotal + cGstTotal - Number(discount || 0);
-    const AdditionalChargesTotal =
-      Number(Total || 0) + Number(additional_charges || 0);
-    setAllTotals({
-      ...allTotals,
-      grandTotal: AdditionalChargesTotal,
-    });
-  }, [allTotals.additional_charges]);
+    setAllTotals(prev => ({
+      ...prev,
+      ...finalTotals
+    }));
+  }, [finalTotals]);
 
-  useEffect(() => {
-    const { grandTotal, amount_paid } = allTotals;
-    const Total = Number(grandTotal || 0);
-    const outstanding = Total - Number(amount_paid || 0);
-    setAllTotals({
-      ...allTotals,
-      outstanding: outstanding,
-    });
-  }, [allTotals.amount_paid]);
-
-  useEffect(() => {
-    const { fully_paid } = allTotals;
-    console.log(" is working ---??", fully_paid);
-    fully_paid &&
-      setAllTotals({
-        ...allTotals,
-        outstanding: 0,
-      });
-  }, [allTotals.fully_paid]);
-
-  const handleOnSelect = (item) => {
-    console.log("lolipop ---->", item);
+  const handleOnSelect = useCallback((item) => {
     const allReadyExist = addedItems.some(
       (elem) => elem.product_full_name === item.product_full_name
     );
-    !allReadyExist && setAddedItems([...addedItems, item]);
-    /*  setTimeout(() => {
-             document.getElementsByClassName("clear-icon")[0].querySelector(':scope > svg')[0].click();
-         }, 1000) */ //1 second delay
-  };
+    if (!allReadyExist) {
+      setAddedItems(prev => [...prev, item]);
+    }
+  }, [addedItems]);
 
-  const updateFieldChanged = (index) => (e) => {
-    // console.log('index: ' + index);
-    // console.log('property name: ' + e.target.name);
-    let newArr = [...addedItems];
-    e.target.name === "quantity" &&
-      (newArr[index].billing_quantity = e.target.value);
-    e.target.name === "purchase_price" &&
-      (newArr[index].purchase_price = e.target.value);
-    e.target.name === "discount" &&
-      (newArr[index].discount_in_rs = e.target.value);
-    newArr[index].amount_total =
-      Number(newArr[index].billing_quantity) *
-        Number(newArr[index].purchase_price) -
-      Number(newArr[index].billing_quantity) *
-        Number(newArr[index].discount_in_rs);
-    // console.log("new arrya --->", newArr);
-    newArr = newArr.filter((item) => item);
-    setAddedItems(newArr);
-  };
+  const updateFieldChanged = useCallback((index) => (e) => {
+    const { name, value } = e.target;
+    
+    setAddedItems(prev => {
+      const newArr = [...prev];
+      const item = { ...newArr[index] };
+      
+      switch (name) {
+        case "quantity":
+          item.billing_quantity = value;
+          break;
+        case "purchase_price":
+          item.purchase_price = value;
+          break;
+        case "discount":
+          item.discount_in_rs = value;
+          break;
+      }
+      
+      // Recalculate amount_total
+      item.amount_total =
+        Number(item.billing_quantity || 0) *
+        Number(item.purchase_price || 0) -
+        Number(item.billing_quantity || 0) *
+        Number(item.discount_in_rs || 0);
+      
+      newArr[index] = item;
+      return newArr.filter(Boolean);
+    });
+  }, []);
 
-  const changeGst = (index) => (e) => {
-    let newArr = [...addedItems];
-    e.target.name === "s_gst" && (newArr[index].s_gst = e.target.value);
-    e.target.name === "s_gst" && (newArr[index].c_gst = e.target.value);
-    e.target.name === "hsnCode" && (newArr[index].hsn_code = e.target.value);
-    e.target.name === "mrp" && (newArr[index].mrp = e.target.value);
-    // newArr[index].amount_total = Number(newArr[index].billing_quantity) * Number(newArr[index].purchase_price);
-    console.log("new arrya --->", newArr);
-    newArr = newArr.filter((item) => item);
-    setAddedItems(newArr);
-  };
+  const changeGst = useCallback((index) => (e) => {
+    const { name, value } = e.target;
+    
+    setAddedItems(prev => {
+      const newArr = [...prev];
+      const item = { ...newArr[index] };
+      
+      switch (name) {
+        case "s_gst":
+          item.s_gst = value;
+          item.c_gst = value; // Both s_gst and c_gst are set to same value
+          break;
+        case "hsnCode":
+          item.hsn_code = value;
+          break;
+        case "mrp":
+          item.mrp = value;
+          break;
+      }
+      
+      newArr[index] = item;
+      return newArr.filter(Boolean);
+    });
+  }, []);
 
-  const deleteFeild = (index) => {
-    let newArr = [...addedItems];
-    delete newArr[index];
-    newArr = newArr.filter((item) => item);
-    setAddedItems(newArr);
-  };
+  const deleteFeild = useCallback((index) => {
+    setAddedItems(prev => {
+      const newArr = [...prev];
+      newArr.splice(index, 1);
+      return newArr;
+    });
+  }, []);
 
-  const submitPurchase = (adminId) => {
-    console.log("product_list_in_purchse", selectedVendor.firm_name);
+  const submitPurchase = useCallback(async (adminId) => {
+    if (!addedItems.length) {
+      toast({
+        title: "Please add products",
+        status: "warning",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
 
-    const data = JSON.stringify({
+    const requestData = {
       store_id: store_login_user.store_id,
       vendor_id: selectedVendor.id,
       vendor_firm_name: selectedVendor.firm_name,
@@ -215,56 +239,52 @@ export const Purchased = () => {
       payment_mode: restInfo.payment_mode,
       purchaes_date: PurchaseDate.toLocaleDateString(),
       product_list: addedItems,
-    });
+    };
 
-    console.log(" all data from data ---->", allTotals);
-    console.log(" all data from data ---->", JSON.parse(data));
-
-    if (addedItems.length) {
-      fetch(URLDomain + "/APP-API/Billing/purchaseStoreProducts", {
+    try {
+      const response = await fetch(URLDomain + "/APP-API/Billing/purchaseStoreProducts", {
         method: "POST",
-        header: {
+        headers: {
           Accept: "application/json",
-          "Content-type": "application/json",
+          "Content-Type": "application/json",
         },
-        body: data,
-      })
-        .then((response) => response.json())
-        .then((responseJson) => {
-          console.log(" purchase server res ---->", responseJson);
-          if (responseJson.purchase_insert) {
-            reloadData();
-            setAddedItems([]);
-            toast({
-              title: "Purchase Inserted",
-              // description: "We've created your account for you.",
-              status: "success",
-              duration: 4000,
-              isClosable: true,
-            });
-          } else {
-            toast({
-              title: "Purchase Not Inserted",
-              // description: "We've created your account for you.",
-              status: "error",
-              duration: 4000,
-              isClosable: true,
-            });
-          }
-        })
-        .catch((error) => {
-          console.error(error);
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseJson = await response.json();
+      
+      if (responseJson.purchase_insert) {
+        reloadData();
+        setAddedItems([]);
+        toast({
+          title: "Purchase Inserted Successfully",
+          status: "success",
+          duration: 4000,
+          isClosable: true,
         });
-    } else {
+      } else {
+        toast({
+          title: "Purchase Not Inserted",
+          status: "error",
+          duration: 4000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      console.error("Purchase submission error:", error);
       toast({
-        title: "Please add products",
-        // description: "We've created your account for you.",
-        status: "warning",
+        title: "Error submitting purchase",
+        description: error.message,
+        status: "error",
         duration: 4000,
         isClosable: true,
       });
     }
-  };
+  }, [addedItems, selectedVendor, restInfo, allTotals, PurchaseDate, store_login_user, reloadData, toast]);
 
   return (
     <>
@@ -988,4 +1008,6 @@ export const Purchased = () => {
       </div>
     </>
   );
-};
+});
+
+Purchased.displayName = 'Purchased';

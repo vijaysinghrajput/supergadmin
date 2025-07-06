@@ -1,81 +1,51 @@
-import React from "react";
+import React, { Suspense, lazy, useContext, useMemo } from "react";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
-
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-  QueryClient,
-  QueryClientProvider,
-} from "react-query";
-
-import HomePage from "./page/HomePage";
-import StockDashPage from "./page/StockDashPage";
-
-import MainContainer from "./component/Shared/MainContainer";
-// import CustomerDetails from './component/Employee/CustomerDetails';
-// import EditCustomer from './component/Employee/EditCustomer';
-import LoginPage from "./page/LoginPage";
-// import AllLeads from './component/Leads/AllLeads';
-// import ContextProvider from './context/contextProvider';
-import Partner from "./component/Partner/Partner";
-import PartnerEdit from "./component/Partner/PartnerEdit";
+import { QueryClient, QueryClientProvider } from "react-query";
 import { ChakraProvider } from "@chakra-ui/react";
-// import Roles from './component/Settings/Master/Roles';
-// import Sallery from './component/Employee/Sallary';
-// import BuyLeads from './component/Leads/BuyLeads';
-// import ManageLeads from './component/Leads/ManageLeads';
-// import AddPlots from './component/Plot/AddPlots';
-import BannerSettings from "./component/Settings/Website/Banner";
-// import TestimonialSettings from './component/Settings/Website/Testimonial/Testimonial';
-
-import PurchaseIndex from "./component/PURCHASE/purchase-index";
-import ExpairyManagement from "./component/PURCHASE/expairy-management";
-
-import VendorManagement from "./component/PURCHASE/vendor-management";
-import ExpensesManagement from "./component/PURCHASE/expenses-management";
-
-import DeliveryManagment from "./component/Delivery/delivery-managment";
-import DeliveryBoyManagment from "./component/Delivery/delivery-boy";
-
-import CouponManagment from "./component/Delivery/coupon-managment";
-
-import SaleIndex from "./component/SALE/sale-index";
-import CustomerManagement from "./component/SALE/customer-management";
-
-import PurchaseHistory from "./component/PURCHASE/purchase-history";
-import PurchaseHistoryRecord from "./component/PURCHASE/purchase-history-record";
-import ExpiryHistoryRecord from "./component/PURCHASE/expiry-history-record";
-
-import OnlineSale from "./component/online/online-sale";
-import OnlineSalesHistoryRecord from "./component/online/online-sales-history-record";
-
-import SalesHistory from "./component/SALE/sale-history";
-import SalesHistoryRecord from "./component/SALE/sales-history-record";
-
-import ProductIndex from "./component/PRODUCT/product-index";
-import ProductManagement from "./component/PRODUCT/product-management";
-import ProductByCategory from "./component/PRODUCT/product-by-category";
-import ProductByParentCategory from "./component/PRODUCT/product-by-parent-category";
-import ProductByBrand from "./component/PRODUCT/product-by-brand";
-
-import CategoryManagement from "./component/PRODUCT/category-management";
-import BrandManagement from "./component/PRODUCT/brand-management";
-import Stocks from "./component/STOCK/Stocks";
-import { Purchased } from "./component/BILLING/Purchased";
-import { Sale } from "./component/BILLING/Sale";
-import LowStock from "./component/STOCK/low-stocks";
-import StocksHistory from "./component/STOCK/product-stocks-history";
-
-import Employee from "./component/Employee/Employee";
-
-import { useContext } from "react";
-import ContextData from "./context/MainContext";
-import Loading from "./component/Shared/Loading";
-import Cookies from "universal-cookie";
 import { PrimeReactProvider } from "primereact/api";
-import SaleDashboard from "./component/Dashboard/SaleDashboard";
-import AnalyticsDashboard from "./component/Dashboard/AnalyticsDashboard";
+import Cookies from "universal-cookie";
+
+import ContextData from "./context/MainContext";
+import MainContainer from "./component/Shared/MainContainer";
+import Loading from "./component/Shared/Loading";
+
+// Lazy load components for better performance
+const HomePage = lazy(() => import("./page/HomePage"));
+const StockDashPage = lazy(() => import("./page/StockDashPage"));
+const LoginPage = lazy(() => import("./page/LoginPage"));
+const Partner = lazy(() => import("./component/Partner/Partner"));
+const PartnerEdit = lazy(() => import("./component/Partner/PartnerEdit"));
+const BannerSettings = lazy(() => import("./component/Settings/Website/Banner"));
+const PurchaseIndex = lazy(() => import("./component/PURCHASE/purchase-index"));
+const ExpairyManagement = lazy(() => import("./component/PURCHASE/expairy-management"));
+const VendorManagement = lazy(() => import("./component/PURCHASE/vendor-management"));
+const ExpensesManagement = lazy(() => import("./component/PURCHASE/expenses-management"));
+const SaleIndex = lazy(() => import("./component/SALE/sale-index"));
+const CustomerManagement = lazy(() => import("./component/SALE/customer-management"));
+const PurchaseHistory = lazy(() => import("./component/PURCHASE/purchase-history"));
+const PurchaseHistoryRecord = lazy(() => import("./component/PURCHASE/purchase-history-record"));
+const ExpiryHistoryRecord = lazy(() => import("./component/PURCHASE/expiry-history-record"));
+const OnlineSale = lazy(() => import("./component/online/online-sale"));
+const OnlineSalesHistoryRecord = lazy(() => import("./component/online/online-sales-history-record"));
+const SalesHistory = lazy(() => import("./component/SALE/sale-history"));
+const SalesHistoryRecord = lazy(() => import("./component/SALE/sales-history-record"));
+const ProductIndex = lazy(() => import("./component/PRODUCT/product-index"));
+const ProductManagement = lazy(() => import("./component/PRODUCT/product-management"));
+const ProductByCategory = lazy(() => import("./component/PRODUCT/product-by-category"));
+const ProductByParentCategory = lazy(() => import("./component/PRODUCT/product-by-parent-category"));
+const ProductByBrand = lazy(() => import("./component/PRODUCT/product-by-brand"));
+const CategoryManagement = lazy(() => import("./component/PRODUCT/category-management"));
+const BrandManagement = lazy(() => import("./component/PRODUCT/brand-management"));
+const Stocks = lazy(() => import("./component/STOCK/Stocks"));
+const Purchased = lazy(() => import("./component/BILLING/Purchased").then(module => ({ default: module.Purchased })));
+const Sale = lazy(() => import("./component/BILLING/Sale").then(module => ({ default: module.Sale })));
+const LowStock = lazy(() => import("./component/STOCK/low-stocks"));
+const StocksHistory = lazy(() => import("./component/STOCK/product-stocks-history"));
+const Employee = lazy(() => import("./component/Employee/Employee"));
+const DeliveryBoyManagment = lazy(() => import("./component/Delivery/delivery-boy"));
+const CouponManagment = lazy(() => import("./component/Delivery/coupon-managment"));
+const SaleDashboard = lazy(() => import("./component/Dashboard/SaleDashboard"));
+const AnalyticsDashboard = lazy(() => import("./component/Dashboard/AnalyticsDashboard"));
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,14 +57,111 @@ export const queryClient = new QueryClient({
 });
 const cookies = new Cookies();
 
-const App = () => {
+const App = React.memo(() => {
   const { isLoading } = useContext(ContextData);
-  const adminId = cookies.get("adminId");
+  
+  // Memoize adminId check to prevent unnecessary re-renders
+  const adminId = useMemo(() => {
+    return cookies.get("adminId");
+  }, []);
 
   // console.log("admin",adminId)
   if (isLoading && adminId) {
     return <Loading />;
   }
+
+  // Memoize the main content to prevent unnecessary re-renders
+  const mainContent = useMemo(() => (
+    <MainContainer>
+      <Routes>
+        <Route path="/" element={<Suspense fallback={<Loading />}><HomePage /></Suspense>} />
+        <Route path="/stock-dashboard" element={<Suspense fallback={<Loading />}><StockDashPage /></Suspense>} />
+        <Route path="/dashboard">
+          <Route path="sales" element={<Suspense fallback={<Loading />}><SaleDashboard /></Suspense>} />
+          <Route path="analytics" element={<Suspense fallback={<Loading />}><AnalyticsDashboard /></Suspense>} />
+        </Route>
+        <Route path="/purchaseManagement">
+          <Route index element={<Suspense fallback={<Loading />}><PurchaseIndex /></Suspense>} />
+          <Route path="purchase" element={<Suspense fallback={<Loading />}><VendorManagement /></Suspense>} />
+          <Route path="vendor" element={<Suspense fallback={<Loading />}><VendorManagement /></Suspense>} />
+          <Route path="expenses" element={<Suspense fallback={<Loading />}><ExpensesManagement /></Suspense>} />
+          <Route path="expairy" element={<Suspense fallback={<Loading />}><ExpairyManagement /></Suspense>} />
+          <Route
+            path="purchase-history"
+            element={<Suspense fallback={<Loading />}><PurchaseHistory /></Suspense>}
+          />
+          <Route
+            path="/purchaseManagement/purchase-history-record/:orderID/:vendorID"
+            element={<Suspense fallback={<Loading />}><PurchaseHistoryRecord /></Suspense>}
+          />
+          <Route
+            path="/purchaseManagement/expiry-history-record/:orderID/:vendorID"
+            element={<Suspense fallback={<Loading />}><ExpiryHistoryRecord /></Suspense>}
+          />
+        </Route>
+        <Route path="/salesManagement">
+          <Route index element={<Suspense fallback={<Loading />}><SaleIndex /></Suspense>} />
+          <Route path="sales-history" element={<Suspense fallback={<Loading />}><SalesHistory /></Suspense>} />
+          <Route path="customers" element={<Suspense fallback={<Loading />}><CustomerManagement /></Suspense>} />
+          <Route
+            path="/salesManagement/sales-history-record/:orderID/:customer_mobile"
+            element={<Suspense fallback={<Loading />}><SalesHistoryRecord /></Suspense>}
+          />
+          <Route
+            path="/salesManagement/customer-history-record/:customerID/:customer_mobile"
+            element={<Suspense fallback={<Loading />}><SalesHistoryRecord /></Suspense>}
+          />
+        </Route>
+        <Route path="/billing">
+          <Route index element={<h4>BILLING</h4>} />
+          <Route path="purchased" element={<Suspense fallback={<Loading />}><Purchased /></Suspense>} />
+          <Route path="sale" element={<Suspense fallback={<Loading />}><Sale /></Suspense>} />
+        </Route>
+        <Route path="/login" element={<Suspense fallback={<Loading />}><LoginPage /></Suspense>} />
+        <Route path="/product-stocks" element={<Suspense fallback={<Loading />}><Stocks /></Suspense>} />
+        <Route path="/low-stocks" element={<Suspense fallback={<Loading />}><LowStock /></Suspense>} />
+        <Route
+          path="/product-stocks-history"
+          element={<Suspense fallback={<Loading />}><StocksHistory /></Suspense>}
+        />
+        <Route path="/productManagement">
+          <Route index element={<Suspense fallback={<Loading />}><ProductIndex /></Suspense>} />
+          <Route path="product" element={<Suspense fallback={<Loading />}><ProductManagement /></Suspense>} />
+          <Route
+            path="/productManagement/product-by-brand/:brandID/:brandName"
+            element={<Suspense fallback={<Loading />}><ProductByBrand /></Suspense>}
+          />
+          <Route
+            path="/productManagement/product-by-category/:subcatID/:subcatName"
+            element={<Suspense fallback={<Loading />}><ProductByCategory /></Suspense>}
+          />
+          <Route
+            path="/productManagement/product-by-parent-category/:subcatID/:subcatName"
+            element={<Suspense fallback={<Loading />}><ProductByParentCategory /></Suspense>}
+          />
+          <Route path="category" element={<Suspense fallback={<Loading />}><CategoryManagement /></Suspense>} />
+          <Route path="brand" element={<Suspense fallback={<Loading />}><BrandManagement /></Suspense>} />
+        </Route>
+        <Route path="/online">
+          <Route index element={<h4>Online 11</h4>} />
+          <Route path="/online/order" element={<Suspense fallback={<Loading />}><OnlineSale /></Suspense>} />
+          <Route
+            path="/online/online-sales-history-record/:orderID/:customer_address/:order_type"
+            element={<Suspense fallback={<Loading />}><OnlineSalesHistoryRecord /></Suspense>}
+          />
+          <Route
+            path="/online/delivery-boy"
+            element={<Suspense fallback={<Loading />}><DeliveryBoyManagment /></Suspense>}
+          />
+          <Route path="/online/coupon" element={<Suspense fallback={<Loading />}><CouponManagment /></Suspense>} />
+        </Route>
+        <Route path="/settings/banners" element={<Suspense fallback={<Loading />}><BannerSettings /></Suspense>} />
+        <Route path="/company" element={<Suspense fallback={<Loading />}><Partner /></Suspense>} />
+        <Route path="/company/edit" element={<Suspense fallback={<Loading />}><PartnerEdit /></Suspense>} />
+        <Route path="/employee" element={<Suspense fallback={<Loading />}><Employee /></Suspense>} />
+      </Routes>
+    </MainContainer>
+  ), []);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -103,101 +170,15 @@ const App = () => {
           {/* <ContextProvider> */}
           {/* navneet dn  jbubub*/}
           <PrimeReactProvider>
-            <MainContainer>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/stock-dashboard" element={<StockDashPage />} />
-                <Route path="/dashboard">
-                  <Route path="sales" element={<SaleDashboard />} />
-                  <Route path="analytics" element={<AnalyticsDashboard />} />
-                </Route>
-                <Route path="/purchaseManagement">
-                  <Route index element={<PurchaseIndex />} />
-                  <Route path="purchase" element={<VendorManagement />} />
-                  <Route path="vendor" element={<VendorManagement />} />
-                  <Route path="expenses" element={<ExpensesManagement />} />
-                  <Route path="expairy" element={<ExpairyManagement />} />
-                  <Route
-                    path="purchase-history"
-                    element={<PurchaseHistory />}
-                  />
-                  <Route
-                    path="/purchaseManagement/purchase-history-record/:orderID/:vendorID"
-                    element={<PurchaseHistoryRecord />}
-                  />
-                  <Route
-                    path="/purchaseManagement/expiry-history-record/:orderID/:vendorID"
-                    element={<ExpiryHistoryRecord />}
-                  />
-                </Route>
-                <Route path="/salesManagement">
-                  <Route index element={<SaleIndex />} />
-                  <Route path="sales-history" element={<SalesHistory />} />
-                  <Route path="customers" element={<CustomerManagement />} />
-                  <Route
-                    path="/salesManagement/sales-history-record/:orderID/:customer_mobile"
-                    element={<SalesHistoryRecord />}
-                  />
-                  <Route
-                    path="/salesManagement/customer-history-record/:customerID/:customer_mobile"
-                    element={<SalesHistoryRecord />}
-                  />
-                </Route>
-                <Route path="/billing">
-                  <Route index element={<h4>BILLING</h4>} />
-                  <Route path="purchased" element={<Purchased />} />
-                  <Route path="sale" element={<Sale />} />
-                </Route>
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/product-stocks" element={<Stocks />} />
-                <Route path="/low-stocks" element={<LowStock />} />
-                <Route
-                  path="/product-stocks-history"
-                  element={<StocksHistory />}
-                />
-                <Route path="/productManagement">
-                  <Route index element={<ProductIndex />} />
-                  <Route path="product" element={<ProductManagement />} />
-                  <Route
-                    path="/productManagement/product-by-brand/:brandID/:brandName"
-                    element={<ProductByBrand />}
-                  />
-                  <Route
-                    path="/productManagement/product-by-category/:subcatID/:subcatName"
-                    element={<ProductByCategory />}
-                  />
-                  <Route
-                    path="/productManagement/product-by-parent-category/:subcatID/:subcatName"
-                    element={<ProductByParentCategory />}
-                  />
-                  <Route path="category" element={<CategoryManagement />} />
-                  <Route path="brand" element={<BrandManagement />} />
-                </Route>
-                <Route path="/online">
-                  <Route index element={<h4>Online 11</h4>} />
-                  <Route path="/online/order" element={<OnlineSale />} />
-                  <Route
-                    path="/online/online-sales-history-record/:orderID/:customer_address/:order_type"
-                    element={<OnlineSalesHistoryRecord />}
-                  />
-                  <Route
-                    path="/online/delivery-boy"
-                    element={<DeliveryBoyManagment />}
-                  />
-                  <Route path="/online/coupon" element={<CouponManagment />} />
-                </Route>
-                <Route path="/settings/banners" element={<BannerSettings />} />
-                <Route path="/company" element={<Partner />} />
-                <Route path="/company/edit" element={<PartnerEdit />} />
-                <Route path="/employee" element={<Employee />} />
-              </Routes>
-            </MainContainer>
+            {mainContent}
           </PrimeReactProvider>
           {/* </ContextProvider> */}
         </BrowserRouter>
       </ChakraProvider>
     </QueryClientProvider>
   );
-};
+});
+
+App.displayName = 'App';
 
 export default App;

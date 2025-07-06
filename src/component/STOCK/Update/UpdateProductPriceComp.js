@@ -1,4 +1,5 @@
-import { useState, useContext, useRef, useEffect } from 'react';
+import { useState, useContext, useRef, useEffect, useCallback, useMemo } from 'react';
+import React from 'react';
 import URL from '../../../URL';
 import Cookies from 'universal-cookie';
 import ContextData from '../../../context/MainContext'; 
@@ -6,7 +7,7 @@ import Alert from 'react-bootstrap/Alert';
 
 const cookies = new Cookies();
 
-export const UpdateProductPriceComp = (EditProductData) => {
+const UpdateProductPriceComp = (EditProductData) => {
 
     const { storeCategoryData, storeBrandsData, storeProductUnits, addDataToCurrentGlobal, getToast, reloadData } = useContext(ContextData);
     const [isLoading, setIL] = useState(false);
@@ -45,7 +46,7 @@ export const UpdateProductPriceComp = (EditProductData) => {
   
 
 
-    const UpdateProductAction = () => {
+    const UpdateProductAction = useCallback(() => {
 
         let DisInPerc = Math.round(((productDetails.price - productDetails.sale_price) * 100) / productDetails.price)
 
@@ -135,19 +136,21 @@ export const UpdateProductPriceComp = (EditProductData) => {
                     //  console.error(error);
                 });
         }
-    };
+    }, [productDetails, adminId, getToast, reloadData]);
 
-    const setPricing = (value) => {
+    const setPricing = useCallback((value) => {
         setproductDetails({ ...productDetails, price: value, sale_price: value, discount_in_rs: 0 })
-    }
-    const setDiscount = (value) => {
+    }, [productDetails]);
+    
+    const setDiscount = useCallback((value) => {
         let dicountPerc = ((productDetails.price - productDetails.sale_price) / productDetails.price) * 10
 
         setproductDetails({ ...productDetails, discount_in_rs: value, sale_price: productDetails.price - value, discount_in_percent: dicountPerc })
-    }
-    const setSalePricing = (value) => {
+    }, [productDetails]);
+    
+    const setSalePricing = useCallback((value) => {
         setproductDetails({ ...productDetails, sale_price: value })
-    }
+    }, [productDetails]);
  
 
 
@@ -250,3 +253,9 @@ export const UpdateProductPriceComp = (EditProductData) => {
     )
 
 }
+
+export default React.memo(UpdateProductPriceComp);
+UpdateProductPriceComp.displayName = 'UpdateProductPriceComp';
+
+// Named export for backward compatibility
+export { UpdateProductPriceComp };

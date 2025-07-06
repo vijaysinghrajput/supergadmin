@@ -1,4 +1,4 @@
-import React, { useReducer, useState, useEffect } from "react";
+import React, { useReducer, useState, useEffect, useMemo, useCallback } from "react";
 import Context from "./MainContext";
 import { reducer } from "../reducer/reducer";
 import Cookies from "universal-cookie";
@@ -7,19 +7,24 @@ import { useToast } from "@chakra-ui/react";
 
 const cookies = new Cookies();
 
-const ContextProvider = (props) => {
+const ContextProvider = React.memo((props) => {
   const toast = useToast();
   const [allDataLoaded, setAllDataLoaded] = useState(false);
-  const MainData = {
+  
+  // Memoize initial data to prevent recreation on every render
+  const MainData = useMemo(() => ({
     isLoading: false,
     auth: {
       isUserLogin: false,
     },
     Store_bussiness_info: [],
     adminId: cookies.get("adminId"),
-  };
+  }), []);
 
-  const functionality = {
+  const [MainDataExport, dispatch] = useReducer(reducer, MainData);
+
+  // Memoize functionality object to prevent recreation
+  const functionality = useMemo(() => ({
     fetchAllData: (payload) => dispatch({ type: "FETCH_ALL_DATA", payload }),
     setUserLogin: (credentials) =>
       dispatch({ type: "USER_LOGIN", credentials }),
@@ -29,9 +34,6 @@ const ContextProvider = (props) => {
       dispatch({ type: "REMOVE_DATA", data }),
     updateDataToCurrentGlobal: (data, where) =>
       dispatch({ type: "UPDATE_DATA", data, where }),
-    // getStoreData: () => {
-    //   dispatch({ type: "SOTRE_DATA", data });
-    // },
     logOut: () => {
       cookies.remove("isUserLogin");
       cookies.remove("adminId");
@@ -43,8 +45,7 @@ const ContextProvider = (props) => {
       cookies.remove("adminStoreType");
       dispatch({ type: "LOGOUT" });
     },
-
-    getToast: (e) => {
+    getToast: useCallback((e) => {
       toast({
         title: e.title,
         description: e.desc,
@@ -53,49 +54,75 @@ const ContextProvider = (props) => {
         isClosable: true,
         position: "bottom-right",
       });
-    },
-  };
+    }, [toast]),
+  }), [toast]);
 
-  useEffect(async () => {
-    async function fetchData() {
-      const data = await fetch(URL + "/APP-API/Billing/Store_bussiness_info", {
-        method: "post",
-        header: {
-          Accept: "application/json",
-          "Content-type": "application/json",
-        },
-        body: JSON.stringify({
-          store_id: MainData.adminId,
-        }),
-      })
-        .then((response) => response.json())
-        .then((responseJson) => responseJson);
+  // Optimized data fetching with proper error handling and loading states
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchData = async () => {
+      if (!MainData.adminId) return;
+      
+      try {
+        functionality.setGloabalLoading(true);
+        
+        const response = await fetch(URL + "/APP-API/Billing/Store_bussiness_info", {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            store_id: MainData.adminId,
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        if (isMounted) {
+          functionality.fetchAllData({ store_data: data });
+          setAllDataLoaded(true);
+        }
+      } catch (error) {
+        console.error("Error fetching store data:", error);
+        if (isMounted) {
+          functionality.getToast({
+            title: "Error",
+            desc: "Failed to load store data",
+            status: "error"
+          });
+        }
+      } finally {
+        if (isMounted) {
+          functionality.setGloabalLoading(false);
+        }
+      }
+    };
 
-      return data;
-    }
+    fetchData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [MainData.adminId, functionality]);
 
-    const data = await fetchData();
-
-    MainData.Store_bussiness_info = data;
-
-    console.log("data", data);
-
-    functionality.fetchAllData({ store_data: data });
-  }, []);
-
-  const [MainDataExport, dispatch] = useReducer(reducer, MainData);
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
+    ...MainDataExport,
+    ...functionality,
+    allDataLoaded,
+  }), [MainDataExport, functionality, allDataLoaded]);
 
   return (
-    <Context.Provider
-      value={{
-        ...MainDataExport,
-        ...functionality,
-        allDataLoaded,
-      }}
-    >
+    <Context.Provider value={contextValue}>
       {props.children}
     </Context.Provider>
   );
-};
+});
 
 export default ContextProvider;

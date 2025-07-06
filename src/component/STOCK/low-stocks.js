@@ -1,12 +1,9 @@
-import { Link } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useCallback, useMemo } from "react";
+import React from "react";
 import ContextData from "../../context/MainContext";
-import URL from '../../URL';
 
 import { MoveWarehouseToStore } from "./Update/MoveWarehouseToStore";
 import { MoveStoreToWarehouse } from "./Update/MoveStoreToWarehouse";
-
-import SweetAlert from 'react-bootstrap-sweetalert';
 
 // import "bootstrap/dist/css/bootstrap.css";
 import { Col, Row, Table } from "react-bootstrap";
@@ -25,26 +22,13 @@ import {
 } from "react-bs-datatable";
 
 // Create table headers consisting of 4 columns.
-import Cookies from 'universal-cookie';
-
-const cookies = new Cookies();
 
 
 const LowStock = () => {
-    const { storeProductsData, removeDataToCurrentGlobal, getToast, reloadData } = useContext(ContextData);
-    const [delID, setProductDelID] = useState(0);
-    const [isDeletAction, setDeletAction] = useState(false);
-    const [isStoreLowStockDataShow, setStoreLowStockDataShow] = useState(true);
-    const [isWarehouseLowStockDataShow, setWarehouseLowStockDataShow] = useState(false);
+    const { storeProductsData } = useContext(ContextData);
     const [filteredStoreStocksData, setFilterStoreStockData] = useState([]);
-    const [filteredWarehouseStocksData, setFilterWarehouseStockData] = useState([]);
 
     const [UpdateProductPrice, setUpdateProductPrice] = useState({});
-    // const [downloadBarcode, setdownloadBarcode] = useState({});
-    const [showData, setShowData] = useState(storeProductsData);
-
-    const adminStoreId = cookies.get("adminStoreId");
-    const adminId = cookies.get("adminId");
 
 
 
@@ -68,13 +52,7 @@ const LowStock = () => {
 
     }, [storeProductsData]);
 
-    const ChangeStatus = () => {
-
-        setProductDelID(true)
-
-    };
-
-    const STORY_HEADERS = [
+    const STORY_HEADERS = useMemo(() => [
 
         {
             prop: "product_name",
@@ -205,10 +183,10 @@ const LowStock = () => {
             }
         },
 
-    ];
+    ], [setUpdateProductPrice]);
 
 
-    const FilterDataLowStock = (value) => {
+    const FilterDataLowStock = useCallback((value) => {
         setRadioValue(value)
 
 
@@ -222,7 +200,7 @@ const LowStock = () => {
             setFilterStoreStockData(newFilterWareHoseStock);
         }
 
-    }
+    }, [storeProductsData]);
 
 
     return (
@@ -374,4 +352,5 @@ const LowStock = () => {
 
 }
 
-export default LowStock;
+export default React.memo(LowStock);
+LowStock.displayName = 'LowStock';

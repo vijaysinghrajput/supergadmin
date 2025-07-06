@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useMemo, useCallback } from "react";
 import ContextData from "../../context/MainContext";
 import URL from '../../URL';
 
@@ -48,14 +48,11 @@ const Stocks = () => {
         setShowData(storeProductsData);
     }, [storeProductsData]);
 
-    const ChangeStatus = () => {
+    const ChangeStatus = useCallback(() => {
+        setProductDelID(true);
+    }, []);
 
-        setProductDelID(true)
-
-    };
-
-    const STORY_HEADERS = [
-
+    const STORY_HEADERS = useMemo(() => [
         {
             prop: "product_name",
             title: "Product",
@@ -185,7 +182,7 @@ const Stocks = () => {
             }
         },
 
-    ];
+    ], [setUpdateProductPrice]);
 
 
     return (
@@ -315,4 +312,5 @@ const Stocks = () => {
 
 }
 
-export default Stocks;
+export default React.memo(Stocks);
+Stocks.displayName = 'Stocks';

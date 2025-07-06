@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { FilterMatchMode, FilterOperator } from "primereact/api";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -34,7 +34,7 @@ import Cookies from "universal-cookie";
 
 const cookies = new Cookies();
 
-export const SaleDataTable = () => {
+const SaleDataTable = () => {
   const [globalFilterValue, setGlobalFilterValue] = useState("");
 
   const [msgHeading, setmsgHeading] = useState(null);
@@ -125,20 +125,20 @@ export const SaleDataTable = () => {
     );
   };
 
-  const statusBodyTemplate = (rowData) => {
+  const statusBodyTemplate = useCallback((rowData) => {
     return (
       <Tag
         value={rowData.order_status}
         severity={getSeverity(rowData.order_status)}
       ></Tag>
     );
-  };
+  }, []);
 
-  const ActionBodyTemplate = (rowData) => {
+  const ActionBodyTemplate = useCallback((rowData) => {
     return <ActionForSaleList id={rowData} />;
-  };
+  }, []);
 
-  const getSeverity = (value) => {
+  const getSeverity = useCallback((value) => {
     switch (value) {
       case "Placed":
         return "dark";
@@ -158,7 +158,7 @@ export const SaleDataTable = () => {
       default:
         return null;
     }
-  };
+  }, []);
 
   const [statuses] = useState(["Store Billing", "Android", "Website", "iOs"]);
 
@@ -177,7 +177,7 @@ export const SaleDataTable = () => {
     );
   };
 
-  const changeSaleDateOnly = (e) => {
+  const changeSaleDateOnly = useCallback((e) => {
     let d = e.value;
     let month = String(d.getMonth() + 1);
     let day = String(d.getDate());
@@ -189,15 +189,15 @@ export const SaleDataTable = () => {
     let dateDatat = `${day}-${month}-${year}`;
     setSaleDate(e.value);
     setsaleDateValue(dateDatat);
-  };
+  }, []);
 
-  const changeRangeSaleDateOnly = (e) => {
+  const changeRangeSaleDateOnly = useCallback((e) => {
     setRangeSaleDate(e.value);
     console.log("date range", e.value);
     // setRangeSaleDate(dateDatat);
-  };
+  }, []);
 
-  const onGlobalFilterChange = (e) => {
+  const onGlobalFilterChange = useCallback((e) => {
     const value = e.target.value;
     let _filters = { ...filters };
 
@@ -205,17 +205,17 @@ export const SaleDataTable = () => {
 
     setFilters(_filters);
     setGlobalFilterValue(value);
-  };
+  }, [filters]);
 
-  const statusItemTemplate = (option) => {
+  const statusItemTemplate = useCallback((option) => {
     return <Tag value={option} severity={getSeverity(option)} />;
-  };
+  }, [getSeverity]);
 
-  const YearTemplate = (option) => {
+  const YearTemplate = useCallback((option) => {
     return <Tag value={option} severity="dark" />;
-  };
+  }, []);
 
-  const changeDataData = (value) => {
+  const changeDataData = useCallback((value) => {
     // console.log("value", value.value);
 
     setselectedMonthYear(value.value);
@@ -223,9 +223,9 @@ export const SaleDataTable = () => {
     queryClient.invalidateQueries({
       queryKey: ["offline_sale_history"],
     });
-  };
+  }, []);
 
-  const renderHeader = () => {
+  const renderHeader = useMemo(() => {
     return (
       <>
         <div className="row  ">
@@ -283,9 +283,9 @@ export const SaleDataTable = () => {
         </div>
       </>
     );
-  };
+  }, [globalFilterValue, onGlobalFilterChange, selectedMonthYear, changeDataData, SaleYear, groupedItemTemplate]);
 
-  const header = renderHeader();
+  const header = renderHeader;
 
   return (
     <div className="card">
@@ -383,3 +383,6 @@ export const SaleDataTable = () => {
     </div>
   );
 };
+
+export default React.memo(SaleDataTable);
+SaleDataTable.displayName = 'SaleDataTable';

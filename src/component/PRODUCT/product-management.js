@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useMemo, useCallback } from "react";
 import ContextData from "../../context/MainContext";
 import URL from "../../URL";
 
@@ -116,7 +116,7 @@ const ProductManagement = () => {
     // console.log("product", showData);
   }, [product_management, isLoadingAPI]);
 
-  const getToast = (e) => {
+  const getToast = useCallback((e) => {
     toast({
       title: e.title,
       description: e.desc,
@@ -125,13 +125,13 @@ const ProductManagement = () => {
       isClosable: true,
       position: "bottom-right",
     });
-  };
+  }, [toast]);
 
-  const ChangeStatus = () => {
+  const ChangeStatus = useCallback(() => {
     setProductDelID(true);
-  };
+  }, []);
 
-  const STORY_HEADERS = [
+  const STORY_HEADERS = useMemo(() => [
     {
       prop: "stock_quantity",
       title: "QTY",
@@ -306,9 +306,9 @@ const ProductManagement = () => {
         );
       },
     },
-  ];
+  ], [setUpdateProductPrice]);
 
-  const UpdateStatusAction = (product_id, product_name, status) => {
+  const UpdateStatusAction = useCallback((product_id, product_name, status) => {
     let flag = false;
 
     var statusAction = "";
@@ -375,9 +375,9 @@ const ProductManagement = () => {
         swal("Nothing Change!");
       }
     });
-  };
+  }, [getToast, adminStoreId, adminId]);
 
-  const deleteAction = (delete_id, product_name) => {
+  const deleteAction = useCallback((delete_id, product_name) => {
     swal({
       title: "Are you sure?",
       text: "Once deleted, you will not be able to recover this Product !",
@@ -428,11 +428,11 @@ const ProductManagement = () => {
         swal("Product is safe!");
       }
     });
-  };
-  const deleteProductFromStore = () => {
+  }, [storeProductRelode, getToast, adminStoreId, adminId]);
+  const deleteProductFromStore = useCallback(() => {
     // console.log('delete_id',delID)
     alert("done");
-  };
+  }, []);
 
   const deletePlot = () => {
     console.log("kit kat", delID);
@@ -467,7 +467,7 @@ const ProductManagement = () => {
         //  console.error(error);
       });
   };
-  const changeStatusData = (value) => {
+  const changeStatusData = useCallback((value) => {
     setRadioValue1(value);
 
     if (value == 1) {
@@ -477,7 +477,7 @@ const ProductManagement = () => {
       const newChildData = storeProductsData.filter((obj) => obj.status == 0);
       setShowData(newChildData);
     }
-  };
+  }, [storeProductsData]);
 
   if (!allDataLoaded) {
   }
@@ -921,4 +921,5 @@ const ProductManagement = () => {
   );
 };
 
-export default ProductManagement;
+export default React.memo(ProductManagement);
+ProductManagement.displayName = 'ProductManagement';
