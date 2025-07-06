@@ -6,6 +6,16 @@ import { useQuery } from "react-query";
 import URLDomain from "../URL";
 import { useLayoutEffect } from "react";
 import ReactApexChart from "react-apexcharts";
+import {
+  FaBox,
+  FaTags,
+  FaLayerGroup,
+  FaUsers,
+  FaCopyright,
+  FaTruck,
+  FaStore,
+  FaGlobe,
+} from "react-icons/fa";
 
 const cookies = new Cookies();
 const adminStoreId = cookies.get("adminStoreId");
@@ -154,32 +164,47 @@ const HomePage = () => {
   // Date range helper functions
   const setDateRangePreset = (preset) => {
     const today = new Date();
-    const endDate = new Date(); // Today
-    let startDate;
+    let startDate, endDate;
 
     switch (preset) {
+      case "today":
+        startDate = new Date();
+        endDate = new Date();
+        break;
+      case "yesterday":
+        startDate = new Date();
+        startDate.setDate(today.getDate() - 1);
+        endDate = new Date();
+        endDate.setDate(today.getDate() - 1);
+        break;
       case "week":
         startDate = new Date();
         startDate.setDate(today.getDate() - 7);
+        endDate = new Date();
         break;
       case "month":
         startDate = new Date();
-        startDate.setMonth(today.getMonth() - 1);
+        startDate.setDate(today.getDate() - 30);
+        endDate = new Date();
         break;
       case "quarter":
         startDate = new Date();
         startDate.setMonth(today.getMonth() - 3);
+        endDate = new Date();
         break;
       case "year":
         startDate = new Date();
         startDate.setFullYear(today.getFullYear() - 1);
+        endDate = new Date();
         break;
       case "ytd": // Year to date
         startDate = new Date(today.getFullYear(), 0, 1);
+        endDate = new Date();
         break;
       default:
         startDate = new Date();
         startDate.setDate(today.getDate() - 30);
+        endDate = new Date();
     }
 
     setDateRange({ startDate, endDate });
@@ -336,13 +361,33 @@ const HomePage = () => {
                   {/* Preset Buttons */}
                   <button
                     className={`btn btn-sm ${
+                      selectedPeriod === "today"
+                        ? "btn-primary"
+                        : "btn-outline-primary"
+                    }`}
+                    onClick={() => setDateRangePreset("today")}
+                  >
+                    Today
+                  </button>
+                  <button
+                    className={`btn btn-sm ${
+                      selectedPeriod === "yesterday"
+                        ? "btn-primary"
+                        : "btn-outline-primary"
+                    }`}
+                    onClick={() => setDateRangePreset("yesterday")}
+                  >
+                    Yesterday
+                  </button>
+                  <button
+                    className={`btn btn-sm ${
                       selectedPeriod === "week"
                         ? "btn-primary"
                         : "btn-outline-primary"
                     }`}
                     onClick={() => setDateRangePreset("week")}
                   >
-                    Last Week
+                    Week
                   </button>
                   <button
                     className={`btn btn-sm ${
@@ -352,7 +397,7 @@ const HomePage = () => {
                     }`}
                     onClick={() => setDateRangePreset("month")}
                   >
-                    Last Month
+                    Month
                   </button>
                   <button
                     className={`btn btn-sm ${
@@ -362,7 +407,7 @@ const HomePage = () => {
                     }`}
                     onClick={() => setDateRangePreset("quarter")}
                   >
-                    Last Quarter
+                    Quarter
                   </button>
                   <button
                     className={`btn btn-sm ${
@@ -372,7 +417,7 @@ const HomePage = () => {
                     }`}
                     onClick={() => setDateRangePreset("year")}
                   >
-                    Last Year
+                    Year
                   </button>
                   <button
                     className={`btn btn-sm ${
@@ -458,12 +503,322 @@ const HomePage = () => {
     );
   };
 
+  function getGreeting() {
+    const now = new Date();
+    const hour = now.getHours();
+
+    let greeting = "";
+
+    if (hour >= 5 && hour < 12) {
+      greeting = "Good Morning";
+    } else if (hour >= 12 && hour < 17) {
+      greeting = "Good Afternoon";
+    } else if (hour >= 17 && hour < 21) {
+      greeting = "Good Evening";
+    } else {
+      greeting = "Good Night";
+    }
+
+    return greeting;
+  }
+
   return (
     <>
       <div className="row">
         <div className="col">
           <div className="h-100">
+            <div className="row mb-3 pb-1">
+              <div className="col-12">
+                <div className="d-flex align-items-lg-center flex-lg-row flex-column">
+                  <div className="flex-grow-1">
+                    <h4 className="fs-16 mb-1">{getGreeting()}, Paal!</h4>
+                    <p className="text-muted mb-0">
+                      Here's what's happening with your store today.
+                    </p>
+                  </div>
+                </div>
+                {/* end card header */}
+              </div>
+              {/*end col*/}
+            </div>
             {/*end row*/}
+            {/* Stats Cards Section */}
+            <div className="row mb-1">
+              <div className="col-xl-3 col-md-6">
+                <div className="card card-animate">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="flex-grow-1 overflow-hidden">
+                        <p className="text-uppercase fw-medium text-muted text-truncate mb-0">
+                          Total Products
+                        </p>
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-end justify-content-between mt-4">
+                      <div>
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-6 fs-22 fw-semibold ff-secondary mb-4"></span>
+                          </div>
+                        ) : (
+                          <h4 className="fs-22 fw-semibold ff-secondary mb-4">
+                            {(
+                              ANALYTICS_DATA?.stats?.totalProducts || 0
+                            ).toLocaleString("en-IN")}
+                          </h4>
+                        )}
+                      </div>
+                      <div className="avatar-sm flex-shrink-0">
+                        <span className="avatar-title bg-soft-primary rounded fs-3">
+                          <FaBox className="text-primary" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-xl-3 col-md-6">
+                <div className="card card-animate">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="flex-grow-1 overflow-hidden">
+                        <p className="text-uppercase fw-medium text-muted text-truncate mb-0">
+                          Total Categories
+                        </p>
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-end justify-content-between mt-4">
+                      <div>
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-6 fs-22 fw-semibold ff-secondary mb-4"></span>
+                          </div>
+                        ) : (
+                          <h4 className="fs-22 fw-semibold ff-secondary mb-4">
+                            {(
+                              ANALYTICS_DATA?.stats?.totalCategories || 0
+                            ).toLocaleString("en-IN")}
+                          </h4>
+                        )}
+                      </div>
+                      <div className="avatar-sm flex-shrink-0">
+                        <span className="avatar-title bg-soft-success rounded fs-3">
+                          <FaTags className="text-success" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-xl-3 col-md-6">
+                <div className="card card-animate">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="flex-grow-1 overflow-hidden">
+                        <p className="text-uppercase fw-medium text-muted text-truncate mb-0">
+                          Total Subcategories
+                        </p>
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-end justify-content-between mt-4">
+                      <div>
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-6 fs-22 fw-semibold ff-secondary mb-4"></span>
+                          </div>
+                        ) : (
+                          <h4 className="fs-22 fw-semibold ff-secondary mb-4">
+                            {(
+                              ANALYTICS_DATA?.stats?.totalSubcategories || 0
+                            ).toLocaleString("en-IN")}
+                          </h4>
+                        )}
+                      </div>
+                      <div className="avatar-sm flex-shrink-0">
+                        <span className="avatar-title bg-soft-info rounded fs-3">
+                          <FaLayerGroup className="text-info" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-xl-3 col-md-6">
+                <div className="card card-animate">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="flex-grow-1 overflow-hidden">
+                        <p className="text-uppercase fw-medium text-muted text-truncate mb-0">
+                          Total Customers
+                        </p>
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-end justify-content-between mt-4">
+                      <div>
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-6 fs-22 fw-semibold ff-secondary mb-4"></span>
+                          </div>
+                        ) : (
+                          <h4 className="fs-22 fw-semibold ff-secondary mb-4">
+                            {(
+                              ANALYTICS_DATA?.stats?.totalCustomers || 0
+                            ).toLocaleString("en-IN")}
+                          </h4>
+                        )}
+                      </div>
+                      <div className="avatar-sm flex-shrink-0">
+                        <span className="avatar-title bg-soft-warning rounded fs-3">
+                          <FaUsers className="text-warning" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="row mb-4">
+              <div className="col-xl-3 col-md-6">
+                <div className="card card-animate">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="flex-grow-1 overflow-hidden">
+                        <p className="text-uppercase fw-medium text-muted text-truncate mb-0">
+                          Total Brands
+                        </p>
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-end justify-content-between mt-4">
+                      <div>
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-6 fs-22 fw-semibold ff-secondary mb-4"></span>
+                          </div>
+                        ) : (
+                          <h4 className="fs-22 fw-semibold ff-secondary mb-4">
+                            {(
+                              ANALYTICS_DATA?.stats?.totalBrands || 0
+                            ).toLocaleString("en-IN")}
+                          </h4>
+                        )}
+                      </div>
+                      <div className="avatar-sm flex-shrink-0">
+                        <span className="avatar-title bg-soft-danger rounded fs-3">
+                          <FaCopyright className="text-danger" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-xl-3 col-md-6">
+                <div className="card card-animate">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="flex-grow-1 overflow-hidden">
+                        <p className="text-uppercase fw-medium text-muted text-truncate mb-0">
+                          Total Vendors
+                        </p>
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-end justify-content-between mt-4">
+                      <div>
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-6 fs-22 fw-semibold ff-secondary mb-4"></span>
+                          </div>
+                        ) : (
+                          <h4 className="fs-22 fw-semibold ff-secondary mb-4">
+                            {(
+                              ANALYTICS_DATA?.stats?.totalVendors || 0
+                            ).toLocaleString("en-IN")}
+                          </h4>
+                        )}
+                      </div>
+                      <div className="avatar-sm flex-shrink-0">
+                        <span className="avatar-title bg-soft-secondary rounded fs-3">
+                          <FaTruck className="text-secondary" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-xl-3 col-md-6">
+                <div className="card card-animate">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="flex-grow-1 overflow-hidden">
+                        <p className="text-uppercase fw-medium text-muted text-truncate mb-0">
+                          Offline Revenue
+                        </p>
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-end justify-content-between mt-4">
+                      <div>
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-6 fs-22 fw-semibold ff-secondary mb-4"></span>
+                          </div>
+                        ) : (
+                          <h4 className="fs-22 fw-semibold ff-secondary mb-4">
+                            ₹
+                            {(
+                              ANALYTICS_DATA?.stats?.offlineRevenue || 0
+                            ).toLocaleString("en-IN")}
+                          </h4>
+                        )}
+                      </div>
+                      <div className="avatar-sm flex-shrink-0">
+                        <span className="avatar-title bg-soft-dark rounded fs-3">
+                          <FaStore className="text-dark" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-xl-3 col-md-6">
+                <div className="card card-animate">
+                  <div className="card-body">
+                    <div className="d-flex align-items-center">
+                      <div className="flex-grow-1 overflow-hidden">
+                        <p className="text-uppercase fw-medium text-muted text-truncate mb-0">
+                          Online Revenue
+                        </p>
+                      </div>
+                    </div>
+                    <div className="d-flex align-items-end justify-content-between mt-4">
+                      <div>
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-6 fs-22 fw-semibold ff-secondary mb-4"></span>
+                          </div>
+                        ) : (
+                          <h4 className="fs-22 fw-semibold ff-secondary mb-4">
+                            ₹
+                            {(
+                              ANALYTICS_DATA?.stats?.onlineRevenue || 0
+                            ).toLocaleString("en-IN")}
+                          </h4>
+                        )}
+                      </div>
+                      <div className="avatar-sm flex-shrink-0">
+                        <span className="avatar-title bg-soft-success rounded fs-3">
+                          <FaGlobe className="text-success" />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             {/* Date Range Picker */}
             <DateRangePicker />
             <div className="row">
@@ -484,30 +839,39 @@ const HomePage = () => {
                         </p>
                       </div>
                       <div className="flex-shrink-0">
-                        <h5
-                          className={`fs-14 mb-0 ${
-                            ANALYTICS_DATA?.kpis?.totalRevenue?.change >= 0
-                              ? "text-success"
-                              : "text-danger"
-                          }`}
-                        >
-                          <i
-                            className={`fs-13 align-middle ${
-                              ANALYTICS_DATA?.kpis?.totalRevenue?.change >= 0
-                                ? "ri-arrow-right-up-line"
-                                : "ri-arrow-right-down-line"
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-8 fs-14 mb-0"></span>
+                          </div>
+                        ) : (
+                          <h5
+                            className={`fs-14 mb-0 ${
+                              (ANALYTICS_DATA?.kpis?.totalRevenue?.change ||
+                                0) >= 0
+                                ? "text-success"
+                                : "text-danger"
                             }`}
-                          />
-                          {ANALYTICS_DATA?.kpis?.totalRevenue?.change
-                            ? `${
-                                ANALYTICS_DATA.kpis.totalRevenue.change > 0
-                                  ? "+"
-                                  : ""
-                              }${ANALYTICS_DATA.kpis.totalRevenue.change.toFixed(
-                                2
-                              )}%`
-                            : "+16.24 %"}
-                        </h5>
+                          >
+                            <i
+                              className={`fs-13 align-middle ${
+                                (ANALYTICS_DATA?.kpis?.totalRevenue?.change ||
+                                  0) >= 0
+                                  ? "ri-arrow-right-up-line"
+                                  : "ri-arrow-right-down-line"
+                              }`}
+                            />
+                            {ANALYTICS_DATA?.kpis?.totalRevenue?.change !==
+                            undefined
+                              ? `${
+                                  ANALYTICS_DATA.kpis.totalRevenue.change > 0
+                                    ? "+"
+                                    : ""
+                                }${ANALYTICS_DATA.kpis.totalRevenue.change.toFixed(
+                                  2
+                                )}%`
+                              : "+0.00%"}
+                          </h5>
+                        )}
                       </div>
                     </div>
                     <div className="d-flex align-items-end justify-content-between mt-4">
@@ -526,9 +890,6 @@ const HomePage = () => {
                               : count.toLocaleString("en-IN")}
                           </h4>
                         )}
-                        <a href="#" className="text-decoration-underline">
-                          View net earnings
-                        </a>
                       </div>
                       <div className="avatar-sm flex-shrink-0">
                         <span className="avatar-title bg-soft-success rounded fs-3">
@@ -553,30 +914,39 @@ const HomePage = () => {
                         </p>
                       </div>
                       <div className="flex-shrink-0">
-                        <h5
-                          className={`fs-14 mb-0 ${
-                            ANALYTICS_DATA?.kpis?.totalOrders?.change >= 0
-                              ? "text-success"
-                              : "text-danger"
-                          }`}
-                        >
-                          <i
-                            className={`fs-13 align-middle ${
-                              ANALYTICS_DATA?.kpis?.totalOrders?.change >= 0
-                                ? "ri-arrow-right-up-line"
-                                : "ri-arrow-right-down-line"
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-8 fs-14 mb-0"></span>
+                          </div>
+                        ) : (
+                          <h5
+                            className={`fs-14 mb-0 ${
+                              (ANALYTICS_DATA?.kpis?.totalOrders?.change ||
+                                0) >= 0
+                                ? "text-success"
+                                : "text-danger"
                             }`}
-                          />
-                          {ANALYTICS_DATA?.kpis?.totalOrders?.change
-                            ? `${
-                                ANALYTICS_DATA.kpis?.totalOrders?.change > 0
-                                  ? "+"
-                                  : ""
-                              }${ANALYTICS_DATA.kpis?.totalOrders?.change.toFixed(
-                                2
-                              )}%`
-                            : "-3.57 %"}
-                        </h5>
+                          >
+                            <i
+                              className={`fs-13 align-middle ${
+                                (ANALYTICS_DATA?.kpis?.totalOrders?.change ||
+                                  0) >= 0
+                                  ? "ri-arrow-right-up-line"
+                                  : "ri-arrow-right-down-line"
+                              }`}
+                            />
+                            {ANALYTICS_DATA?.kpis?.totalOrders?.change !==
+                            undefined
+                              ? `${
+                                  ANALYTICS_DATA.kpis?.totalOrders?.change > 0
+                                    ? "+"
+                                    : ""
+                                }${ANALYTICS_DATA.kpis?.totalOrders?.change.toFixed(
+                                  2
+                                )}%`
+                              : "+0.00%"}
+                          </h5>
+                        )}
                       </div>
                     </div>
                     <div className="d-flex align-items-end justify-content-between mt-4">
@@ -592,9 +962,6 @@ const HomePage = () => {
                             ).toLocaleString("en-IN")}
                           </h4>
                         )}
-                        <a href="#" className="text-decoration-underline">
-                          View all orders
-                        </a>
                       </div>
                       <div className="avatar-sm flex-shrink-0">
                         <span className="avatar-title bg-soft-info rounded fs-3">
@@ -619,30 +986,39 @@ const HomePage = () => {
                         </p>
                       </div>
                       <div className="flex-shrink-0">
-                        <h5
-                          className={`fs-14 mb-0 ${
-                            ANALYTICS_DATA?.kpis?.totalCustomers?.change >= 0
-                              ? "text-success"
-                              : "text-danger"
-                          }`}
-                        >
-                          <i
-                            className={`fs-13 align-middle ${
-                              ANALYTICS_DATA?.kpis?.totalCustomers?.change >= 0
-                                ? "ri-arrow-right-up-line"
-                                : "ri-arrow-right-down-line"
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-8 fs-14 mb-0"></span>
+                          </div>
+                        ) : (
+                          <h5
+                            className={`fs-14 mb-0 ${
+                              (ANALYTICS_DATA?.kpis?.totalCustomers?.change ||
+                                0) >= 0
+                                ? "text-success"
+                                : "text-danger"
                             }`}
-                          />
-                          {ANALYTICS_DATA?.kpis?.totalCustomers?.change
-                            ? `${
-                                ANALYTICS_DATA.kpis?.totalCustomers.change > 0
-                                  ? "+"
-                                  : ""
-                              }${ANALYTICS_DATA.kpis?.totalCustomers.change.toFixed(
-                                2
-                              )}%`
-                            : "+29.08 %"}
-                        </h5>
+                          >
+                            <i
+                              className={`fs-13 align-middle ${
+                                (ANALYTICS_DATA?.kpis?.totalCustomers?.change ||
+                                  0) >= 0
+                                  ? "ri-arrow-right-up-line"
+                                  : "ri-arrow-right-down-line"
+                              }`}
+                            />
+                            {ANALYTICS_DATA?.kpis?.totalCustomers?.change !==
+                            undefined
+                              ? `${
+                                  ANALYTICS_DATA.kpis?.totalCustomers.change > 0
+                                    ? "+"
+                                    : ""
+                                }${ANALYTICS_DATA.kpis?.totalCustomers.change.toFixed(
+                                  2
+                                )}%`
+                              : "+0.00%"}
+                          </h5>
+                        )}
                       </div>
                     </div>
                     <div className="d-flex align-items-end justify-content-between mt-4">
@@ -658,9 +1034,6 @@ const HomePage = () => {
                             ).toLocaleString("en-IN")}
                           </h4>
                         )}
-                        <a href="#" className="text-decoration-underline">
-                          See details
-                        </a>
                       </div>
                       <div className="avatar-sm flex-shrink-0">
                         <span className="avatar-title bg-soft-warning rounded fs-3">
@@ -685,30 +1058,39 @@ const HomePage = () => {
                         </p>
                       </div>
                       <div className="flex-shrink-0">
-                        <h5
-                          className={`fs-14 mb-0 ${
-                            ANALYTICS_DATA?.kpis?.activeUsers?.change >= 0
-                              ? "text-success"
-                              : "text-danger"
-                          }`}
-                        >
-                          <i
-                            className={`fs-13 align-middle ${
-                              ANALYTICS_DATA?.kpis?.activeUsers?.change >= 0
-                                ? "ri-arrow-right-up-line"
-                                : "ri-arrow-right-down-line"
+                        {isLoadingAPI ? (
+                          <div className="placeholder-glow">
+                            <span className="placeholder col-8 fs-14 mb-0"></span>
+                          </div>
+                        ) : (
+                          <h5
+                            className={`fs-14 mb-0 ${
+                              (ANALYTICS_DATA?.kpis?.activeUsers?.change ||
+                                0) >= 0
+                                ? "text-success"
+                                : "text-danger"
                             }`}
-                          />
-                          {ANALYTICS_DATA?.kpis?.activeUsers?.change
-                            ? `${
-                                ANALYTICS_DATA.kpis?.activeUsers.change > 0
-                                  ? "+"
-                                  : ""
-                              }${ANALYTICS_DATA.kpis?.activeUsers.change.toFixed(
-                                2
-                              )}%`
-                            : "+0.00 %"}
-                        </h5>
+                          >
+                            <i
+                              className={`fs-13 align-middle ${
+                                (ANALYTICS_DATA?.kpis?.activeUsers?.change ||
+                                  0) >= 0
+                                  ? "ri-arrow-right-up-line"
+                                  : "ri-arrow-right-down-line"
+                              }`}
+                            />
+                            {ANALYTICS_DATA?.kpis?.activeUsers?.change !==
+                            undefined
+                              ? `${
+                                  ANALYTICS_DATA.kpis?.activeUsers.change > 0
+                                    ? "+"
+                                    : ""
+                                }${ANALYTICS_DATA.kpis?.activeUsers.change.toFixed(
+                                  2
+                                )}%`
+                              : "+0.00%"}
+                          </h5>
+                        )}
                       </div>
                     </div>
                     <div className="d-flex align-items-end justify-content-between mt-4">
@@ -718,15 +1100,20 @@ const HomePage = () => {
                             <span className="placeholder col-6 fs-22 fw-semibold ff-secondary mb-4"></span>
                           </div>
                         ) : (
-                          <h4 className="fs-22 fw-semibold ff-secondary mb-4">
-                            {(
-                              ANALYTICS_DATA?.kpis?.activeUsers?.current || 0
-                            ).toLocaleString("en-IN")}
-                          </h4>
+                          <>
+                            <h4 className="fs-22 fw-semibold ff-secondary mb-4">
+                              {(
+                                ANALYTICS_DATA?.kpis?.activeUsers?.current || 0
+                              ).toLocaleString("en-IN")}
+                              <small
+                                className="text-muted"
+                                style={{ fontSize: 10 }}
+                              >
+                                (Constantly ordering for last 30 days)
+                              </small>
+                            </h4>
+                          </>
                         )}
-                        <a href="#" className="text-decoration-underline">
-                          View user activity
-                        </a>
                       </div>
                       <div className="avatar-sm flex-shrink-0">
                         <span className="avatar-title bg-soft-primary rounded fs-3">

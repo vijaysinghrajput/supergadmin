@@ -125,7 +125,7 @@ const ContextProvider = React.memo((props) => {
       }
     };
 
-    fetchData();
+    // fetchData();
 
     return () => {
       isMounted = false;
