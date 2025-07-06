@@ -1,7 +1,7 @@
 import { BiRupee, BiBarcodeReader } from "react-icons/bi";
 import { FcCalendar } from "react-icons/fc";
 import { AiOutlineDelete } from "react-icons/ai";
-import { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState, useCallback, useMemo } from "react";
 import ContextData from "../../context/MainContext";
 import Multiselect from "multiselect-react-dropdown";
 import DatePicker from "react-datepicker";
@@ -28,7 +28,7 @@ import URLDomain from "../../URL";
 import Cookies from "universal-cookie";
 const cookies = new Cookies();
 
-export const Purchased = () => {
+export const Purchased = React.memo(() => {
   const getAllVendorsRef = useRef(null);
   const navigate = useNavigate();
   const {
@@ -70,7 +70,7 @@ export const Purchased = () => {
   });
   const toast = useToast();
 
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     const data = await fetch(
       URLDomain + "/APP-API/Billing/InsertPurchaseData",
       {
@@ -88,7 +88,7 @@ export const Purchased = () => {
       .then((responseJson) => responseJson);
 
     return data;
-  }
+  }, [adminStoreId]);
 
   const {
     data: PURCHASEDATA,
@@ -125,47 +125,55 @@ export const Purchased = () => {
     },
   });
 
-  useEffect(() => {
-    const subTotalGet = addedItems.reduce((acc, obj) => {
-      return acc + Number(Number(obj?.amount_total || 0));
-    }, 0);
+  // Optimized calculation using useMemo to prevent unnecessary recalculations
+  const calculatedTotals = useMemo(() => {
+    if (!addedItems.length) {
+      return {
+        subTotal: 0,
+        sGstTotal: 0,
+        cGstTotal: 0,
+        discount: 0,
+        grandTotal: 0
+      };
+    }
 
-    const grandTotal = addedItems.reduce((acc, obj) => {
-      return acc + Number(Number(obj?.net_amount || 0));
-    }, 0);
+    // Single pass through addedItems for all calculations
+    const totals = addedItems.reduce((acc, obj) => {
+      const quantity = Number(obj?.billing_quantity || 0);
+      const rate = Number(obj?.rate || 0);
+      const sGst = Number(obj?.s_gst || 0);
+      const discountPercent = Number(obj?.discount_in_percent || 0);
+      const amountTotal = Number(obj?.amount_total || 0);
+      const netAmount = Number(obj?.net_amount || 0);
 
-    const discount = addedItems.reduce((acc, obj) => {
-      const initialPurchasePrice =
-        Number(obj?.rate) +
-        Number((Number(obj?.s_gst) / 100) * 2 * Number(obj?.rate));
+      const initialPurchasePrice = rate + ((sGst / 100) * 2 * rate);
+      const discountedRupee = (initialPurchasePrice * discountPercent) / 100;
+      const sGstAmount = (sGst / 100) * rate * quantity;
 
-      const discountedRupee =
-        (initialPurchasePrice * Number(obj?.discount_in_percent)) / 100;
-      return (
-        acc +
-        Number(Number(discountedRupee) * Number(obj?.billing_quantity || 0))
-      );
-    }, 0);
+      return {
+        subTotalGet: acc.subTotalGet + amountTotal,
+        grandTotal: acc.grandTotal + netAmount,
+        discount: acc.discount + (discountedRupee * quantity),
+        sGstTotal: acc.sGstTotal + sGstAmount
+      };
+    }, { subTotalGet: 0, grandTotal: 0, discount: 0, sGstTotal: 0 });
 
-    const sGstTotal = addedItems.reduce((acc, obj) => {
-      return (
-        acc +
-        (Number(obj?.s_gst || 0) / 100) *
-          Number(obj?.rate || 0) *
-          Number(obj?.billing_quantity || 0)
-      );
-    }, 0);
-    const subTotal = subTotalGet;
-    // const grandTotal = subTotal;
-    setAllTotals({
-      ...allTotals,
-      discount,
-      subTotal,
-      sGstTotal,
-      cGstTotal: sGstTotal,
-      grandTotal,
-    });
+    return {
+      subTotal: totals.subTotalGet,
+      sGstTotal: totals.sGstTotal,
+      cGstTotal: totals.sGstTotal,
+      discount: totals.discount,
+      grandTotal: totals.grandTotal
+    };
   }, [addedItems]);
+
+  // Update allTotals when calculated values change
+  useEffect(() => {
+    setAllTotals(prev => ({
+      ...prev,
+      ...calculatedTotals
+    }));
+  }, [calculatedTotals]);
 
   // useEffect(() => {
   //   const { subTotal, sGstTotal, cGstTotal, discount, additional_charges } =
@@ -225,22 +233,28 @@ export const Purchased = () => {
       });
   }, [allTotals.fully_paid]);
 
-  const handleOnSelect = (item) => {
+  const handleOnSelect = useCallback((item) => {
     console.log("lolipop ---->", item);
     const allReadyExist = addedItems.some((elem) => {
       return elem.id === item.id;
     });
-    item["mrp"] = item.price;
-    item["c_gst"] = 0;
-    item["s_gst"] = 0;
-    item["discount_in_percent"] = 0;
-    item["discount_in_rs"] = 0;
-    item["purchase_price"] = 0;
-    !allReadyExist && setAddedItems([...addedItems, item]);
+    
+    if (!allReadyExist) {
+      const newItem = {
+        ...item,
+        mrp: item.price,
+        c_gst: 0,
+        s_gst: 0,
+        discount_in_percent: 0,
+        discount_in_rs: 0,
+        purchase_price: 0
+      };
+      setAddedItems(prev => [...prev, newItem]);
+    }
     /*  setTimeout(() => {
              document.getElementsByClassName("clear-icon")[0].querySelector(':scope > svg')[0].click();
          }, 1000) */ //1 second delay
-  };
+  }, [addedItems]);
 
   const calRowTotals = ({ index, newArr }) => {
     const discount = newArr[index].discount_in_percent | 0;
@@ -270,72 +284,87 @@ export const Purchased = () => {
     setAddedItems(newArr);
   };
 
-  const updateFieldChanged = (index) => (e) => {
-    // console.log('index: ' + index);
-    // console.log('property name: ' + e.target.name);
-    let newArr = [...addedItems];
-    e.target.name === "quantity" &&
-      (newArr[index].billing_quantity = e.target.value);
-    e.target.name === "purchase_price" &&
-      (newArr[index].purchase_price = e.target.value);
-    e.target.name === "rate" && (newArr[index].rate = e.target.value);
-    e.target.name === "rate" && (newArr[index].purchase_price = e.target.value);
+  const updateFieldChanged = useCallback((index) => (e) => {
+    const { name, value } = e.target;
+    
+    setAddedItems(prev => {
+      const newArr = [...prev];
+      const item = { ...newArr[index] };
+      
+      switch (name) {
+        case "quantity":
+          item.billing_quantity = value;
+          break;
+        case "purchase_price":
+          item.purchase_price = value;
+          break;
+        case "rate":
+          item.rate = value;
+          item.purchase_price = value;
+          break;
+        case "discount":
+          item.discount_in_percent = value;
+          break;
+        default:
+          break;
+      }
+      
+      // Recalculate totals
+      item.amount_total = Number(item.billing_quantity) * Number(item.rate);
+      
+      const sGst = Number(item.purchase_price) * Number(Number(item.s_gst) / 100);
+      const val = Number(item.billing_quantity) * (sGst * 2);
+      item.net_amount = item.amount_total + val;
+      
+      newArr[index] = item;
+      
+      // Call calRowTotals with updated array
+      calRowTotals({ index, newArr });
+      
+      return newArr;
+    });
+  }, []);
 
-    newArr[index].amount_total =
-      Number(newArr[index].billing_quantity) * Number(newArr[index].rate);
+  const changeGst = useCallback((index) => (e) => {
+    const { name, value } = e.target;
+    
+    setAddedItems(prev => {
+      const newArr = [...prev];
+      const item = { ...newArr[index] };
+      
+      switch (name) {
+        case "s_gst":
+          item.s_gst = value;
+          item.c_gst = value;
+          break;
+        case "hsnCode":
+          item.hsn_code = value;
+          break;
+        case "mrp":
+          item.mrp = value;
+          console.log("jaanu mai ya naa----->", newArr);
+          break;
+        default:
+          break;
+      }
+      
+      newArr[index] = item;
+      calRowTotals({ index, newArr });
+      console.log("new arrya --->", newArr);
+      
+      return newArr;
+    });
+  }, []);
 
-    const sGst =
-      Number(newArr[index].purchase_price) *
-      Number(Number(newArr[index].s_gst) / 100);
+  const deleteFeild = useCallback((index) => {
+    setAddedItems(prev => {
+      const newArr = [...prev];
+      newArr.splice(index, 1);
+      return newArr;
+    });
+  }, []);
 
-    const val = Number(newArr[index].billing_quantity) * (sGst * 2);
-
-    newArr[index].net_amount = newArr[index].amount_total + val;
-
-    if (e.target.name === "discount") {
-      newArr[index].discount_in_percent = e.target.value;
-    }
-
-    calRowTotals({ index, newArr });
-
-    // console.log("new arrya --->", newArr);
-    // newArr = newArr.filter((item) => item);
-    // setAddedItems(newArr);
-  };
-
-  const changeGst = (index) => (e) => {
-    let newArr = [...addedItems];
-
-    if (e.target.name === "s_gst") {
-      newArr[index].s_gst = e.target.value;
-      newArr[index].c_gst = e.target.value;
-
-      // const sGst =
-      //   Number(newArr[index].purchase_price) *
-      //   Number(Number(e.target.value) / 100);
-
-      // const val =  * (sGst * 2);
-    }
-
-    e.target.name === "hsnCode" && (newArr[index].hsn_code = e.target.value);
-    if (e.target.name === "mrp") {
-      newArr[index].mrp = e.target.value;
-      console.log("jaanu mai ya naa----->", newArr);
-    }
-
-    calRowTotals({ index, newArr });
-    // newArr[index].amount_total = Number(newArr[index].billing_quantity) * Number(newArr[index].purchase_price);
-    console.log("new arrya --->", newArr);
-  };
-
-  const deleteFeild = (index) => {
-    let newArr = [...addedItems];
-    delete newArr[index];
-    newArr = newArr.filter((item) => item);
-    setAddedItems(newArr);
-  };
-
-  const submitPurchase = () => {
+  const submitPurchase = useCallback(() => {
     if (selectedVendor) {
       const data = JSON.stringify({
         store_id: adminStoreId,
@@ -422,7 +451,7 @@ export const Purchased = () => {
         isClosable: true,
       });
     }
-  };
+  }, [selectedVendor, adminStoreId, adminId, restInfo, allTotals, PurchaseDate, addedItems, setLoading, toast, storeVendorRelode, navigate]);
 
   return (
     <>
@@ -1208,4 +1237,6 @@ export const Purchased = () => {
       </div>
     </>
   );
-};
+});
+
+Purchased.displayName = 'Purchased';

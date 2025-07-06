@@ -1,6 +1,6 @@
 import { BiRupee, BiBarcodeReader } from "react-icons/bi";
 import { AiOutlineDelete } from "react-icons/ai";
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { ReactSearchAutocomplete } from "react-search-autocomplete";
 import useScanDetection from "use-scan-detection";
 import {
@@ -80,7 +80,7 @@ function isValidBarcode(barcode) {
   return checkSum == lastDigit;
 }
 
-export const Sale = () => {
+const Sale = React.memo(() => {
   const [Saledate, setSaledate] = useState(new Date());
   const [selectedCustomer, setSelectCustomer] = useState({
     mobile: 9999999999,
@@ -102,7 +102,7 @@ export const Sale = () => {
   const adminStoreId = cookies.get("adminStoreId");
   const adminId = cookies.get("adminId");
 
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     const data = await fetch(
       URLDomain + "/APP-API/Billing/InsertPurchaseData",
       {
@@ -120,7 +120,7 @@ export const Sale = () => {
       .then((responseJson) => responseJson);
 
     return data;
-  }
+  }, [adminStoreId]);
 
   const {
     data: PURCHASEDATA,
@@ -272,15 +272,15 @@ export const Sale = () => {
     );
   }, [addedItems, previousAddedItems]);
 
-  const deleteAll = () => {
+  const deleteAll = useCallback(() => {
     setAddedItems([]);
-  };
+  }, []);
 
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
   });
 
-  const getToast = (e) => {
+  const getToast = useCallback((e) => {
     toast({
       title: e.title,
       description: e.desc,
@@ -289,7 +289,7 @@ export const Sale = () => {
       isClosable: true,
       position: "bottom-right",
     });
-  };
+  }, [toast]);
 
   // useEffect(
   //   () => {
@@ -366,54 +366,52 @@ export const Sale = () => {
     },
   });
 
-  useEffect(() => {
-    const subTotalGet = addedItems.reduce((acc, obj) => {
-      return (
-        acc +
-        Number(Number(obj?.price || 0) * Number(obj?.billing_quantity || 0))
-      );
-    }, 0);
+  // Optimized calculation using useMemo to prevent unnecessary recalculations
+  const calculatedTotals = useMemo(() => {
+    if (!addedItems.length) {
+      return {
+        subTotal: 0,
+        sGstTotal: 0,
+        cGstTotal: 0,
+        discount: 0,
+        grandTotal: 0
+      };
+    }
 
-    const grandTotal = addedItems.reduce((acc, obj) => {
-      return (
-        acc +
-        Number(
-          Number(obj?.sale_price || 0) * Number(obj?.billing_quantity || 0)
-        )
-      );
-    }, 0);
+    // Single pass through addedItems for all calculations
+    const totals = addedItems.reduce((acc, obj) => {
+      const quantity = Number(obj?.billing_quantity || 0);
+      const price = Number(obj?.price || 0);
+      const salePrice = Number(obj?.sale_price || 0);
+      const discountInRs = Number(obj?.discount_in_rs || 0);
+      const sGst = Number(obj?.s_gst || 0);
 
-    const discount = addedItems.reduce((acc, obj) => {
-      return (
-        acc +
-        Number(
-          Number(obj?.discount_in_rs || 0) * Number(obj?.billing_quantity || 0)
-        )
-      );
-    }, 0);
+      return {
+        subTotalGet: acc.subTotalGet + (price * quantity),
+        grandTotal: acc.grandTotal + (salePrice * quantity),
+        discount: acc.discount + (discountInRs * quantity),
+        sGstTotal: acc.sGstTotal + ((sGst / 100) * salePrice * quantity)
+      };
+    }, { subTotalGet: 0, grandTotal: 0, discount: 0, sGstTotal: 0 });
 
-    const sGstTotal = addedItems.reduce((acc, obj) => {
-      return (
-        acc +
-        (Number(obj?.s_gst || 0) / 100) *
-          Number(obj?.sale_price || 0) *
-          Number(obj?.billing_quantity || 0)
-      );
-    }, 0);
+    console.log("sub total =========>", totals.sGstTotal);
 
-    const subTotal = subTotalGet;
-
-    console.log("sub total =========>", sGstTotal);
-
-    setAllTotals({
-      ...allTotals,
-      discount,
-      subTotal,
-      sGstTotal,
-      cGstTotal: sGstTotal,
-      grandTotal,
-    });
+    return {
+      subTotal: totals.subTotalGet,
+      sGstTotal: totals.sGstTotal,
+      cGstTotal: totals.sGstTotal,
+      discount: totals.discount,
+      grandTotal: totals.grandTotal
+    };
   }, [addedItems]);
+
+  // Update allTotals when calculated values change
+  useEffect(() => {
+    setAllTotals(prev => ({
+      ...prev,
+      ...calculatedTotals
+    }));
+  }, [calculatedTotals]);
 
   useEffect(() => {
     console.log("all totoals ==========>", allTotals);
@@ -450,7 +448,7 @@ export const Sale = () => {
       });
   }, [allTotals?.fully_paid]);
 
-  const handleOnSelect = (item) => {
+  const handleOnSelect = useCallback((item) => {
     console.log("barcode ---->", item.product_bar_code);
     const allReadyExist = addedItems.some(
       (elem) => elem.product_full_name === item.product_full_name
@@ -465,56 +463,66 @@ export const Sale = () => {
           ...addedItems,
         ])
       : setAddedItems((previousState) => {
-          let obj = previousState[index];
+          const newState = [...previousState];
+          const obj = { ...newState[index] };
           if (obj !== undefined) {
-            obj.billing_quantity = Number(obj.billing_quantity || 0) + 1; // <-- state mutation
+            obj.billing_quantity = Number(obj.billing_quantity || 0) + 1;
             obj.amount_total =
               Number(obj.billing_quantity) * Number(obj.sale_price);
             console.log("Quantity Scan ---->", obj.billing_quantity);
+            newState[index] = obj;
           }
-          return [...previousState];
+          return newState;
         });
     // !allReadyExist && setAddedItems([...addedItems, item]);
     /*  setTimeout(() => {
              document.getElementsByClassName("clear-icon")[0].querySelector(':scope > svg')[0].click();
          }, 1000) */ //1 second delay
-  };
+  }, [addedItems]);
 
-  const updateFieldChanged = (index) => (e) => {
+  const updateFieldChanged = useCallback((index) => (e) => {
     // console.log('index: ' + index);
     // console.log('property name: ' + e.target.name);
-    let newArr = [...addedItems];
-
-    e.target.name === "price" &&
-      (newArr[index].price = e.target.value) &&
-      (newArr[index].sale_price = e.target.value) &&
-      (newArr[index].discount_in_rs = 0);
-
-    e.target.name === "quantity" &&
-      (newArr[index].billing_quantity = e.target.value);
-
-    e.target.name === "product_name" &&
-      (newArr[index].product_name = e.target.value);
-    e.target.name === "product_size" &&
-      (newArr[index].product_size = e.target.value);
-    e.target.name === "product_unit" &&
-      (newArr[index].product_unit = e.target.value);
-
-    e.target.name === "sale_price" &&
-      (newArr[index].sale_price = e.target.value) &&
-      (newArr[index].discount_in_rs =
-        newArr[index].price - newArr[index].sale_price);
-    e.target.name === "discount" &&
-      (newArr[index].discount_in_rs = e.target.value) &&
-      (newArr[index].sale_price =
-        newArr[index].price - newArr[index].discount_in_rs);
-    newArr[index].amount_total =
-      Number(newArr[index].billing_quantity) * Number(newArr[index].sale_price);
-    // console.log("new arrya --->", newArr);
-
-    newArr = newArr.filter((item) => item);
-    setAddedItems(newArr);
-  };
+    const { name, value } = e.target;
+    
+    setAddedItems(prev => {
+      const newArr = [...prev];
+      const item = { ...newArr[index] };
+      
+      switch (name) {
+        case "price":
+          item.price = value;
+          item.sale_price = value;
+          item.discount_in_rs = 0;
+          break;
+        case "quantity":
+          item.billing_quantity = value;
+          break;
+        case "product_name":
+          item.product_name = value;
+          break;
+        case "product_size":
+          item.product_size = value;
+          break;
+        case "product_unit":
+          item.product_unit = value;
+          break;
+        case "sale_price":
+          item.sale_price = value;
+          item.discount_in_rs = item.price - item.sale_price;
+          break;
+        case "discount":
+          item.discount_in_rs = value;
+          item.sale_price = item.price - item.discount_in_rs;
+          break;
+      }
+      
+      item.amount_total = Number(item.billing_quantity) * Number(item.sale_price);
+      newArr[index] = item;
+      
+      return newArr.filter(Boolean);
+    });
+  }, []);
 
   const Print = () => {
     console.log("print");
@@ -526,12 +534,13 @@ export const Sale = () => {
     document.body.innerHTML = originalContents;
   };
 
-  const deleteFeild = (index) => {
-    let newArr = [...addedItems];
-    delete newArr[index];
-    newArr = newArr.filter((item) => item);
-    setAddedItems(newArr);
-  };
+  const deleteFeild = useCallback((index) => {
+    setAddedItems(prev => {
+      const newArr = [...prev];
+      newArr.splice(index, 1);
+      return newArr.filter(Boolean);
+    });
+  }, []);
 
   const submitSale = () => {
     console.log(
@@ -1714,6 +1723,11 @@ export const Sale = () => {
       </div>
     </>
   );
-};
+});
+
+Sale.displayName = 'Sale';
+
+export { Sale };
+export default Sale;
 
 //
