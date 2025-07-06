@@ -549,7 +549,7 @@ const Sale = React.memo(() => {
       " ========== ",
       addedItems
     );
-    setIL(true);
+    // setIL(true);
     // if (
     //   selectedCustomer.mobile == undefined ||
     //   selectedCustomer.mobile == null
@@ -588,7 +588,9 @@ const Sale = React.memo(() => {
         coupon_code: useCouponData.coupon_code,
         coupon_discount_value: allTotals?.coupon_discount_value,
         coupon_id: useCouponData.coupon_id,
-        purchaes_date: Saledate.toLocaleDateString(),
+        purchaes_date: Saledate
+          ? new Date(Saledate).toLocaleDateString()
+          : null,
         product_list: addedItems,
       });
 
