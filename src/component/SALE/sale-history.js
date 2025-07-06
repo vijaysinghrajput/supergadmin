@@ -1,4 +1,4 @@
-import { SaleDataTable } from "./component/SaleDataTable";
+import SaleDataTable from "./component/SaleDataTable";
 import { Splitter, SplitterPanel } from "primereact/splitter";
 
 const SalesHistory = () => {

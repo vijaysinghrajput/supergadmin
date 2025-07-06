@@ -1,5 +1,11 @@
 import { Link } from "react-router-dom";
-import { useState, useContext, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useContext,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import ContextData from "../../context/MainContext";
 import URL from "../../URL";
 
@@ -116,319 +122,335 @@ const ProductManagement = () => {
     // console.log("product", showData);
   }, [product_management, isLoadingAPI]);
 
-  const getToast = useCallback((e) => {
-    toast({
-      title: e.title,
-      description: e.desc,
-      status: e.status,
-      duration: 3000,
-      isClosable: true,
-      position: "bottom-right",
-    });
-  }, [toast]);
+  const getToast = useCallback(
+    (e) => {
+      toast({
+        title: e.title,
+        description: e.desc,
+        status: e.status,
+        duration: 3000,
+        isClosable: true,
+        position: "bottom-right",
+      });
+    },
+    [toast]
+  );
 
   const ChangeStatus = useCallback(() => {
     setProductDelID(true);
   }, []);
 
-  const STORY_HEADERS = useMemo(() => [
-    {
-      prop: "stock_quantity",
-      title: "QTY",
-      isFilterable: true,
-      isSortable: true,
-      cell: (row) => {
-        return <p className="text-primary">{row.stock_quantity}</p>;
+  const STORY_HEADERS = useMemo(
+    () => [
+      {
+        prop: "stock_quantity",
+        title: "QTY",
+        isFilterable: true,
+        isSortable: true,
+        cell: (row) => {
+          return <p className="text-primary">{row.stock_quantity}</p>;
+        },
       },
-    },
-    {
-      prop: "product_name",
-      title: "Product",
-      isFilterable: true,
-      isSortable: true,
-      cell: (row) => {
-        return <p className="text-primary">{row.product_full_name}</p>;
+      {
+        prop: "product_name",
+        title: "Product",
+        isFilterable: true,
+        isSortable: true,
+        cell: (row) => {
+          return <p className="text-primary">{row.product_full_name}</p>;
+        },
       },
-    },
-    {
-      prop: "product_image",
-      title: "Image",
-      isFilterable: true,
-      isSortable: true,
+      {
+        prop: "product_image",
+        title: "Image",
+        isFilterable: true,
+        isSortable: true,
 
-      cell: (row) => {
-        return (
-          <img
-            onClick={() => setUpdateProductPrice(row)}
-            data-bs-toggle="modal"
-            data-bs-target="#showImage"
-            src={row.product_image}
-            alt=""
-            style={{ height: "40px", borderRadius: "14px", cursor: "pointer" }}
-          />
-        );
+        cell: (row) => {
+          return (
+            <img
+              onClick={() => setUpdateProductPrice(row)}
+              data-bs-toggle="modal"
+              data-bs-target="#showImage"
+              src={row.product_image}
+              alt=""
+              style={{
+                height: "40px",
+                borderRadius: "14px",
+                cursor: "pointer",
+              }}
+            />
+          );
+        },
       },
-    },
 
-    {
-      prop: "child_category_name",
-      title: "Category",
-      isFilterable: true,
-      isSortable: true,
-      cell: (row) => {
-        return <p className="text-success">{row.child_category_name}</p>;
+      {
+        prop: "child_category_name",
+        title: "Category",
+        isFilterable: true,
+        isSortable: true,
+        cell: (row) => {
+          return <p className="text-success">{row.child_category_name}</p>;
+        },
       },
-    },
-    {
-      prop: "brand_name",
-      title: "Brand",
-      isFilterable: true,
-      isSortable: true,
-      cell: (row) => {
-        return <p className="text-dark">{row.brand_name}</p>;
+      {
+        prop: "brand_name",
+        title: "Brand",
+        isFilterable: true,
+        isSortable: true,
+        cell: (row) => {
+          return <p className="text-dark">{row.brand_name}</p>;
+        },
       },
-    },
 
-    // {
-    //     prop: "discount_in_rs",
-    //     title: "Discount",
-    //     isFilterable: true,
-    //     isSortable: true,
-    //     cell: (row) => {
-    //         return (
-    //             <p className="text-danger"> ₹ {row.discount_in_rs}</p>
-    //         );
-    //     }
-    // },
-    {
-      prop: "sale_price",
-      title: "Sale Price",
-      isFilterable: true,
-      isSortable: true,
-      cell: (row) => {
-        return <p className="text-danger"> ₹ {row.sale_price}</p>;
+      // {
+      //     prop: "discount_in_rs",
+      //     title: "Discount",
+      //     isFilterable: true,
+      //     isSortable: true,
+      //     cell: (row) => {
+      //         return (
+      //             <p className="text-danger"> ₹ {row.discount_in_rs}</p>
+      //         );
+      //     }
+      // },
+      {
+        prop: "sale_price",
+        title: "Sale Price",
+        isFilterable: true,
+        isSortable: true,
+        cell: (row) => {
+          return <p className="text-danger"> ₹ {row.sale_price}</p>;
+        },
       },
-    },
 
-    {
-      prop: "status",
-      title: "Status",
-      isSortable: true,
+      {
+        prop: "status",
+        title: "Status",
+        isSortable: true,
 
-      cell: (row) => {
-        return (
-          <Dropdown>
-            <Dropdown.Toggle
-              variant={row.status == 1 ? "success" : "danger"}
-              id="dropdown-basic"
-            >
-              {row.status == 1 ? "Active" : "Not Active"}
-            </Dropdown.Toggle>
-
-            <Dropdown.Menu>
-              <Dropdown.Item
-                onClick={() =>
-                  UpdateStatusAction(row.id, row.product_name, row.status)
-                }
+        cell: (row) => {
+          return (
+            <Dropdown>
+              <Dropdown.Toggle
+                variant={row.status == 1 ? "success" : "danger"}
+                id="dropdown-basic"
               >
-                {row.status == 1 ? "Make Not Active" : "Make Active"}
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        );
+                {row.status == 1 ? "Active" : "Not Active"}
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu>
+                <Dropdown.Item
+                  onClick={() =>
+                    UpdateStatusAction(row.id, row.product_name, row.status)
+                  }
+                >
+                  {row.status == 1 ? "Make Not Active" : "Make Active"}
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          );
+        },
       },
-    },
 
-    {
-      prop: "Stock",
-      title: "Action",
+      {
+        prop: "Stock",
+        title: "Action",
 
-      cell: (row) => {
-        return (
-          <Dropdown>
-            <Dropdown.Toggle variant="dark" id="dropdown-basic">
-              Action
-            </Dropdown.Toggle>
+        cell: (row) => {
+          return (
+            <Dropdown>
+              <Dropdown.Toggle variant="dark" id="dropdown-basic">
+                Action
+              </Dropdown.Toggle>
 
-            <Dropdown.Menu>
-              <Dropdown.Item
-                onClick={() => setUpdateProductPrice(row)}
-                data-bs-toggle="modal"
-                data-bs-target="#UpdateProductPricing"
-              >
-                Update Price
-              </Dropdown.Item>
-              <Dropdown.Item
-                onClick={() => setUpdateProductPrice(row)}
-                data-bs-toggle="modal"
-                data-bs-target="#UpdateProductStock"
-              >
-                Update Stock
-              </Dropdown.Item>
-              <Dropdown.Item
-                onClick={() => setUpdateProductPrice(row)}
-                data-bs-toggle="modal"
-                data-bs-target="#UpdateProductComp"
-              >
-                Update Product
-              </Dropdown.Item>
-              <Dropdown.Item
-                onClick={() => setUpdateProductPrice(row)}
-                data-bs-toggle="modal"
-                data-bs-target="#downloadBarcode"
-              >
-                Download Barcode
-              </Dropdown.Item>
-              <Dropdown.Item
-                onClick={() => setUpdateProductPrice(row)}
-                data-bs-toggle="modal"
-                data-bs-target="#updateImage"
-              >
-                Update Image
-              </Dropdown.Item>
+              <Dropdown.Menu>
+                <Dropdown.Item
+                  onClick={() => setUpdateProductPrice(row)}
+                  data-bs-toggle="modal"
+                  data-bs-target="#UpdateProductPricing"
+                >
+                  Update Price
+                </Dropdown.Item>
+                <Dropdown.Item
+                  onClick={() => setUpdateProductPrice(row)}
+                  data-bs-toggle="modal"
+                  data-bs-target="#UpdateProductStock"
+                >
+                  Update Stock
+                </Dropdown.Item>
+                <Dropdown.Item
+                  onClick={() => setUpdateProductPrice(row)}
+                  data-bs-toggle="modal"
+                  data-bs-target="#UpdateProductComp"
+                >
+                  Update Product
+                </Dropdown.Item>
+                <Dropdown.Item
+                  onClick={() => setUpdateProductPrice(row)}
+                  data-bs-toggle="modal"
+                  data-bs-target="#downloadBarcode"
+                >
+                  Download Barcode
+                </Dropdown.Item>
+                <Dropdown.Item
+                  onClick={() => setUpdateProductPrice(row)}
+                  data-bs-toggle="modal"
+                  data-bs-target="#updateImage"
+                >
+                  Update Image
+                </Dropdown.Item>
 
-              <Dropdown.Item
-                onClick={() =>
-                  deleteAction(
-                    row.id,
-                    row.product_name +
-                      " " +
-                      row.product_size +
-                      " " +
-                      row.product_unit
-                  )
-                }
-              >
-                Delete Product
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        );
+                <Dropdown.Item
+                  onClick={() =>
+                    deleteAction(
+                      row.id,
+                      row.product_name +
+                        " " +
+                        row.product_size +
+                        " " +
+                        row.product_unit
+                    )
+                  }
+                >
+                  Delete Product
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          );
+        },
       },
-    },
-  ], [setUpdateProductPrice]);
+    ],
+    [setUpdateProductPrice]
+  );
 
-  const UpdateStatusAction = useCallback((product_id, product_name, status) => {
-    let flag = false;
+  const UpdateStatusAction = useCallback(
+    (product_id, product_name, status) => {
+      let flag = false;
 
-    var statusAction = "";
-    var statusModified = null;
-    if (Number(status) == 1) {
-      statusAction = "Not Active";
-      statusModified = 0;
-    } else {
-      statusAction = "Active";
-      statusModified = 1;
-    }
-
-    swal({
-      title: "Action | " + statusAction + " | to " + product_name,
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    }).then((deleteProductFromStore) => {
-      if (deleteProductFromStore) {
-        console.log("status", statusModified);
-
-        fetch(URLDomain + "/APP-API/Billing/changeStoreProductStatus", {
-          method: "POST",
-          header: {
-            Accept: "application/json",
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({
-            product_id: product_id,
-            statusModified: statusModified,
-          }),
-        })
-          .then((response) => response.json())
-          .then((responseJson) => {
-            if (responseJson.success) {
-              // storeProductRelode();
-              // fetchData();
-
-              queryClient.invalidateQueries({
-                queryKey: ["product_management"],
-              });
-
-              getToast({
-                title: "Status Change ",
-                dec: "Successful",
-                status: "success",
-              });
-            } else {
-              getToast({ title: "ERROR", dec: "ERROR", status: "error" });
-            }
-
-            for (let i = 0; i < 10; i++) {
-              document.getElementsByClassName("btn-close")[i].click();
-            }
-          })
-          .catch((error) => {
-            //  console.error(error);
-          });
-
-        swal("Status Change!", {
-          icon: "success",
-        });
+      var statusAction = "";
+      var statusModified = null;
+      if (Number(status) == 1) {
+        statusAction = "Not Active";
+        statusModified = 0;
       } else {
-        swal("Nothing Change!");
+        statusAction = "Active";
+        statusModified = 1;
       }
-    });
-  }, [getToast, adminStoreId, adminId]);
 
-  const deleteAction = useCallback((delete_id, product_name) => {
-    swal({
-      title: "Are you sure?",
-      text: "Once deleted, you will not be able to recover this Product !",
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    }).then((deleteProductFromStore) => {
-      if (deleteProductFromStore) {
-        fetch(URLDomain + "/APP-API/Billing/deleteStoreProduct", {
-          method: "POST",
-          header: {
-            Accept: "application/json",
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({
-            delete_id: delete_id,
-            product_name: product_name,
-            store_id: adminStoreId,
-            adminId: adminId,
-          }),
-        })
-          .then((response) => response.json())
-          .then((responseJson) => {
-            console.log("respond delete", responseJson);
-            if (responseJson.delete) {
-              storeProductRelode();
-              getToast({
-                title: "Product Deleted ",
-                dec: "Successful",
-                status: "success",
-              });
-            } else {
-              getToast({ title: "ERROR", dec: "ERROR", status: "error" });
-            }
+      swal({
+        title: "Action | " + statusAction + " | to " + product_name,
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      }).then((deleteProductFromStore) => {
+        if (deleteProductFromStore) {
+          console.log("status", statusModified);
 
-            for (let i = 0; i < 10; i++) {
-              document.getElementsByClassName("btn-close")[i].click();
-            }
+          fetch(URLDomain + "/APP-API/Billing/changeStoreProductStatus", {
+            method: "POST",
+            header: {
+              Accept: "application/json",
+              "Content-type": "application/json",
+            },
+            body: JSON.stringify({
+              product_id: product_id,
+              statusModified: statusModified,
+            }),
           })
-          .catch((error) => {
-            //  console.error(error);
-          });
+            .then((response) => response.json())
+            .then((responseJson) => {
+              if (responseJson.success) {
+                // storeProductRelode();
+                // fetchData();
 
-        swal("Poof! Your Product  has been deleted!", {
-          icon: "success",
-        });
-      } else {
-        swal("Product is safe!");
-      }
-    });
-  }, [storeProductRelode, getToast, adminStoreId, adminId]);
+                queryClient.invalidateQueries({
+                  queryKey: ["product_management"],
+                });
+
+                getToast({
+                  title: "Status Change ",
+                  dec: "Successful",
+                  status: "success",
+                });
+              } else {
+                getToast({ title: "ERROR", dec: "ERROR", status: "error" });
+              }
+
+              for (let i = 0; i < 10; i++) {
+                document.getElementsByClassName("btn-close")[i].click();
+              }
+            })
+            .catch((error) => {
+              //  console.error(error);
+            });
+
+          swal("Status Change!", {
+            icon: "success",
+          });
+        } else {
+          swal("Nothing Change!");
+        }
+      });
+    },
+    [getToast, adminStoreId, adminId]
+  );
+
+  const deleteAction = useCallback(
+    (delete_id, product_name) => {
+      swal({
+        title: "Are you sure?",
+        text: "Once deleted, you will not be able to recover this Product !",
+        icon: "warning",
+        buttons: true,
+        dangerMode: true,
+      }).then((deleteProductFromStore) => {
+        if (deleteProductFromStore) {
+          fetch(URLDomain + "/APP-API/Billing/deleteStoreProduct", {
+            method: "POST",
+            header: {
+              Accept: "application/json",
+              "Content-type": "application/json",
+            },
+            body: JSON.stringify({
+              delete_id: delete_id,
+              product_name: product_name,
+              store_id: adminStoreId,
+              adminId: adminId,
+            }),
+          })
+            .then((response) => response.json())
+            .then((responseJson) => {
+              console.log("respond delete", responseJson);
+              if (responseJson.delete) {
+                storeProductRelode();
+                getToast({
+                  title: "Product Deleted ",
+                  dec: "Successful",
+                  status: "success",
+                });
+              } else {
+                getToast({ title: "ERROR", dec: "ERROR", status: "error" });
+              }
+
+              for (let i = 0; i < 10; i++) {
+                document.getElementsByClassName("btn-close")[i].click();
+              }
+            })
+            .catch((error) => {
+              //  console.error(error);
+            });
+
+          swal("Poof! Your Product  has been deleted!", {
+            icon: "success",
+          });
+        } else {
+          swal("Product is safe!");
+        }
+      });
+    },
+    [storeProductRelode, getToast, adminStoreId, adminId]
+  );
   const deleteProductFromStore = useCallback(() => {
     // console.log('delete_id',delID)
     alert("done");
@@ -467,17 +489,22 @@ const ProductManagement = () => {
         //  console.error(error);
       });
   };
-  const changeStatusData = useCallback((value) => {
-    setRadioValue1(value);
+  const changeStatusData = useCallback(
+    (value) => {
+      setRadioValue1(value);
 
-    if (value == 1) {
-      const newParentData = storeProductsData.filter((obj) => obj.status == 1);
-      setShowData(newParentData);
-    } else {
-      const newChildData = storeProductsData.filter((obj) => obj.status == 0);
-      setShowData(newChildData);
-    }
-  }, [storeProductsData]);
+      if (value == 1) {
+        const newParentData = storeProductsData.filter(
+          (obj) => obj.status == 1
+        );
+        setShowData(newParentData);
+      } else {
+        const newChildData = storeProductsData.filter((obj) => obj.status == 0);
+        setShowData(newChildData);
+      }
+    },
+    [storeProductsData]
+  );
 
   if (!allDataLoaded) {
   }
@@ -922,4 +949,4 @@ const ProductManagement = () => {
 };
 
 export default React.memo(ProductManagement);
-ProductManagement.displayName = 'ProductManagement';
+ProductManagement.displayName = "ProductManagement";
