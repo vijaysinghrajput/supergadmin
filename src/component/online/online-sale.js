@@ -1,102 +1,98 @@
-import { Link } from "react-router-dom";
-import { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router";
+import { useMutation } from "react-query";
+
 import ContextData from "../../context/MainContext";
 import URL from "../../URL";
 
-import { useNavigate } from "react-router";
-
-import { useQuery } from "react-query";
-
-// import "bootstrap/dist/css/bootstrap.css";
-import { Col, Row, Table } from "react-bootstrap";
 import Dropdown from "react-bootstrap/Dropdown";
-
 import ButtonGroup from "react-bootstrap/ButtonGroup";
 import ToggleButton from "react-bootstrap/ToggleButton";
 
 import { queryClient } from "../../App";
-
 import { OnlineOrderListDataTable } from "./component/OnlineOrderListDataTable";
 
 import swal from "sweetalert";
-
-import {
-  DatatableWrapper,
-  Filter,
-  Pagination,
-  PaginationOptions,
-  TableBody,
-  TableHeader,
-} from "react-bs-datatable";
-
-// Create table headers consisting of 4 columns.
 import Cookies from "universal-cookie";
-import { Box, Flex, Spinner } from "@chakra-ui/react";
+import { Flex, Spinner, useToast } from "@chakra-ui/react";
 
 const cookies = new Cookies();
 
 const OnlineSale = () => {
-  const {
-    store_customer_purchase_record,
-    removeDataToCurrentGlobal,
-    getToast,
-    reloadData,
-  } = useContext(ContextData);
-  const [delID, setProductDelID] = useState(0);
-  const [isDeletAction, setDeletAction] = useState(false);
-  const [vendorData, getVendorData] = useState({});
+  const { getToast } = useContext(ContextData);
   const navigate = useNavigate();
+  const toast = useToast();
 
   const adminStoreId = cookies.get("adminStoreId");
   const adminId = cookies.get("adminId");
 
   const [radioValue, setRadioValue] = useState("Placed");
-  console.log("radio ======>", radioValue);
 
-  const radios = [
-    { name: "Placed", value: "Placed", variant: "dark" },
-    { name: "Confirmed", value: "Confirmed", variant: "success" },
-    {
-      name: "Preparing for dispatch",
-      value: "Preparing for dispatch",
-      variant: "warning",
-    },
-    { name: "On the way", value: "On the way", variant: "info" },
-    { name: "Delivered", value: "Delivered", variant: "primary" },
-    { name: "Canceled", value: "Canceled", variant: "danger" },
-  ];
+  // Memoized status options for better performance
+  const radios = useMemo(
+    () => [
+      { name: "Placed", value: "Placed", variant: "dark" },
+      { name: "Confirmed", value: "Confirmed", variant: "success" },
+      {
+        name: "Preparing for dispatch",
+        value: "Preparing for dispatch",
+        variant: "warning",
+      },
+      { name: "On the way", value: "On the way", variant: "info" },
+      { name: "Delivered", value: "Delivered", variant: "primary" },
+      { name: "Canceled", value: "Canceled", variant: "danger" },
+    ],
+    []
+  );
 
-  async function fetchData({ order_status }) {
-    const data = await fetch(URL + "/APP-API/Billing/getOnlineOrder", {
-      method: "post",
-      header: {
+  // API function for updating order status
+  const updateOrderStatusAPI = async ({ store_id, order_id, order_status }) => {
+    const response = await fetch(URL + "/APP-API/Billing/updateOrderStatus", {
+      method: "POST",
+      headers: {
         Accept: "application/json",
-        "Content-type": "application/json",
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        store_id: adminStoreId,
+        store_id,
+        order_id,
         order_status,
       }),
-    })
-      .then((response) => response.json())
-      .then((responseJson) => responseJson);
-    return data.online_order;
-  }
+    });
 
-  const {
-    data: ONLINE_ORDERS,
-    isFetching,
-    isLoading: ONLINE_ORDERS_LOADING,
-  } = useQuery({
-    queryKey: ["ONLINE_ORDERS", radioValue],
-    queryFn: (e) => fetchData({ order_status: e.queryKey[1] }),
-  });
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
 
-  // console.log("isisFetching", isFetching);
-
-  const ChangeStatus = () => {
-    setProductDelID(true);
+    return response.json();
   };
+
+  // Mutation for updating order status
+  const updateOrderStatusMutation = useMutation(updateOrderStatusAPI, {
+    onSuccess: (data) => {
+      if (data.status) {
+        queryClient.invalidateQueries(["ONLINE_ORDERS"]);
+        toast({
+          title: "Status Updated",
+          dec: "Order status updated successfully",
+          status: "success",
+        });
+      } else {
+        toast({
+          title: "Error",
+          dec: data.message || "Failed to update order status",
+          status: "error",
+        });
+      }
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        dec: "Failed to update order status",
+        status: "error",
+      });
+    },
+  });
 
   const STORY_HEADERS = [
     {
@@ -171,6 +167,62 @@ const OnlineSale = () => {
     },
 
     {
+      prop: "order_status",
+      title: "Current Status",
+      isFilterable: true,
+      isSortable: true,
+      cell: (row) => {
+        const statusVariant =
+          radios.find((r) => r.value === row.order_status)?.variant ||
+          "secondary";
+        return (
+          <span className={`badge bg-${statusVariant}`}>
+            {row.order_status}
+          </span>
+        );
+      },
+    },
+
+    {
+      prop: "quick_status_change",
+      title: "Quick Status",
+      cell: (row) => {
+        return (
+          <Dropdown>
+            <Dropdown.Toggle
+              variant="outline-primary"
+              size="sm"
+              id={`status-dropdown-${row.order_id}`}
+              disabled={updateOrderStatusMutation.isLoading}
+            >
+              {updateOrderStatusMutation.isLoading
+                ? "Updating..."
+                : "Change Status"}
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              {radios.map((radio, idx) => (
+                <div key={idx}>
+                  {radio.value !== row.order_status && (
+                    <Dropdown.Item
+                      onClick={() =>
+                        handleQuickStatusChange(row.order_id, radio.value)
+                      }
+                      className={`text-${radio.variant}`}
+                    >
+                      <i className={`ri-checkbox-circle-line me-2`}></i>
+                      {radio.value}
+                    </Dropdown.Item>
+                  )}
+                </div>
+              ))}
+            </Dropdown.Menu>
+          </Dropdown>
+        );
+      },
+    },
+
+    {
       prop: "action",
       title: "Action",
 
@@ -237,6 +289,21 @@ const OnlineSale = () => {
     },
   ];
 
+  // Quick status change handler with callback optimization
+  const handleQuickStatusChange = useCallback(
+    (order_id, new_status) => {
+      console.log("order_id --->", order_id);
+      console.log("new_status --->", new_status);
+      updateOrderStatusMutation.mutate({
+        store_id: adminStoreId,
+        order_id: order_id,
+        order_status: new_status,
+      });
+    },
+    [updateOrderStatusMutation, adminStoreId]
+  );
+
+  // Enhanced status update with confirmation
   const UpdateStatusAction = (
     order_id,
     old_order_status,
@@ -250,46 +317,11 @@ const OnlineSale = () => {
       dangerMode: true,
     }).then((changeOrderStatus) => {
       if (changeOrderStatus) {
-        console.log("status", order_status);
-
-        fetch(URL + "/APP-API/Billing/changeStoreOrderStatus", {
-          method: "POST",
-          header: {
-            Accept: "application/json",
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({
-            order_id: order_id,
-            order_status: order_status,
-            user_id,
-          }),
-        })
-          .then((response) => response.json())
-          .then((responseJson) => {
-            if (responseJson.success) {
-              // storeProductRelode();
-              // fetchData();
-
-              queryClient.invalidateQueries({
-                queryKey: ["ONLINE_ORDERS"],
-              });
-
-              getToast({
-                title: "Status Change ",
-                dec: "Successful",
-                status: "success",
-              });
-            } else {
-              getToast({ title: "ERROR", dec: "ERROR", status: "error" });
-            }
-
-            for (let i = 0; i < 10; i++) {
-              document.getElementsByClassName("btn-close")[i].click();
-            }
-          })
-          .catch((error) => {
-            //  console.error(error);
-          });
+        updateOrderStatusMutation.mutate({
+          store_id: adminStoreId,
+          order_id: order_id,
+          order_status: order_status,
+        });
 
         swal("Status Change!", {
           icon: "success",
@@ -300,103 +332,9 @@ const OnlineSale = () => {
     });
   };
 
-  const deleteAction = (delete_id, order_status) => {
-    swal({
-      title: "Are you sure?",
-      text: "Once deleted, you will not be able to recover this Product !",
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    }).then((changeOrderStatus) => {
-      if (changeOrderStatus) {
-        fetch(URL + "/APP-API/Billing/deleteStoreProduct", {
-          method: "POST",
-          header: {
-            Accept: "application/json",
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({
-            delete_id: delete_id,
-            order_status: order_status,
-            store_id: adminStoreId,
-            adminId: adminId,
-          }),
-        })
-          .then((response) => response.json())
-          .then((responseJson) => {
-            console.log("respond delete", responseJson);
-            if (responseJson.delete) {
-              getToast({
-                title: "Product Deleted ",
-                dec: "Successful",
-                status: "success",
-              });
-            } else {
-              getToast({ title: "ERROR", dec: "ERROR", status: "error" });
-            }
-
-            for (let i = 0; i < 10; i++) {
-              document.getElementsByClassName("btn-close")[i].click();
-            }
-          })
-          .catch((error) => {
-            //  console.error(error);
-          });
-
-        reloadData();
-
-        swal("Poof! Your Product  has been deleted!", {
-          icon: "success",
-        });
-      } else {
-        swal("Product is safe!");
-      }
-    });
-  };
-
-  const deletePlot = () => {
-    console.log("kit kat", delID);
-    fetch(URL + "/APP-API/App/deletePlot", {
-      method: "POST",
-      header: {
-        Accept: "application/json",
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify({
-        id: delID,
-      }),
-    })
-      .then((response) => response.json())
-      .then((responseJson) => {
-        console.log("respond", responseJson);
-        if (responseJson.deleted) {
-          removeDataToCurrentGlobal({
-            type: "store_customer_purchase_record",
-            payload: delID,
-            where: "id",
-          });
-          getToast({ title: "Plot Deleted", dec: "", status: "error" });
-        } else {
-          alert("Error");
-        }
-        for (let i = 0; i < 10; i++) {
-          document.getElementsByClassName("btn-close")[i].click();
-        }
-      })
-      .catch((error) => {
-        //  console.error(error);
-      });
-  };
-
-  const changeOrderStatus = (value) => {
+  const changeOrderStatus = useCallback((value) => {
     setRadioValue(value);
-
-    if (value == 1) {
-    } else if (value == 2) {
-    } else if (value == 3) {
-    } else if (value == 4) {
-    }
-  };
+  }, []);
 
   return (
     <>
@@ -404,7 +342,15 @@ const OnlineSale = () => {
         <div className="row">
           <div className="col-12">
             <div className="page-title-box d-sm-flex align-items-center justify-content-between">
-              <h4 className="mb-sm-0">Vendor List </h4>
+              <h4 className="mb-sm-0">Online Orders Management</h4>
+              <div className="page-title-right">
+                <ol className="breadcrumb m-0">
+                  <li className="breadcrumb-item">
+                    <a href="#">Dashboard</a>
+                  </li>
+                  <li className="breadcrumb-item active">Online Orders</li>
+                </ol>
+              </div>
             </div>
           </div>
         </div>
@@ -423,9 +369,11 @@ const OnlineSale = () => {
                         name="radio"
                         value={radio.value}
                         checked={radioValue === radio.value}
-                        onChange={(e) =>
-                          changeOrderStatus(e.currentTarget.value)
-                        }
+                        onChange={(e) => {
+                          console.log("value --->", e.currentTarget.value);
+                          setRadioValue(e.currentTarget.value);
+                          changeOrderStatus(e.currentTarget.value);
+                        }}
                       >
                         {radio.name}
                       </ToggleButton>
@@ -438,11 +386,13 @@ const OnlineSale = () => {
               <div className="col-sm-auto ms-auto">
                 <div className="list-grid-nav hstack gap-1">
                   <button
-                    className="btn btn-dark"
-                    data-bs-toggle="modal"
-                    data-bs-target="#addVendor"
+                    className="btn btn-success"
+                    onClick={() =>
+                      queryClient.invalidateQueries(["ONLINE_ORDERS"])
+                    }
                   >
-                    <i className="ri-add-fill me-1 align-bottom" /> Add Vendor
+                    <i className="ri-refresh-line me-1 align-bottom" />
+                    Refresh Orders
                   </button>
                 </div>
               </div>
@@ -460,17 +410,11 @@ const OnlineSale = () => {
               <div className="card-body">
                 <div id="customerList">
                   <div className="table-responsive table-card mb-1">
-                    {ONLINE_ORDERS_LOADING ? (
-                      <Flex
-                        height={"5rem"}
-                        justifyContent={"center"}
-                        alignItems={"center"}
-                      >
-                        <Spinner />
-                      </Flex>
-                    ) : (
-                      <OnlineOrderListDataTable data={radioValue} />
-                    )}
+                    <OnlineOrderListDataTable
+                      data={radioValue}
+                      onStatusChange={handleQuickStatusChange}
+                      isUpdating={updateOrderStatusMutation.isLoading}
+                    />
                   </div>
                 </div>
               </div>
@@ -478,61 +422,20 @@ const OnlineSale = () => {
           </div>
         </div>
 
-        <div
-          className="modal fade"
-          id="addVendor"
-          tabIndex={-1}
-          aria-hidden="true"
-        >
-          <div className="modal-dialog modal-dialog-centered w-50">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="myModalLabel">
-                  Sale History
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                />
-              </div>
-              <div className="modal-body">{/* <AddVendorForm /> */}</div>
-            </div>
-            {/*end modal-content*/}
-          </div>
-          {/*end modal-dialog*/}
-        </div>
-        {/*end modal*/}
-
-        <div
-          className="modal fade"
-          id="updateVendor"
-          tabIndex={-1}
-          aria-hidden="true"
-        >
-          <div className="modal-dialog modal-dialog-centered w-50">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title" id="myModalLabel">
-                  Edit Vendor
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                />
-              </div>
-              <div className="modal-body">
-                {/* <UpdateVendor vendorDetails={vendorData} /> */}
+        {/* Order Status Update Loading Overlay */}
+        {updateOrderStatusMutation.isLoading && (
+          <div
+            className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+            style={{ backgroundColor: "rgba(0,0,0,0.5)", zIndex: 9999 }}
+          >
+            <div className="bg-white p-4 rounded shadow">
+              <div className="d-flex align-items-center">
+                <Spinner className="me-3" />
+                <span>Updating order status...</span>
               </div>
             </div>
-            {/*end modal-content*/}
           </div>
-          {/*end modal-dialog*/}
-        </div>
-        {/*end modal*/}
+        )}
 
         <svg className="bookmark-hide">
           <symbol

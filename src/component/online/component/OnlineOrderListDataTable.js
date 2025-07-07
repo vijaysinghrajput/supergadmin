@@ -20,7 +20,12 @@ import { queryClient } from "../../../App";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 const cookies = new Cookies();
 
-export const OnlineOrderListDataTable = (order_type) => {
+export const OnlineOrderListDataTable = ({
+  data: order_type,
+  onStatusChange,
+  isUpdating,
+}) => {
+  console.log("order_type --->", order_type);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [selectedMonthYear, setselectedMonthYear] = useState(null);
 
@@ -49,7 +54,7 @@ export const OnlineOrderListDataTable = (order_type) => {
         body: JSON.stringify({
           store_id: adminStoreId,
           selectedMonthYear,
-          order_type: order_type.data,
+          order_type: order_type,
         }),
       }
     )
@@ -66,7 +71,7 @@ export const OnlineOrderListDataTable = (order_type) => {
     // queryKey: ["ONLINE_ORDERS", order_type.data],
     // queryFn: (e) => fetchData({ order_status: e.queryKey[1] }),
 
-    queryKey: ["ONLINE_ORDERS", selectedMonthYear, order_type.data],
+    queryKey: ["ONLINE_ORDERS", selectedMonthYear, order_type],
     queryFn: (e) =>
       fetchData({ MonthYear: e.queryKey[1], order_status: e.queryKey[2] }),
   });
@@ -123,6 +128,53 @@ export const OnlineOrderListDataTable = (order_type) => {
     return <ActionForOnlineList id={rowData} />;
   };
 
+  // Current Status Badge Template
+  const currentStatusTemplate = (rowData) => {
+    return (
+      <Tag
+        value={rowData.order_status}
+        severity={getSeverity(rowData.order_status)}
+        className="text-uppercase"
+      />
+    );
+  };
+
+  // Quick Status Change Template
+  const quickStatusTemplate = (rowData) => {
+    const statuses = [
+      { label: "Placed", value: "Placed", variant: "dark" },
+      { label: "Confirmed", value: "Confirmed", variant: "success" },
+      {
+        label: "Preparing for dispatch",
+        value: "Preparing for dispatch",
+        variant: "warning",
+      },
+      { label: "On the way", value: "On the way", variant: "info" },
+      { label: "Delivered", value: "Delivered", variant: "primary" },
+      { label: "Canceled", value: "Canceled", variant: "danger" },
+    ];
+
+    const availableStatuses = statuses.filter(
+      (status) => status.value !== rowData.order_status
+    );
+
+    return (
+      <Dropdown
+        value={null}
+        options={availableStatuses}
+        optionLabel="label"
+        placeholder={isUpdating ? "Updating..." : "Change Status"}
+        className="w-full"
+        onChange={(e) => {
+          if (onStatusChange && e.value) {
+            onStatusChange(rowData.order_id, e.value);
+          }
+        }}
+        disabled={availableStatuses.length === 0 || isUpdating}
+      />
+    );
+  };
+
   const getSeverity = (value) => {
     switch (value) {
       case "Placed":
@@ -151,7 +203,6 @@ export const OnlineOrderListDataTable = (order_type) => {
     "On the way",
     "Delivered",
     "Canceled",
-    "Sold",
   ]);
 
   const statusRowFilterTemplate = (options) => {
@@ -300,7 +351,22 @@ export const OnlineOrderListDataTable = (order_type) => {
           field="delivery_slots"
           header="Slot"
           sortable
-          style={{ width: "55%" }}
+          style={{ width: "10%" }}
+        ></Column>
+
+        <Column
+          field="order_status"
+          header="Current Status"
+          body={currentStatusTemplate}
+          sortable
+          style={{ width: "15%" }}
+        ></Column>
+
+        <Column
+          field="quick_status_change"
+          header="Quick Status"
+          body={quickStatusTemplate}
+          style={{ width: "20%" }}
         ></Column>
 
         <Column
@@ -308,7 +374,7 @@ export const OnlineOrderListDataTable = (order_type) => {
           header="Action"
           body={ActionBodyTemplate}
           sortable
-          style={{ width: "25%" }}
+          style={{ width: "15%" }}
         ></Column>
       </DataTable>
     </div>
