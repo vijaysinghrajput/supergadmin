@@ -43,6 +43,8 @@ import {
 import swal from "sweetalert";
 
 import URL from "../../../URL";
+import A4Record from "./A4Record";
+import { useA4Print, A4PrintButton } from "../../../utils/useA4Print";
 
 import "react-datepicker/dist/react-datepicker.css";
 const cookies = new Cookies();
@@ -55,6 +57,7 @@ export const OfflineRecord = (ORD, MO) => {
   const toast = useToast();
   const componentRef = useRef();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isA4Open, onA4Open, onA4Close } = useA4Print();
 
   // console.log("orderID", orderID);
   // console.log("customer_address", customer_address);
@@ -482,11 +485,11 @@ export const OfflineRecord = (ORD, MO) => {
                     </div>
                   </div>
 
-                  <div class="hstack gap-2 justify-content-center mb-2 d-print-none mt-4">
+                  <div class="hstack gap-3 justify-content-center mb-2 d-print-none mt-4">
                     <a onClick={handlePrint} class="btn btn-success">
-                      <i class="ri-printer-line align-bottom me-1"></i> Print
-                      Bill
+                      <i class="ri-printer-line align-bottom me-1"></i> Print 3 inch thermal
                     </a>
+                    <A4PrintButton onClick={onA4Open} />
                   </div>
                   {/*end col*/}
                 </div>
@@ -940,6 +943,16 @@ export const OfflineRecord = (ORD, MO) => {
           </div>
         </Box>
       </div>
+      
+      {/* A4 Print Modal */}
+      {isA4Open && (
+        <A4Record 
+          orderID={orderID} 
+          customer_address={customer_address}
+          isOpen={isA4Open}
+          onClose={onA4Close}
+        />
+      )}
     </>
   );
 };

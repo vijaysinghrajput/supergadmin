@@ -1,5 +1,5 @@
 // import { BiRupee } from "react-icons/bi";
-import { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { BiRupee, BiBarcodeReader } from "react-icons/bi";
 import { AiOutlineDelete } from "react-icons/ai";
@@ -42,6 +42,8 @@ import {
 import swal from "sweetalert";
 
 import URL from "../../URL";
+import A4Record from "./component/A4Record";
+import { useA4Print, A4PrintButton } from "../../utils/useA4Print";
 
 import "react-datepicker/dist/react-datepicker.css";
 const cookies = new Cookies();
@@ -55,6 +57,7 @@ const OnlineSalesHistoryRecord = () => {
   const toast = useToast();
   const componentRef = useRef();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isA4Open, onA4Open, onA4Close } = useA4Print();
 
   // console.log("orderID", orderID);
   // console.log("customer_address", customer_address);
@@ -305,41 +308,41 @@ const OnlineSalesHistoryRecord = () => {
                         <div className="px-5 border-left">
                           <h6 className="">
                             Sub Total :{" "}
-                            <strong>{orderDetails?.sub_total}</strong>
+                            <strong>{orderDetails?.sub_total || '0'}</strong>
                           </h6>
                           <h6 className="">
                             Discount : -{" "}
-                            <strong>{orderDetails?.discount}</strong>
+                            <strong>{orderDetails?.discount || '0'}</strong>
                           </h6>
 
                           <h6 className="">
                             Grand Total :{" "}
-                            <strong>{orderDetails?.grand_total}</strong>
+                            <strong>{orderDetails?.grand_total || '0'}</strong>
                           </h6>
 
                           <h6 className="">
                             Delivery Charge : +{" "}
-                            <strong>{orderDetails?.delivery_charge}</strong>
+                            <strong>{orderDetails?.delivery_charge || '0'}</strong>
                           </h6>
 
                           <h6 className="">
                             Coupon Discount : -{" "}
                             <strong>
-                              {orderDetails?.coupon_discount_value}
+                              {orderDetails?.coupon_discount_value || '0'}
                             </strong>
                           </h6>
 
                           <h6 className="">
                             Extra Added Amount :{" "}
                             <strong>
-                              {Number(orderDetails?.extra_item_total)}
+                              {Number(orderDetails?.extra_item_total) || 0}
                             </strong>
                           </h6>
 
                           <h6 className="">
                             Total Paymnet :{" "}
                             <strong>
-                              {Number(orderDetails?.total_payment)}
+                              {Number(orderDetails?.total_payment) || 0}
                             </strong>
                           </h6>
 
@@ -366,13 +369,14 @@ const OnlineSalesHistoryRecord = () => {
                           <h6 className="">
                             Payment after All Settlement :{" "}
                             <strong>
-                              {Number(orderDetails?.total_payment) -
-                                Number(
+                              {(Number(orderDetails?.total_payment) || 0) -
+                                (Number(
                                   ONLINESALEHISTORYRECORD?.sumOfNotAvilable
-                                ) -
-                                Number(
+                                ) || 0) -
+                                (Number(
                                   ONLINESALEHISTORYRECORD?.getSumOfProductNotAvilable
-                                )}
+                                ) || 0)
+                              }
                             </strong>
                           </h6>
                         </div>
@@ -468,20 +472,15 @@ const OnlineSalesHistoryRecord = () => {
                           {productData.length && productData ? (
                             productData.map((items, index) => {
                               return (
-                                <>
-                                  {items && (
-                                    <tr
-                                      class={
-                                        items.avl_status == "1"
-                                          ? "table-active"
-                                          : "table-danger"
-                                      }
-                                      className={
-                                        items.is_extra_item == "1"
-                                          ? "bg-secondery"
-                                          : "bg-light"
-                                      }
-                                    >
+                                items && (
+                                  <tr
+                                    key={items.id || index}
+                                    className={
+                                      items.avl_status == "1"
+                                        ? "table-active"
+                                        : "table-danger"
+                                    }
+                                  >
                                       <td scope="col">
                                         <img
                                           style={{ height: 35 }}
@@ -534,7 +533,7 @@ const OnlineSalesHistoryRecord = () => {
                                               items.avl_status
                                             )
                                           }
-                                          class={
+                                          className={
                                             items.avl_status == 1
                                               ? "btn btn-sm btn-success"
                                               : "btn btn-sm btn-danger"
@@ -546,8 +545,7 @@ const OnlineSalesHistoryRecord = () => {
                                         </a>
                                       </td>
                                     </tr>
-                                  )}
-                                </>
+                                )
                               );
                             })
                           ) : (
@@ -558,11 +556,11 @@ const OnlineSalesHistoryRecord = () => {
                     </div>
                   </div>
 
-                  <div class="hstack gap-2 justify-content-center mb-2 d-print-none mt-4">
-                    <a onClick={handlePrint} class="btn btn-success">
-                      <i class="ri-printer-line align-bottom me-1"></i> Print
-                      Bill
+                  <div className="hstack gap-3 justify-content-center mb-2 d-print-none mt-4">
+                    <a onClick={handlePrint} className="btn btn-success">
+                      <i className="ri-printer-line align-bottom me-1"></i> Print 3 inch thermal
                     </a>
+                    <A4PrintButton onClick={onA4Open} />
                   </div>
                   {/*end col*/}
                 </div>
@@ -579,9 +577,9 @@ const OnlineSalesHistoryRecord = () => {
       <div className="row">
         <div className="col-lg-12">
           <div className="card">
-            <div className="card-body" class="map-responsive">
+            <div className="card-body map-responsive">
               <Map
-                class="h-500 w-100"
+                className="h-500 w-100"
                 google={window.google}
                 center={{
                   lat: customerAddress?.latitude,
@@ -735,6 +733,21 @@ const OnlineSalesHistoryRecord = () => {
           </p>
         </div>
       </div>
+      
+      {/* A4 Print Modal */}
+      {isA4Open && (
+        <A4Record 
+          orderID={orderID} 
+          customer_address={customer_address}
+          isOpen={isA4Open}
+          onClose={onA4Close}
+          orderDetails={orderDetails}
+          customerAddress={customerAddress}
+          productData={productData}
+          Store_bussiness_info={Store_bussiness_info}
+          delivery_slots={delivery_slots}
+        />
+      )}
     </>
   );
 };
@@ -1001,7 +1014,7 @@ export function AddProductModal({
                               fontSize={14}
                               className="mb-0"
                             >
-                              Print
+                              Print 3 inch thermal
                             </Text>
                             <TiPrinter size={28} />
                           </Flex>
