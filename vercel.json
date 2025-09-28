@@ -1,20 +1,7 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "build"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ],
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
   "env": {
     "GENERATE_SOURCEMAP": "false",
     "CI": "false",
@@ -22,5 +9,10 @@
     "SKIP_PREFLIGHT_CHECK": "true",
     "NODE_OPTIONS": "--max-old-space-size=4096"
   },
-  "buildCommand": "npm run build"
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }
