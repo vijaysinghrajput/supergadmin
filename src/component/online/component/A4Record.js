@@ -51,7 +51,7 @@ export const A4Record = ({
 
   const handleDownloadPDF = async () => {
     try {
-      console.log('Generating PDF from HTML...');
+
       
       const element = componentRefA4.current;
       

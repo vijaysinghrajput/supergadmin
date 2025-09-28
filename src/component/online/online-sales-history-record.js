@@ -289,8 +289,7 @@ const OnlineSalesHistoryRecord = () => {
       updateData.value = parseFloat(value) || 0;
     }
 
-    console.log('Saving to API:', URL + "/APP-API/Billing/updateSalesRecord");
-    console.log('Update data:', updateData);
+
     
     try {
       const response = await fetch(URL + "/APP-API/Billing/updateSalesRecord", {
@@ -307,7 +306,7 @@ const OnlineSalesHistoryRecord = () => {
       }
 
       const responseJson = await response.json();
-      console.log('API Response:', responseJson);
+
       
       if (responseJson.success) {
         return { success: true };
@@ -514,7 +513,7 @@ const OnlineSalesHistoryRecord = () => {
                                   
                                   for (const itemID of Object.keys(modifiedItems)) {
                                     try {
-                                      console.log('Saving item:', itemID, 'Data:', modifiedItems[itemID]);
+
                                       await saveToDatabase({
                                         itemID,
                                         field: 'batch_update',
