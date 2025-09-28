@@ -17,7 +17,10 @@
   ],
   "env": {
     "GENERATE_SOURCEMAP": "false",
-    "CI": "false"
+    "CI": "false",
+    "DISABLE_ESLINT_PLUGIN": "true",
+    "SKIP_PREFLIGHT_CHECK": "true",
+    "NODE_OPTIONS": "--max-old-space-size=4096"
   },
   "buildCommand": "npm run build"
 }
