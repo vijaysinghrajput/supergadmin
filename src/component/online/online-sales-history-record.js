@@ -25,7 +25,7 @@ import { useQuery } from "react-query";
 import { queryClient } from "../../App";
 import Cookies from "universal-cookie";
 import { SimpleGrid } from "@chakra-ui/react";
-import { Map, InfoWindow, Marker, GoogleApiWrapper } from "google-maps-react";
+// import { GoogleMap, InfoWindow, Marker } from "@react-google-maps/api";
 
 import {
   Box,
@@ -837,7 +837,7 @@ const OnlineSalesHistoryRecord = () => {
       </div>
 
       <div className="row">
-        <div className="col-lg-12">
+        {/* <div className="col-lg-12">
           <div className="card">
             <div className="card-body map-responsive">
               <Map
@@ -887,7 +887,7 @@ const OnlineSalesHistoryRecord = () => {
               </Map>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div

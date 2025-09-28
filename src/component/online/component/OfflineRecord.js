@@ -24,7 +24,7 @@ import {
 import { useQuery } from "react-query";
 import Cookies from "universal-cookie";
 import { SimpleGrid } from "@chakra-ui/react";
-import { Map, InfoWindow, Marker, GoogleApiWrapper } from "google-maps-react";
+// import { GoogleMap, InfoWindow, Marker } from "@react-google-maps/api";
 
 import { queryClient } from "../../../App";
 
