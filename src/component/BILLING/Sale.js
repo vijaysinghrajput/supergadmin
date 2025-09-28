@@ -594,6 +594,8 @@ const Sale = React.memo(() => {
         product_list: addedItems,
       });
 
+      console.log("final order data to submit", data);
+
       fetch(URLDomain + "/APP-API/Billing/SaleStoreProducts", {
         method: "POST",
         header: {

@@ -78,6 +78,7 @@ const OnlineSalesHistoryRecord = () => {
 
   const [orderDetails, setorderDetails] = useState([]);
 
+  const [customer, setcustomer] = useState({});
   const [customerAddress, setcustomerAddress] = useState({});
   const [productData, setproductData] = useState([]);
   const [Store_bussiness_info, setStore_bussiness_info] = useState([]);
@@ -119,6 +120,7 @@ const OnlineSalesHistoryRecord = () => {
     console.log("detaiols", ONLINESALEHISTORYRECORD);
     if (ONLINESALEHISTORYRECORD) {
       // setShowData(ONLINESALEHISTORYRECORD.store_customer_purchase_record);
+      setcustomer(ONLINESALEHISTORYRECORD.customer_details);
       setcustomerAddress(ONLINESALEHISTORYRECORD.customer_address_details);
       setproductData(ONLINESALEHISTORYRECORD.order_products_details);
       setorderDetails(ONLINESALEHISTORYRECORD.order_details);
@@ -236,6 +238,120 @@ const OnlineSalesHistoryRecord = () => {
 
   const notAvilable = debounce(notAvilable1, 1000);
 
+  // State for tracking local modifications
+  const [modifiedItems, setModifiedItems] = useState({});
+
+  // Local update function - only updates local state, no API call
+  const updateLocalState = ({ itemID, field, value, currentItem }) => {
+    // Real-time calculations
+    const quantity = field === 'quantity' ? parseFloat(value) : parseFloat(currentItem.quantity);
+    const mrp = field === 'mrp' ? parseFloat(value) : parseFloat(currentItem.mrp);
+    const salePrice = field === 'sale_price' ? parseFloat(value) : parseFloat(currentItem.sale_price);
+    const discount = field === 'discount' ? parseFloat(value) : parseFloat(currentItem.discount);
+
+    let calculatedData = { [field]: value };
+
+    // Calculate dependent fields
+    if (field === 'mrp' || field === 'sale_price') {
+      calculatedData.discount = Math.max(0, mrp - salePrice);
+    }
+    
+    if (field === 'discount') {
+      calculatedData.sale_price = Math.max(0, mrp - discount);
+    }
+
+    // Always recalculate total amount
+    const finalSalePrice = field === 'discount' ? (mrp - discount) : salePrice;
+    calculatedData.total_amount = quantity * finalSalePrice;
+
+    // Update local state immediately for visual feedback
+    setModifiedItems(prev => ({
+      ...prev,
+      [itemID]: {
+        ...currentItem,
+        ...calculatedData
+      }
+    }));
+  };
+
+  // API call function - only called when saving
+  const saveToDatabase = async ({ itemID, field, value, currentItem }) => {
+    let updateData = {
+      orderID,
+      itemID,
+      field
+    };
+
+    // Handle batch_update differently - send the entire object
+    if (field === 'batch_update') {
+      updateData.value = value; // value is the entire modified item object
+    } else {
+      updateData.value = parseFloat(value) || 0;
+    }
+
+    console.log('Saving to API:', URL + "/APP-API/Billing/updateSalesRecord");
+    console.log('Update data:', updateData);
+    
+    try {
+      const response = await fetch(URL + "/APP-API/Billing/updateSalesRecord", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseJson = await response.json();
+      console.log('API Response:', responseJson);
+      
+      if (responseJson.success) {
+        return { success: true };
+      } else {
+        throw new Error(responseJson.error || "Failed to update sales record");
+      }
+    } catch (error) {
+      console.error('Save error:', error);
+      throw error;
+    }
+  };
+
+  // Function to recalculate order totals
+  const getUpdatedTotals = () => {
+    if (!productData.length) return orderDetails;
+
+    let newSubTotal = 0;
+    let newGrandTotal = 0;
+    let newDiscount = 0;
+
+    productData.forEach(item => {
+      const currentItem = modifiedItems[item.id] || item;
+      const quantity = parseFloat(currentItem.quantity) || 0;
+      const mrp = parseFloat(currentItem.mrp) || 0;
+      const salePrice = parseFloat(currentItem.sale_price) || 0;
+      const discount = parseFloat(currentItem.discount) || 0;
+
+      newSubTotal += (mrp * quantity);
+      newGrandTotal += (salePrice * quantity);
+      newDiscount += (discount * quantity);
+    });
+
+    return {
+      ...orderDetails,
+      sub_total: newSubTotal.toFixed(2),
+      grand_total: newGrandTotal.toFixed(2),
+      discount: newDiscount.toFixed(2),
+      total_payment: newGrandTotal.toFixed(2)
+    };
+  };
+
+  // Get updated totals
+  const displayTotals = getUpdatedTotals();
+
   if (isLoading) {
     return <>loading...</>;
   }
@@ -308,16 +424,22 @@ const OnlineSalesHistoryRecord = () => {
                         <div className="px-5 border-left">
                           <h6 className="">
                             Sub Total :{" "}
-                            <strong>{orderDetails?.sub_total || '0'}</strong>
+                            <strong style={Object.keys(modifiedItems).length ? {color: 'blue'} : {}}>
+                              {displayTotals?.sub_total || '0'}
+                            </strong>
                           </h6>
                           <h6 className="">
                             Discount : -{" "}
-                            <strong>{orderDetails?.discount || '0'}</strong>
+                            <strong style={Object.keys(modifiedItems).length ? {color: 'blue'} : {}}>
+                              {displayTotals?.discount || '0'}
+                            </strong>
                           </h6>
 
                           <h6 className="">
                             Grand Total :{" "}
-                            <strong>{orderDetails?.grand_total || '0'}</strong>
+                            <strong style={Object.keys(modifiedItems).length ? {color: 'blue'} : {}}>
+                              {displayTotals?.grand_total || '0'}
+                            </strong>
                           </h6>
 
                           <h6 className="">
@@ -340,9 +462,9 @@ const OnlineSalesHistoryRecord = () => {
                           </h6>
 
                           <h6 className="">
-                            Total Paymnet :{" "}
-                            <strong>
-                              {Number(orderDetails?.total_payment) || 0}
+                            Total Payment :{" "}
+                            <strong style={Object.keys(modifiedItems).length ? {color: 'blue'} : {}}>
+                              {Number(displayTotals?.total_payment) || 0}
                             </strong>
                           </h6>
 
@@ -379,6 +501,60 @@ const OnlineSalesHistoryRecord = () => {
                               }
                             </strong>
                           </h6>
+                          
+                          {/* Save Changes Button */}
+                          {Object.keys(modifiedItems).length > 0 && (
+                            <Box mt={4}>
+                              <Button
+                                colorScheme="blue"
+                                size="sm"
+                                onClick={async () => {
+                                  let saveCount = 0;
+                                  let errorCount = 0;
+                                  
+                                  for (const itemID of Object.keys(modifiedItems)) {
+                                    try {
+                                      console.log('Saving item:', itemID, 'Data:', modifiedItems[itemID]);
+                                      await saveToDatabase({
+                                        itemID,
+                                        field: 'batch_update',
+                                        value: modifiedItems[itemID],
+                                        currentItem: modifiedItems[itemID]
+                                      });
+                                      saveCount++;
+                                    } catch (error) {
+                                      errorCount++;
+                                      console.error(`Failed to save item ${itemID}:`, error);
+                                    }
+                                  }
+                                  
+                                  if (saveCount > 0) {
+                                    queryClient.invalidateQueries({
+                                      queryKey: ["ONLINESALEHISTORYRECORD"],
+                                    });
+                                    
+                                    getToast({
+                                      title: "Records Saved",
+                                      desc: `${saveCount} record(s) updated successfully`,
+                                      status: "success",
+                                    });
+                                    
+                                    setModifiedItems({});
+                                  }
+                                  
+                                  if (errorCount > 0) {
+                                    getToast({
+                                      title: "Save Errors",
+                                      desc: `${errorCount} record(s) failed to save`,
+                                      status: "error",
+                                    });
+                                  }
+                                }}
+                              >
+                                Save All Changes ({Object.keys(modifiedItems).length})
+                              </Button>
+                            </Box>
+                          )}
                         </div>
                       </div>
 
@@ -471,6 +647,9 @@ const OnlineSalesHistoryRecord = () => {
                         <tbody>
                           {productData.length && productData ? (
                             productData.map((items, index) => {
+                              // Use modified values if available, otherwise use original
+                              const currentItem = modifiedItems[items.id] || items;
+                              
                               return (
                                 items && (
                                   <tr
@@ -487,7 +666,26 @@ const OnlineSalesHistoryRecord = () => {
                                           src={items.product_img}
                                         />
                                       </td>
-                                      <td scope="col">{items.quantity}</td>
+                                      <td scope="col">
+                                        <Input
+                                          type="number"
+                                          value={currentItem.quantity}
+                                          w={16}
+                                          h={8}
+                                          fontSize={12}
+                                          min={1}
+                                          bg={modifiedItems[items.id] ? 'blue.50' : 'white'}
+                                          borderColor={modifiedItems[items.id] ? 'blue.300' : 'gray.200'}
+                                          onChange={(e) => {
+                                            updateLocalState({
+                                              itemID: items.id,
+                                              field: 'quantity',
+                                              value: e.target.value,
+                                              currentItem: currentItem
+                                            });
+                                          }}
+                                        />
+                                      </td>
 
                                       <td scope="col">
                                         {items.product_size}{" "}
@@ -496,13 +694,78 @@ const OnlineSalesHistoryRecord = () => {
 
                                       <td>{items.product_full_name}</td>
 
-                                      <td scope="col">{items.mrp}</td>
                                       <td scope="col">
-                                        {items.sale_price} * {items.quantity}
+                                        <Input
+                                          type="number"
+                                          value={currentItem.mrp}
+                                          w={20}
+                                          h={8}
+                                          fontSize={12}
+                                          min={0}
+                                          step="0.01"
+                                          bg={modifiedItems[items.id] ? 'blue.50' : 'white'}
+                                          borderColor={modifiedItems[items.id] ? 'blue.300' : 'gray.200'}
+                                          onChange={(e) => {
+                                            updateLocalState({
+                                              itemID: items.id,
+                                              field: 'mrp',
+                                              value: e.target.value,
+                                              currentItem: currentItem
+                                            });
+                                          }}
+                                        />
                                       </td>
-                                      <td scope="col">{items.discount}</td>
+                                      <td scope="col">
+                                        <Input
+                                          type="number"
+                                          value={currentItem.sale_price}
+                                          w={20}
+                                          h={8}
+                                          fontSize={12}
+                                          min={0}
+                                          step="0.01"
+                                          bg={modifiedItems[items.id] ? 'blue.50' : 'white'}
+                                          borderColor={modifiedItems[items.id] ? 'blue.300' : 'gray.200'}
+                                          onChange={(e) => {
+                                            updateLocalState({
+                                              itemID: items.id,
+                                              field: 'sale_price',
+                                              value: e.target.value,
+                                              currentItem: currentItem
+                                            });
+                                          }}
+                                        />
+                                        <Text fontSize={10} color="gray.500">
+                                          * {currentItem.quantity}
+                                        </Text>
+                                      </td>
+                                      <td scope="col">
+                                        <Input
+                                          type="number"
+                                          value={currentItem.discount}
+                                          w={20}
+                                          h={8}
+                                          fontSize={12}
+                                          min={0}
+                                          step="0.01"
+                                          bg={modifiedItems[items.id] ? 'blue.50' : 'white'}
+                                          borderColor={modifiedItems[items.id] ? 'blue.300' : 'gray.200'}
+                                          onChange={(e) => {
+                                            updateLocalState({
+                                              itemID: items.id,
+                                              field: 'discount',
+                                              value: e.target.value,
+                                              currentItem: currentItem
+                                            });
+                                          }}
+                                        />
+                                      </td>
 
-                                      <td scope="col">{items.total_amount}</td>
+                                      <td scope="col">
+                                        <Text fontWeight="bold" fontSize={14}>
+                                          ₹{currentItem.total_amount}
+                                        </Text>
+                                      </td>
                                       <td scope="col">
                                         <Input
                                           type="number"
@@ -582,8 +845,8 @@ const OnlineSalesHistoryRecord = () => {
                 className="h-500 w-100"
                 google={window.google}
                 center={{
-                  lat: customerAddress?.latitude,
-                  lng: customerAddress?.longitude,
+                  lat: parseFloat(customerAddress?.latitude) || 0,
+                  lng: parseFloat(customerAddress?.longitude) || 0,
                 }}
                 bootstrapURLKeys={{
                   key: "AIzaSyDDirDSiLgvG8Gl8crjbvrGRXlCPOTYRzE",
@@ -591,17 +854,17 @@ const OnlineSalesHistoryRecord = () => {
                 zoom={15}
                 defaultZoom="Zoom"
                 initialCenter={{
-                  lat: customerAddress?.latitude,
-                  lng: customerAddress?.longitude,
+                  lat: parseFloat(customerAddress?.latitude) || 0,
+                  lng: parseFloat(customerAddress?.longitude) || 0,
                 }}
                 // onIdle={this.handleMapIdle}
               >
-                {orderDetails && (
+                {orderDetails && customerAddress?.latitude && customerAddress?.longitude && (
                   <Marker
                     map={window.google}
                     position={{
-                      lat: customerAddress?.latitude,
-                      lng: customerAddress?.longitude,
+                      lat: parseFloat(customerAddress?.latitude) || 0,
+                      lng: parseFloat(customerAddress?.longitude) || 0,
                     }}
                     // onDragend={(t, map, coord) => this.onMarkerDragEnd(coord)}
                     show={true}
@@ -610,16 +873,18 @@ const OnlineSalesHistoryRecord = () => {
 
                   // animation={window.google.maps.Animation.DROP} />
                 )}
-                <InfoWindow
-                  position={{
-                    lat: customerAddress?.latitude,
-                    lng: customerAddress?.longitude,
-                  }}
-                >
-                  <div>
-                    <p style={{ padding: 0, margin: 0 }}>hello</p>
-                  </div>
-                </InfoWindow>
+                {customerAddress?.latitude && customerAddress?.longitude && (
+                  <InfoWindow
+                    position={{
+                      lat: parseFloat(customerAddress?.latitude) || 0,
+                      lng: parseFloat(customerAddress?.longitude) || 0,
+                    }}
+                  >
+                    <div>
+                      <p style={{ padding: 0, margin: 0 }}>hello</p>
+                    </div>
+                  </InfoWindow>
+                )}
               </Map>
             </div>
           </div>
@@ -738,6 +1003,7 @@ const OnlineSalesHistoryRecord = () => {
       {isA4Open && (
         <A4Record 
           orderID={orderID} 
+          customer={customer}
           customer_address={customer_address}
           isOpen={isA4Open}
           onClose={onA4Close}
