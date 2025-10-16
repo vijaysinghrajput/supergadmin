@@ -365,9 +365,9 @@ export const A4Record = ({
               fontFamily: 'Arial, sans-serif',
               backgroundColor: 'white',
               color: 'black',
-              fontSize: '22px',
-              lineHeight: '1.4',
-              fontWeight: '700',
+              fontSize: '12px',
+              lineHeight: '1.2',
+              fontWeight: '600',
               width: '100%',
               minHeight: '297mm',
               maxWidth: '100%',
@@ -378,18 +378,18 @@ export const A4Record = ({
               widows: '3'
             }}>
               {/* Simple Header */}
-              <div style={{ marginBottom: '15px', textAlign: 'left' }}>
-                <h2 style={{ margin: '0', fontSize: '28px', fontWeight: '800' }}>{customer?.name}</h2>
+              <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+                <h2 style={{ margin: '0', fontSize: '16px', fontWeight: '700' }}>{customer?.name}</h2>
               </div>
 
               {/* Products Table */}
               <table style={{ 
                 width: '100%', 
                 borderCollapse: 'collapse', 
-                marginBottom: '25px',
-                border: '2px solid #000',
-                fontSize: '18px',
-                fontWeight: '700',
+                marginBottom: '15px',
+                border: '1px solid #000',
+                fontSize: '10px',
+                fontWeight: '600',
                 tableLayout: 'fixed',
                 pageBreakInside: 'auto'
               }} 
@@ -405,13 +405,13 @@ export const A4Record = ({
                     pageBreakInside: 'avoid',
                     breakInside: 'avoid'
                   }}>
-                    <th style={{ border: '1px solid #000', padding: '12px', textAlign: 'left', fontSize: '22px', fontWeight: '800', width: '8%' }}>S.No</th>
-                    <th style={{ border: '1px solid #000', padding: '12px', textAlign: 'left', fontSize: '22px', fontWeight: '800', width: '35%' }}>Product Name</th>
-                    <th style={{ border: '1px solid #000', padding: '12px', textAlign: 'center', fontSize: '22px', fontWeight: '800', width: '12%' }}>Size</th>
-                    <th style={{ border: '1px solid #000', padding: '12px', textAlign: 'center', fontSize: '22px', fontWeight: '800', width: '8%' }}>Qty</th>
-                    <th style={{ border: '1px solid #000', padding: '12px', textAlign: 'center', fontSize: '22px', fontWeight: '800', width: '12%' }}>MRP</th>
-                    <th style={{ border: '1px solid #000', padding: '12px', textAlign: 'center', fontSize: '22px', fontWeight: '800', width: '12%' }}>Rate</th>
-                    <th style={{ border: '1px solid #000', padding: '12px', textAlign: 'center', fontSize: '22px', fontWeight: '800', width: '13%' }}>Amount</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'left', fontSize: '12px', fontWeight: '700', width: '8%' }}>S.No</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'left', fontSize: '12px', fontWeight: '700', width: '35%' }}>Product Name</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '12%' }}>Size</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '8%' }}>Qty</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '12%' }}>MRP</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '12%' }}>Rate</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '13%' }}>Amount</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -421,33 +421,33 @@ export const A4Record = ({
                       pageBreakInside: 'avoid',
                       breakInside: 'avoid'
                     }}>
-                      <td style={{ border: '1px solid #000', padding: '10px 8px', textAlign: 'center', fontSize: '17px', fontWeight: '700', minHeight: '25px' }}>
+                      <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center', fontSize: '10px', fontWeight: '600', minHeight: '15px' }}>
                         {index + 1}
                       </td>
                       <td style={{ 
                         border: '1px solid #000', 
-                        padding: '10px 8px', 
-                        fontSize: '17px',
-                        fontWeight: '700',
+                        padding: '3px', 
+                        fontSize: '10px',
+                        fontWeight: '600',
                         wordWrap: 'break-word',
                         overflow: 'hidden',
-                        minHeight: '25px'
+                        minHeight: '15px'
                       }}>
                         {item?.product_name}
                       </td>
-                      <td style={{ border: '1px solid #000', padding: '10px 8px', textAlign: 'center', fontSize: '17px', fontWeight: '700', minHeight: '25px' }}>
+                      <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center', fontSize: '10px', fontWeight: '600', minHeight: '15px' }}>
                         {item.product_size} {item.product_unit}
                       </td>
-                      <td style={{ border: '1px solid #000', padding: '10px 8px', textAlign: 'center', fontSize: '17px', fontWeight: '700', minHeight: '25px' }}>
+                      <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center', fontSize: '10px', fontWeight: '600', minHeight: '15px' }}>
                         {item.quantity} {Number(item.not_avl_qty) ? `-(${item.not_avl_qty}*)` : ""}
                       </td>
-                      <td style={{ border: '1px solid #000', padding: '10px 8px', textAlign: 'center', fontSize: '17px', fontWeight: '700', minHeight: '25px' }}>
+                      <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center', fontSize: '10px', fontWeight: '600', minHeight: '15px' }}>
                         ₹{item.price}
                       </td>
-                      <td style={{ border: '1px solid #000', padding: '10px 8px', textAlign: 'center', fontSize: '17px', fontWeight: '700', minHeight: '25px' }}>
+                      <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center', fontSize: '10px', fontWeight: '600', minHeight: '15px' }}>
                         ₹{item.sale_price}
                       </td>
-                      <td style={{ border: '1px solid #000', padding: '10px 8px', textAlign: 'center', fontSize: '17px', fontWeight: '700', minHeight: '25px' }}>
+                      <td style={{ border: '1px solid #000', padding: '3px', textAlign: 'center', fontSize: '10px', fontWeight: '600', minHeight: '15px' }}>
                         ₹{(Number(item.quantity) - Number(item.not_avl_qty)) * Number(item.sale_price)}
                       </td>
                     </tr>
@@ -466,24 +466,24 @@ export const A4Record = ({
               className="page-break-safe"
               >
                 {/* Billing Summary */}
-                <div style={{ borderTop: '2px solid #000', paddingTop: '15px' }}>
+                <div style={{ borderTop: '1px solid #000', paddingTop: '10px' }}>
                   <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
-                    <div style={{ width: '300px', marginRight: '40px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '18px', fontWeight: 'bold' }}>
+                    <div style={{ width: '250px', marginRight: '20px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '11px', fontWeight: 'bold' }}>
                         <span><strong>Sub Total:</strong></span>
                         <span>₹{orderDetails?.sub_total}</span>
                       </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '18px', fontWeight: 'bold' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '11px', fontWeight: 'bold' }}>
                         <span><strong>Discount:</strong></span>
                         <span>- ₹{orderDetails?.discount}</span>
                       </div>
                       <div style={{ 
                         display: 'flex', 
                         justifyContent: 'space-between', 
-                        marginBottom: '8px',
-                        borderTop: '2px solid #000',
-                        paddingTop: '8px',
-                        fontSize: '20px',
+                        marginBottom: '4px',
+                        borderTop: '1px solid #000',
+                        paddingTop: '4px',
+                        fontSize: '13px',
                         fontWeight: 'bold'
                       }}>
                         <span>Total Payment:</span>
@@ -496,19 +496,18 @@ export const A4Record = ({
 
               {/* Bottom section that should stay together */}
               <div style={{ 
-                pageBreakInside: 'avoid', 
-                marginTop: '30px',
-                marginBottom: '25px',
-                paddingTop: '20px',
-                paddingBottom: '25px'
+                marginTop: '20px',
+                marginBottom: '15px',
+                paddingTop: '10px',
+                paddingBottom: '15px'
               }}>
                 {/* Amount in Words */}
                 <div style={{ 
-                  borderTop: '2px solid #000', 
-                  paddingTop: '12px',
-                  fontSize: '16px',
+                  borderTop: '1px solid #000', 
+                  paddingTop: '8px',
+                  fontSize: '9px',
                   fontWeight: 'bold',
-                  marginBottom: '20px'
+                  marginBottom: '10px'
                 }}>
                   <strong>Amount in Words: </strong>
                   {orderDetails?.total_payment ? 
