@@ -7047,6 +7047,119 @@ if($obj["outstanding"]>=1)
     
     
     
+    /**
+     * Translation Proxy Endpoint
+     * Handles AI translation requests to avoid CORS issues
+     */
+    public function translateText() {
+        // Add CORS headers
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: POST, OPTIONS');
+        header('Access-Control-Allow-Headers: Content-Type, Accept, Authorization');
+        header('Content-Type: application/json');
+        
+        // Handle preflight OPTIONS request
+        if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+            http_response_code(200);
+            exit();
+        }
+
+        $json = file_get_contents("php://input");
+        $obj = json_decode($json, true);
+
+        try {
+            // Validate required fields
+            if (!isset($obj["text"]) || !isset($obj["targetLanguage"])) {
+                echo json_encode(["success" => false, "error" => "Missing required fields: text and targetLanguage"]);
+                return;
+            }
+
+            $text = $obj["text"];
+            $targetLanguage = $obj["targetLanguage"];
+            $isArray = isset($obj["isArray"]) ? $obj["isArray"] : false;
+
+            // DeepSeek API configuration
+            $apiKey = "sk-4cdde649a811459394d6ef59ec467f7d";
+            $apiUrl = "https://api.deepseek.com/v1/chat/completions";
+
+            // Prepare the prompt
+            if ($isArray) {
+                $prompt = "Translate the following text to $targetLanguage. Return ONLY the translated text, no explanations: $text";
+            } else {
+                $prompt = "Translate to $targetLanguage (return ONLY the translation, no explanations): $text";
+            }
+
+            // Prepare API request
+            $requestData = [
+                "model" => "deepseek-chat",
+                "messages" => [
+                    ["role" => "user", "content" => $prompt]
+                ],
+                "temperature" => 0.3
+            ];
+
+            // Initialize cURL
+            $ch = curl_init($apiUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($requestData));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $apiKey
+            ]);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
+            // Execute request
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            
+            if (curl_errno($ch)) {
+                $error = curl_error($ch);
+                curl_close($ch);
+                echo json_encode([
+                    "success" => false,
+                    "error" => "cURL Error: " . $error
+                ]);
+                return;
+            }
+            
+            curl_close($ch);
+
+            // Parse response
+            $responseData = json_decode($response, true);
+
+            if ($httpCode !== 200) {
+                echo json_encode([
+                    "success" => false,
+                    "error" => "API Error: " . ($responseData['error']['message'] ?? 'Unknown error'),
+                    "httpCode" => $httpCode
+                ]);
+                return;
+            }
+
+            // Extract translated text
+            if (isset($responseData['choices'][0]['message']['content'])) {
+                $translatedText = trim($responseData['choices'][0]['message']['content']);
+                echo json_encode([
+                    "success" => true,
+                    "translatedText" => $translatedText,
+                    "originalText" => $text,
+                    "targetLanguage" => $targetLanguage
+                ]);
+            } else {
+                echo json_encode([
+                    "success" => false,
+                    "error" => "Invalid API response format"
+                ]);
+            }
+
+        } catch (Exception $e) {
+            echo json_encode([
+                "success" => false,
+                "error" => "Exception: " . $e->getMessage()
+            ]);
+        }
+    }
     
     
     

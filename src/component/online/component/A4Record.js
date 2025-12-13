@@ -18,6 +18,9 @@ import {
   Flex,
   Text,
   useDisclosure,
+  Select,
+  FormControl,
+  FormLabel,
 } from "@chakra-ui/react";
 import { toWords } from "number-to-words";
 import html2canvas from 'html2canvas';
@@ -26,6 +29,11 @@ import jsPDF from 'jspdf';
 import { queryClient } from "../../../App";
 import URL from "../../../URL";
 import { useA4Print } from "../../../utils/useA4Print";
+import { 
+  SUPPORTED_LANGUAGES, 
+  translateProductData, 
+  getInvoiceLabels 
+} from "../../../utils/aiTranslation";
 
 const cookies = new Cookies();
 const adminId = cookies.get("adminId");
@@ -48,6 +56,84 @@ export const A4Record = ({
   const { componentRefA4, handlePrintA4 } = useA4Print();
 
   const adminStoreId = cookies.get("adminStoreId");
+  
+  // Language translation states
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [translatedProducts, setTranslatedProducts] = useState(productData);
+  const [translatedLabels, setTranslatedLabels] = useState({
+    serialNo: 'S.No',
+    productName: 'Product Name',
+    size: 'Size',
+    quantity: 'Qty',
+    mrp: 'MRP',
+    rate: 'Rate',
+    amount: 'Amount',
+    subTotal: 'Sub Total',
+    discount: 'Discount',
+    totalPayment: 'Total Payment',
+    amountInWords: 'Amount in Words',
+    rupeesOnly: 'Rupees Only'
+  });
+  const [isTranslating, setIsTranslating] = useState(false);
+
+  // Handle language change
+  const handleLanguageChange = async (e) => {
+    const newLang = e.target.value;
+    setSelectedLanguage(newLang);
+    
+    if (newLang === 'en') {
+      setTranslatedProducts(productData);
+      setTranslatedLabels({
+        serialNo: 'S.No',
+        productName: 'Product Name',
+        size: 'Size',
+        quantity: 'Qty',
+        mrp: 'MRP',
+        rate: 'Rate',
+        amount: 'Amount',
+        subTotal: 'Sub Total',
+        discount: 'Discount',
+        totalPayment: 'Total Payment',
+        amountInWords: 'Amount in Words',
+        rupeesOnly: 'Rupees Only'
+      });
+      return;
+    }
+
+    setIsTranslating(true);
+    
+    try {
+      // Translate product names
+      const translatedProds = await translateProductData(productData, newLang);
+      setTranslatedProducts(translatedProds);
+      
+      // Translate labels
+      const labels = await getInvoiceLabels(newLang);
+      setTranslatedLabels(labels);
+      
+      getToast({
+        title: "Translation Complete",
+        desc: `Bill translated to ${SUPPORTED_LANGUAGES.find(l => l.code === newLang)?.name}`,
+        status: "success"
+      });
+    } catch (error) {
+      console.error('Translation error:', error);
+      getToast({
+        title: "Translation Error",
+        desc: "Failed to translate. Using original language.",
+        status: "error"
+      });
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  // Update translated products when productData changes
+  useEffect(() => {
+    if (selectedLanguage === 'en') {
+      setTranslatedProducts(productData);
+    }
+  }, [productData, selectedLanguage]);
 
   const handleDownloadPDF = async () => {
     try {
@@ -161,14 +247,49 @@ export const A4Record = ({
     <Modal isOpen={isOpen} onClose={onClose} size="4xl">
       <ModalOverlay />
       <ModalContent maxW="90vw" maxH="90vh">
-        <ModalHeader>A4 Print Preview</ModalHeader>
+        <ModalHeader>
+          A4 Print Preview
+          {customerAddress?.name && (
+            <Text fontSize="md" fontWeight="normal" color="gray.600" mt={1}>
+              Customer: {customerAddress.name}
+            </Text>
+          )}
+        </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
+          {/* Language Selector */}
+          <div className="mb-3 no-print">
+            <FormControl>
+              <FormLabel fontSize="sm" fontWeight="bold">
+                Select Language / भाषा चुनें / ভাষা নির্বাচন করুন
+              </FormLabel>
+              <Select 
+                value={selectedLanguage} 
+                onChange={handleLanguageChange}
+                size="md"
+                isDisabled={isTranslating}
+                bg="white"
+                borderColor="blue.300"
+              >
+                {SUPPORTED_LANGUAGES.map(lang => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.nativeName} ({lang.name})
+                  </option>
+                ))}
+              </Select>
+              {isTranslating && (
+                <Text fontSize="xs" color="blue.500" mt={1}>
+                  🔄 Translating with AI...
+                </Text>
+              )}
+            </FormControl>
+          </div>
+
           <div className="d-flex justify-content-center mb-3 no-print" style={{ gap: '15px' }}>
-            <Button onClick={handlePrintA4} colorScheme="blue" size="lg">
+            <Button onClick={handlePrintA4} colorScheme="blue" size="lg" isDisabled={isTranslating}>
               Print A4
             </Button>
-            <Button onClick={handleDownloadPDF} colorScheme="green" size="lg">
+            <Button onClick={handleDownloadPDF} colorScheme="green" size="lg" isDisabled={isTranslating}>
               Download PDF
             </Button>
           </div>
@@ -377,10 +498,14 @@ export const A4Record = ({
               orphans: '3',
               widows: '3'
             }}>
-              {/* Simple Header */}
-              <div style={{ marginBottom: '10px', textAlign: 'left' }}>
-                <h2 style={{ margin: '0', fontSize: '16px', fontWeight: '700' }}>{customer?.name}</h2>
-              </div>
+              {/* Customer Name Header */}
+              {customerAddress?.name && (
+                <div style={{ marginBottom: '10px', textAlign: 'left' }}>
+                  <h3 style={{ margin: '0', fontSize: '14px', fontWeight: '700' }}>
+                    {customerAddress.name}
+                  </h3>
+                </div>
+              )}
 
               {/* Products Table */}
               <table style={{ 
@@ -405,17 +530,17 @@ export const A4Record = ({
                     pageBreakInside: 'avoid',
                     breakInside: 'avoid'
                   }}>
-                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'left', fontSize: '12px', fontWeight: '700', width: '8%' }}>S.No</th>
-                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'left', fontSize: '12px', fontWeight: '700', width: '35%' }}>Product Name</th>
-                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '12%' }}>Size</th>
-                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '8%' }}>Qty</th>
-                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '12%' }}>MRP</th>
-                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '12%' }}>Rate</th>
-                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '13%' }}>Amount</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'left', fontSize: '12px', fontWeight: '700', width: '8%' }}>{translatedLabels.serialNo}</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'left', fontSize: '12px', fontWeight: '700', width: '35%' }}>{translatedLabels.productName}</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '12%' }}>{translatedLabels.size}</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '8%' }}>{translatedLabels.quantity}</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '12%' }}>{translatedLabels.mrp}</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '12%' }}>{translatedLabels.rate}</th>
+                    <th style={{ border: '1px solid #000', padding: '4px', textAlign: 'center', fontSize: '12px', fontWeight: '700', width: '13%' }}>{translatedLabels.amount}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {productData?.map((item, index) => (
+                  {translatedProducts?.map((item, index) => (
                     <tr key={index} style={{
                       ...(!Number(item.avl_status) ? { textDecoration: 'line-through' } : {}),
                       pageBreakInside: 'avoid',
@@ -470,11 +595,11 @@ export const A4Record = ({
                   <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%' }}>
                     <div style={{ width: '250px', marginRight: '20px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '11px', fontWeight: 'bold' }}>
-                        <span><strong>Sub Total:</strong></span>
+                        <span><strong>{translatedLabels.subTotal}:</strong></span>
                         <span>₹{orderDetails?.sub_total}</span>
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px', fontSize: '11px', fontWeight: 'bold' }}>
-                        <span><strong>Discount:</strong></span>
+                        <span><strong>{translatedLabels.discount}:</strong></span>
                         <span>- ₹{orderDetails?.discount}</span>
                       </div>
                       <div style={{ 
@@ -486,7 +611,7 @@ export const A4Record = ({
                         fontSize: '13px',
                         fontWeight: 'bold'
                       }}>
-                        <span>Total Payment:</span>
+                        <span>{translatedLabels.totalPayment}:</span>
                         <span>₹{orderDetails?.total_payment}</span>
                       </div>
                     </div>
@@ -509,10 +634,10 @@ export const A4Record = ({
                   fontWeight: 'bold',
                   marginBottom: '10px'
                 }}>
-                  <strong>Amount in Words: </strong>
+                  <strong>{translatedLabels.amountInWords}: </strong>
                   {orderDetails?.total_payment ? 
-                    `${toWords(Number(orderDetails.total_payment)).replace(/\b\w/g, l => l.toUpperCase())} Rupees Only` 
-                    : 'Zero Rupees Only'
+                    `${toWords(Number(orderDetails.total_payment)).replace(/\b\w/g, l => l.toUpperCase())} ${translatedLabels.rupeesOnly}` 
+                    : `Zero ${translatedLabels.rupeesOnly}`
                   }
                 </div>
 
@@ -525,14 +650,14 @@ export const A4Record = ({
                 }}>
                   <div style={{ width: '45%' }}>
                     <div style={{ borderTop: '2px solid #000', paddingTop: '8px', textAlign: 'center', fontWeight: 'bold' }}>
-                      <strong>Customer Signature</strong>
+                      <strong>{translatedLabels.customerSignature}</strong>
                     </div>
                     <div style={{ height: '50px' }}></div>
                   </div>
                   
                   <div style={{ width: '45%' }}>
                     <div style={{ borderTop: '2px solid #000', paddingTop: '8px', textAlign: 'center', fontWeight: 'bold' }}>
-                      <strong>Authorized Signature</strong>
+                      <strong>{translatedLabels.authorizedSignature}</strong>
                     </div>
                     <div style={{ height: '50px' }}></div>
                   </div>
