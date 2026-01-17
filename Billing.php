@@ -7079,7 +7079,7 @@ if($obj["outstanding"]>=1)
             $isArray = isset($obj["isArray"]) ? $obj["isArray"] : false;
 
             // DeepSeek API configuration
-            $apiKey = "sk-4cdde649a811459394d6ef59ec467f7d";
+            $apiKey = "sk-4fcc38ef0984467486463b881175aa3e";
             $apiUrl = "https://api.deepseek.com/v1/chat/completions";
 
             // Prepare the prompt
